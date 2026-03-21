@@ -1,5 +1,8 @@
 const https = require("https");
 
+// Standard function - just starts the Tinyfish run and returns run_id immediately.
+// We connect to the SSE stream but only wait for the first event (run_id), 
+// which Tinyfish emits within 1-2 seconds of accepting the request.
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
@@ -12,13 +15,17 @@ exports.handler = async function (event) {
 
     const payload = JSON.stringify({
       url,
-      goal: "You are researching a nonprofit organization. Visit this website and extract: organization name, mission statement, all programs and services, populations served, geographic area, impact statistics, budget size if mentioned, year founded, current initiatives, and any existing funders or partners mentioned on the site. Navigate to About, Programs, Impact, and Mission pages if they exist. Return everything as structured JSON.",
+      goal: "Visit this nonprofit website. Extract: organization name, mission statement, programs and services, populations served, geographic area, impact statistics, budget if mentioned, year founded, current initiatives, existing funders or partners. Check About/Programs/Impact/Mission pages. Return structured JSON.",
       browser_profile: "lite",
     });
 
-    // Use Node's https module to make the SSE request and read only the first data event
     const runId = await new Promise((resolve, reject) => {
-      const options = {
+      // 9 second hard timeout — Netlify default is 10s, leave 1s buffer
+      const timeout = setTimeout(() => {
+        reject(new Error("Connection to Tinyfish timed out. Please try again."));
+      }, 9000);
+
+      const req = https.request({
         hostname: "agent.tinyfish.ai",
         path: "/v1/automation/run-sse",
         method: "POST",
@@ -27,47 +34,38 @@ exports.handler = async function (event) {
           "Content-Length": Buffer.byteLength(payload),
           "X-API-Key": tinyfishKey,
         },
-      };
-
-      const req = https.request(options, (res) => {
+      }, (res) => {
         if (res.statusCode !== 200) {
           let body = "";
-          res.on("data", (chunk) => { body += chunk; });
-          res.on("end", () => reject(new Error("HTTP " + res.statusCode + ": " + body.slice(0, 200))));
+          res.on("data", (c) => { body += c; });
+          res.on("end", () => { clearTimeout(timeout); reject(new Error("Tinyfish HTTP " + res.statusCode + ": " + body.slice(0, 300))); });
           return;
         }
 
-        let buffer = "";
-        let found = false;
-
+        let buf = "";
         res.on("data", (chunk) => {
-          if (found) return;
-          buffer += chunk.toString();
-          const lines = buffer.split("\n");
+          buf += chunk.toString();
+          const lines = buf.split("\n");
+          buf = lines.pop();
           for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.run_id) {
-                  found = true;
-                  res.destroy(); // stop reading
-                  resolve(data.run_id);
-                  return;
-                }
-              } catch (e) {}
-            }
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const d = JSON.parse(line.slice(6));
+              if (d.run_id) {
+                clearTimeout(timeout);
+                res.destroy();
+                resolve(d.run_id);
+                return;
+              }
+            } catch (e) {}
           }
-          buffer = lines[lines.length - 1];
         });
 
-        res.on("end", () => {
-          if (!found) reject(new Error("Stream ended without run_id"));
-        });
-
-        res.on("error", reject);
+        res.on("end", () => { clearTimeout(timeout); reject(new Error("SSE stream ended before run_id was received")); });
+        res.on("error", (e) => { clearTimeout(timeout); reject(e); });
       });
 
-      req.on("error", reject);
+      req.on("error", (e) => { clearTimeout(timeout); reject(e); });
       req.write(payload);
       req.end();
     });

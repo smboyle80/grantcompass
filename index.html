@@ -410,7 +410,6 @@ async function scanWebsite() {
   btn.disabled = true;
   document.getElementById('webscan-results').innerHTML = '';
 
-  // Reset steps
   [1,2,3,4].forEach(n => setStep(n, 'pending'));
   document.getElementById('scan-progress').className = 'scan-progress visible';
   scanSeconds = 0;
@@ -422,24 +421,58 @@ async function scanWebsite() {
   }, 1000);
 
   try {
-    // Step 1: Launch agent
+    // Step 1: Get API key from Netlify, then open SSE stream directly in browser
+    // This avoids Netlify function timeouts — browser holds the stream, not the server
     setStep(1, 'active');
-    const startResp = await fetch('/.netlify/functions/scan-start', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ url })
+    const keyResp = await fetch('/.netlify/functions/get-tinyfish-key');
+    const keyData = await keyResp.json();
+    if (!keyData.key) throw new Error(keyData.error || 'Could not retrieve scan credentials');
+
+    const sseResp = await fetch('https://agent.tinyfish.ai/v1/automation/run-sse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': keyData.key },
+      body: JSON.stringify({
+        url,
+        goal: 'Visit this nonprofit website. Extract: organization name, mission statement, programs and services, populations served, geographic area, impact statistics, budget if mentioned, year founded, current initiatives, existing funders or partners. Check About/Programs/Impact/Mission pages. Return structured JSON.',
+        browser_profile: 'lite',
+      })
     });
-    const startData = await startResp.json();
-    if (!startData.runId) throw new Error(startData.error || 'Failed to start scan');
-    const runId = startData.runId;
+
+    if (!sseResp.ok) throw new Error('Tinyfish scan failed to start: HTTP ' + sseResp.status);
+
+    // Read SSE stream to get run_id from first event
+    const reader = sseResp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let runId = null;
+
+    while (!runId) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const d = JSON.parse(line.slice(6));
+            if (d.run_id) { runId = d.run_id; break; }
+          } catch(e) {}
+        }
+      }
+    }
+    reader.cancel();
+
+    if (!runId) throw new Error('Could not start scan. Please try again.');
     setStep(1, 'done'); setStep(2, 'active');
 
-    // Step 2-3: Poll for completion
+    // Step 2-3: Poll scan-status every 4s until complete
     let result = null;
     let attempts = 0;
-    const maxAttempts = 40; // ~2 min at 3s intervals
+    const maxAttempts = 45; // ~3 min
 
     while (attempts < maxAttempts) {
-      await new Promise(r => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 4000));
       attempts++;
 
       const pollResp = await fetch('/.netlify/functions/scan-status?runId=' + encodeURIComponent(runId));
