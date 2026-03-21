@@ -519,112 +519,100 @@ async function scanWebsite() {
   const btn = document.getElementById('scan-btn');
   btn.disabled = true;
   document.getElementById('webscan-results').innerHTML = '';
-
   [1,2,3,4].forEach(n => setStep(n, 'pending'));
   document.getElementById('scan-progress').className = 'scan-progress visible';
   scanSeconds = 0;
   document.getElementById('scan-timer').textContent = '0s';
   clearInterval(scanTimerInterval);
-  scanTimerInterval = setInterval(() => {
-    scanSeconds++;
-    document.getElementById('scan-timer').textContent = scanSeconds + 's';
-  }, 1000);
+  scanTimerInterval = setInterval(() => { scanSeconds++; document.getElementById('scan-timer').textContent = scanSeconds + 's'; }, 1000);
+
+  function errMsg(d) {
+    if (!d) return 'Unknown error';
+    if (typeof d.error === 'string') return d.error;
+    if (typeof d.error === 'object') return JSON.stringify(d.error);
+    return JSON.stringify(d);
+  }
+
+  async function startPhase(phase, extra) {
+    const r = await fetch('/api/scan-and-search', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phase, ...extra })
+    });
+    const d = await r.json();
+    if (!d.runId) throw new Error('Failed to start ' + phase + ': ' + errMsg(d));
+    return d.runId;
+  }
+
+  async function pollUntilDone(runId, maxAttempts) {
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(r => setTimeout(r, 4000));
+      const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
+      const d = await r.json();
+      if (d.error) throw new Error(errMsg(d));
+      if (d.status === 'complete') return d.result;
+      if (d.status === 'failed') throw new Error('Agent run failed. Please try again.');
+    }
+    throw new Error('Timed out. Please try again.');
+  }
 
   try {
-    // Helper to safely extract error message from any response
-    function errMsg(data) {
-      if (!data) return 'Unknown error';
-      if (typeof data.error === 'string') return data.error;
-      if (typeof data.error === 'object') return JSON.stringify(data.error);
-      if (typeof data.message === 'string') return data.message;
-      return JSON.stringify(data);
-    }
-
-    // Step 1: Start Tinyfish scan — /run-async returns run_id instantly
+    // Phase 1: Scan the nonprofit website
     setStep(1, 'active');
-    const startResp = await fetch('/api/scan-start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-    const startData = await startResp.json();
-    if (!startData.runId) throw new Error('Start failed: ' + errMsg(startData));
-    const runId = startData.runId;
+    const scanRunId = await startPhase('scan', { url });
+    const scanResult = await pollUntilDone(scanRunId, 60);
     setStep(1, 'done'); setStep(2, 'active');
 
-    // Step 2-3: Poll scan-status every 4s until complete
-    let result = null;
-    let attempts = 0;
-    const maxAttempts = 90; // ~6 min
+    // Parse org profile
+    let orgData;
+    try { orgData = (typeof scanResult === 'string') ? pj(scanResult) : scanResult; } catch(e) { orgData = scanResult; }
+    const orgProfile = (typeof orgData === 'string') ? orgData : JSON.stringify(orgData, null, 2);
 
-    while (attempts < maxAttempts) {
-      await new Promise(r => setTimeout(r, 4000));
-      attempts++;
+    // Detect state
+    const orgText = orgProfile.toLowerCase();
+    const stateMatch = orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon)\b/);
+    const detectedState = stateMatch ? stateMatch[1] : '';
 
-      const pollResp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
-      const pollData = await pollResp.json();
+    document.getElementById('webscan-results').innerHTML =
+      '<div class="card" style="margin-bottom:12px;"><div class="st" style="margin-bottom:6px;">Organization profile found</div>' +
+      '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.5;">' + orgProfile.slice(0, 600) + (orgProfile.length > 600 ? '...' : '') + '</pre></div>' +
+      '<div class="loading"><span class="dot">Searching GrantWatch for matching grants</span></div>';
 
-      if (scanSeconds > 15 && document.getElementById('step-2-icon').className.includes('active')) {
-        setStep(2, 'done'); setStep(3, 'active');
-      }
+    setStep(2, 'done'); setStep(3, 'active');
 
-      if (pollData.error) throw new Error('Poll failed: ' + errMsg(pollData));
-
-      if (pollData.status === 'complete') {
-        result = pollData.result;
-        break;
-      } else if (pollData.status === 'failed') {
-        throw new Error('Web agent scan failed. The site may be inaccessible.');
-      }
-    }
-
-    if (!result) throw new Error('Scan timed out after 3 minutes. Please try again.');
+    // Phase 2: Search GrantWatch
+    const searchRunId = await startPhase('search', { orgProfile, state: detectedState });
+    const searchResult = await pollUntilDone(searchRunId, 60);
     setStep(3, 'done'); setStep(4, 'active');
 
-    // Step 4: Claude analysis
-    const today2 = new Date().toISOString().split('T')[0];
-    const text = await callClaude(`You are a nonprofit grant expert. Today's date is ${today2}. A web agent has browsed this nonprofit's website and extracted the following information.
+    // Parse grants
+    let grants;
+    try {
+      const raw = (typeof searchResult === 'string') ? searchResult : JSON.stringify(searchResult);
+      grants = pj(raw);
+      if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
+    } catch(e) { throw new Error('Could not parse grant results: ' + e.message); }
 
-Website URL: ${url}
-Extracted content:
-${typeof result === 'string' ? result.slice(0, 5000) : JSON.stringify(result).slice(0, 5000)}
-
-Based on this real information, return a JSON object with:
-- orgSummary: 2-sentence summary of the organization
-- strengths: array of 4 grant-relevant strengths from the content
-- grants: array of 6 grant objects, each with: name, funder, amount, deadline (specific future date after ${today2}), match ("Strong match" or "Good match"), description (2 sentences tying the grant to what you found on the site)
-
-IMPORTANT RULES:
-- Only include grants you are highly confident still exist and are active as of ${today2}.
-- Do NOT make up deadline dates — deadlines change every grant cycle and you cannot know the current one.
-- Use "Rolling" or "Check funder website" for the deadline field on every grant.
-- Only include grants you are very confident about. If unsure, omit it.
-Return ONLY raw JSON starting with {.`);
-
-    const analysis = pj(text);
+    // Claude adds match + why
+    const today = new Date().toISOString().split('T')[0];
+    const rankPrompt = 'Today is ' + today + '. Nonprofit profile:\n' + orgProfile.slice(0, 1000) +
+      '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants, null, 2).slice(0, 3000) +
+      '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence why this org qualifies) to each grant object. Return same JSON array with these fields added. Keep all original fields. Return ONLY raw JSON array starting with [.';
+    const rankText = await callClaude(rankPrompt);
+    const rankedGrants = pj(rankText);
     setStep(4, 'done');
     clearInterval(scanTimerInterval);
 
-    let html = '';
-    if (analysis.orgSummary) {
-      html += `<div class="card" style="margin-bottom:12px;">
-        <div class="st" style="margin-bottom:8px;">What our agent found</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-          <span class="badge b-info">Scanned by Tinyfish</span>
-          <span style="font-size:12px;color:var(--text3);">${scanSeconds}s scan time</span>
-        </div>
-        <p style="font-size:13px;line-height:1.65;color:var(--text2);margin-bottom:12px;">${analysis.orgSummary}</p>
-        ${(analysis.strengths||[]).map(s=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;"><span style="color:var(--success);font-weight:500;font-size:13px;flex-shrink:0;">+</span><span style="font-size:13px;color:var(--text2);">${s}</span></div>`).join('')}
-      </div>`;
-    }
-    html += `<div class="sh"><span class="st">Grants matched to your site</span><span class="cc">${(analysis.grants||[]).length} found</span></div>`;
-    (analysis.grants||[]).forEach(g => { html += grantCard(g); });
+    let html = '<div class="card" style="margin-bottom:12px;"><div class="st" style="margin-bottom:6px;">Organization identified</div>' +
+      '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.5;">' + orgProfile.slice(0, 400) + (orgProfile.length > 400 ? '...' : '') + '</pre></div>' +
+      '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + rankedGrants.length + ' found</span></div>' +
+      '<p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Live results matched to your organization — deadlines verified by web agent.</p>';
+    rankedGrants.forEach(function(g) { html += grantWatchCard(g); });
     document.getElementById('webscan-results').innerHTML = html;
 
   } catch(e) {
     clearInterval(scanTimerInterval);
     [1,2,3,4].forEach(n => setStep(n,'pending'));
-    document.getElementById('webscan-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+    document.getElementById('webscan-results').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
   }
 
   document.getElementById('scan-progress').className = 'scan-progress';
