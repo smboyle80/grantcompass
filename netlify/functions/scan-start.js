@@ -1,3 +1,5 @@
+const https = require("https");
+
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
 
@@ -8,36 +10,72 @@ exports.handler = async function (event) {
     const { url } = JSON.parse(event.body);
     if (!url) return { statusCode: 400, body: JSON.stringify({ error: "url is required" }) };
 
-    const response = await fetch("https://api.tinyfish.io/api/v1/run", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${tinyfishKey}`,
-      },
-      body: JSON.stringify({
-        url,
-        goal: `You are researching a nonprofit organization. Visit this website and extract as much of the following as you can find:
-1. Organization name
-2. Mission statement or purpose
-3. Programs and services offered (list each one)
-4. Populations or communities served (demographics, geography)
-5. Geographic area of service (city, state, national, international)
-6. Any impact statistics or outcomes mentioned (numbers served, results achieved)
-7. Organization size or annual budget if mentioned
-8. Year founded or years of operation
-9. Any current initiatives, campaigns, or focus areas
-10. Partner organizations or funders already mentioned on the site
-
-Navigate to the About, Programs, Impact, and Mission pages if they exist. Return everything you find as plain structured text.`,
-        browser_profile: "lite",
-      }),
+    const payload = JSON.stringify({
+      url,
+      goal: "You are researching a nonprofit organization. Visit this website and extract: organization name, mission statement, all programs and services, populations served, geographic area, impact statistics, budget size if mentioned, year founded, current initiatives, and any existing funders or partners mentioned on the site. Navigate to About, Programs, Impact, and Mission pages if they exist. Return everything as structured JSON.",
+      browser_profile: "lite",
     });
 
-    const data = await response.json();
+    // Use Node's https module to make the SSE request and read only the first data event
+    const runId = await new Promise((resolve, reject) => {
+      const options = {
+        hostname: "agent.tinyfish.ai",
+        path: "/v1/automation/run-sse",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+          "X-API-Key": tinyfishKey,
+        },
+      };
+
+      const req = https.request(options, (res) => {
+        if (res.statusCode !== 200) {
+          let body = "";
+          res.on("data", (chunk) => { body += chunk; });
+          res.on("end", () => reject(new Error("HTTP " + res.statusCode + ": " + body.slice(0, 200))));
+          return;
+        }
+
+        let buffer = "";
+        let found = false;
+
+        res.on("data", (chunk) => {
+          if (found) return;
+          buffer += chunk.toString();
+          const lines = buffer.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.run_id) {
+                  found = true;
+                  res.destroy(); // stop reading
+                  resolve(data.run_id);
+                  return;
+                }
+              } catch (e) {}
+            }
+          }
+          buffer = lines[lines.length - 1];
+        });
+
+        res.on("end", () => {
+          if (!found) reject(new Error("Stream ended without run_id"));
+        });
+
+        res.on("error", reject);
+      });
+
+      req.on("error", reject);
+      req.write(payload);
+      req.end();
+    });
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ runId: data.id || data.run_id || data.runId }),
+      body: JSON.stringify({ runId }),
     };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
