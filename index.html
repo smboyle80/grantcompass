@@ -190,35 +190,30 @@
   <div id="panel-webscan" class="panel">
     <div class="info-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="var(--info)" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="var(--info)" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Enter your organization's details and we'll search GrantWatch live for currently open grants that match your mission and location.
+      Enter your website URL and our agent will read your site, learn about your mission and programs, then search GrantWatch for currently open matching grants.
     </div>
-    <div class="g2">
-      <div class="fg"><label>Organization name</label><input type="text" id="scan-org-name" placeholder="e.g. Lura Turner Homes"/></div>
-      <div class="fg"><label>State</label><input type="text" id="scan-state" placeholder="e.g. Arizona"/></div>
-    </div>
-    <div class="fg"><label>Mission / focus area</label><textarea id="scan-mission" style="min-height:70px;" placeholder="Briefly describe your mission, populations served, and main programs..."></textarea></div>
-    <div class="btn-row">
-      <button class="btn btn-p" id="scan-btn" onclick="scanWebsite()">Search GrantWatch</button>
-      <button class="btn btn-g" onclick="document.getElementById('scan-org-name').value='';document.getElementById('scan-state').value='';document.getElementById('scan-mission').value='';document.getElementById('webscan-results').innerHTML='';">Clear</button>
+    <div class="url-row">
+      <div class="fg"><label>Organization website URL</label><input type="url" id="scan-url" placeholder="https://yourorganization.org"/></div>
+      <button class="btn btn-p" id="scan-btn" onclick="scanWebsite()" style="flex-shrink:0;margin-bottom:0;">Scan &amp; find grants</button>
     </div>
 
     <div class="scan-progress" id="scan-progress">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span class="st">Search in progress</span>
+        <span class="st">Scan in progress</span>
         <span class="scan-timer" id="scan-timer">0s</span>
       </div>
       <ul class="scan-steps">
         <li class="scan-step" id="step-1">
           <div class="step-icon step-pending" id="step-1-icon">1</div>
-          <span>Connecting to GrantWatch</span>
+          <span>Reading your website</span>
         </li>
         <li class="scan-step" id="step-2">
           <div class="step-icon step-pending" id="step-2-icon">2</div>
-          <span>Searching for matching grants</span>
+          <span>Identifying mission &amp; programs</span>
         </li>
         <li class="scan-step" id="step-3">
           <div class="step-icon step-pending" id="step-3-icon">3</div>
-          <span>Extracting grant details</span>
+          <span>Searching GrantWatch for matches</span>
         </li>
         <li class="scan-step" id="step-4">
           <div class="step-icon step-pending" id="step-4-icon">4</div>
@@ -519,14 +514,8 @@ function setStep(n, state) {
 }
 
 async function scanWebsite() {
-  const orgName = document.getElementById('scan-org-name').value.trim();
-  const state = document.getElementById('scan-state').value.trim();
-  const mission = document.getElementById('scan-mission').value.trim();
-
-  if (!mission && !orgName) {
-    document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization name and mission.</div>';
-    return;
-  }
+  const url = document.getElementById('scan-url').value.trim();
+  if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization's website URL.</div>'; return; }
 
   const btn = document.getElementById('scan-btn');
   btn.disabled = true;
@@ -545,55 +534,135 @@ async function scanWebsite() {
     return JSON.stringify(d);
   }
 
-  try {
-    // Single phase: search GrantWatch directly
-    setStep(1, 'active');
-    const orgProfile = (orgName ? 'Organization: ' + orgName + '\n' : '') +
-                       (state ? 'State: ' + state + '\n' : '') +
-                       (mission ? 'Mission: ' + mission : '');
-
-    const startResp = await fetch('/api/search-grants', {
+  async function startRun(endpoint, body) {
+    const r = await fetch(endpoint, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category: mission || orgName, state, orgProfile })
+      body: JSON.stringify(body)
     });
-    const startData = await startResp.json();
-    if (!startData.runId) throw new Error('Search failed to start: ' + errMsg(startData));
-    const runId = startData.runId;
-    setStep(1, 'done'); setStep(2, 'active');
+    const d = await r.json();
+    if (!d.runId) throw new Error('Failed to start: ' + errMsg(d));
+    return d.runId;
+  }
 
-    // Poll until done
-    let searchResult = null;
-    for (let i = 0; i < 90; i++) {
+  async function pollUntilDone(runId, maxAttempts) {
+    for (let i = 0; i < maxAttempts; i++) {
       await new Promise(r => setTimeout(r, 4000));
       const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
       const d = await r.json();
       if (d.error) throw new Error(errMsg(d));
-      if (i === 5) { setStep(2, 'done'); setStep(3, 'active'); }
-      if (d.status === 'complete') { searchResult = d.result; break; }
-      if (d.status === 'failed') throw new Error('GrantWatch search failed. Please try again.');
+      if (d.status === 'complete') return d.result;
+      if (d.status === 'failed') throw new Error('Run failed. Please try again.');
+    }
+    return null;
+  }
+
+  try {
+    // Step 1: Start BOTH Tinyfish runs in parallel immediately
+    setStep(1, 'active');
+
+    // Run 1: Scan the nonprofit website
+    const scanRunId = await startRun('/api/scan-and-search', { phase: 'scan', url });
+
+    // Run 2: Start a broad GrantWatch search in parallel using the URL domain as a hint
+    const domain = new URL(url).hostname.replace('www.', '');
+    const grantRunId = await startRun('/api/search-grants', {
+      category: 'nonprofit programs community services',
+      state: '',
+      orgProfile: 'Organization website: ' + url
+    });
+
+    setStep(1, 'done'); setStep(2, 'active');
+
+    // Poll both runs simultaneously
+    let orgResult = null;
+    let grantResult = null;
+    let orgDone = false;
+    let grantDone = false;
+
+    for (let i = 0; i < 90; i++) {
+      await new Promise(r => setTimeout(r, 4000));
+
+      // Poll site scan
+      if (!orgDone) {
+        const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(scanRunId));
+        const d = await r.json();
+        if (d.status === 'complete') { orgResult = d.result; orgDone = true; setStep(2, 'done'); setStep(3, 'active'); }
+        else if (d.status === 'failed') { orgDone = true; } // continue without org data
+      }
+
+      // Poll GrantWatch search
+      if (!grantDone) {
+        const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(grantRunId));
+        const d = await r.json();
+        if (d.status === 'complete') { grantResult = d.result; grantDone = true; }
+        else if (d.status === 'failed') { grantDone = true; }
+      }
+
+      if (orgDone && grantDone) break;
     }
 
-    if (!searchResult) throw new Error('Search timed out. Please try again.');
+    // If we got org profile, rerun GrantWatch search with better context
+    if (orgResult) {
+      let orgData;
+      try { orgData = (typeof orgResult === 'string') ? pj(orgResult) : orgResult; } catch(e) { orgData = orgResult; }
+      const orgProfile = (typeof orgData === 'string') ? orgData : JSON.stringify(orgData, null, 2);
+
+      // Detect state
+      const orgText = orgProfile.toLowerCase();
+      const stateMatch = orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
+      const detectedState = stateMatch ? stateMatch[1] : '';
+
+      // Show org profile immediately
+      document.getElementById('webscan-results').innerHTML =
+        '<div class="card" style="margin-bottom:12px;">' +
+        '<div class="st" style="margin-bottom:6px;">Your organization — identified from website</div>' +
+        '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.6;">' +
+        orgProfile.slice(0, 800) + (orgProfile.length > 800 ? '...' : '') +
+        '</pre></div>' +
+        '<div class="loading"><span class="dot">Searching GrantWatch with your org profile</span></div>';
+
+      setStep(3, 'active');
+
+      // Now do a targeted GrantWatch search using the real org profile
+      const targetedRunId = await startRun('/api/search-grants', {
+        category: orgProfile,
+        state: detectedState,
+        orgProfile
+      });
+
+      grantResult = await pollUntilDone(targetedRunId, 60);
+      if (!grantResult) throw new Error('GrantWatch search timed out. Please try again.');
+    }
+
+    if (!grantResult) throw new Error('Could not retrieve grant results. Please try again.');
     setStep(3, 'done'); setStep(4, 'active');
 
     // Parse grants
     let grants;
     try {
-      const raw = (typeof searchResult === 'string') ? searchResult : JSON.stringify(searchResult);
+      const raw = (typeof grantResult === 'string') ? grantResult : JSON.stringify(grantResult);
       grants = pj(raw);
       if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
-    } catch(e) { throw new Error('Could not parse results: ' + e.message); }
+    } catch(e) { throw new Error('Could not parse grant results: ' + e.message); }
 
     // Claude ranks by relevance
+    const orgContext = orgResult ? (typeof orgResult === 'string' ? orgResult : JSON.stringify(orgResult)).slice(0, 800) : 'Organization from: ' + url;
     const today = new Date().toISOString().split('T')[0];
-    const rankText = await callClaude('Today is ' + today + '. Nonprofit: ' + orgProfile +
+    const rankText = await callClaude('Today is ' + today + '. Nonprofit: ' + orgContext +
       '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants, null, 2).slice(0, 3000) +
-      '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence why this org qualifies) to each grant. Return same JSON array with these two fields added. Keep all original fields. Return ONLY raw JSON array starting with [.');
+      '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence why this org qualifies based on what you know about them). Return same JSON array with these two fields added. Keep all original fields. Return ONLY raw JSON array starting with [.');
     const rankedGrants = pj(rankText);
     setStep(4, 'done');
     clearInterval(scanTimerInterval);
 
-    let html = '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + rankedGrants.length + ' found</span></div>' +
+    const orgBlock = orgResult
+      ? '<div class="card" style="margin-bottom:12px;"><div class="st" style="margin-bottom:6px;">Organization identified from website</div>' +
+        '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.6;">' +
+        orgContext.slice(0, 500) + (orgContext.length > 500 ? '...' : '') + '</pre></div>'
+      : '';
+
+    let html = orgBlock +
+      '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + rankedGrants.length + ' found</span></div>' +
       '<p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Live results — deadlines and amounts verified directly from GrantWatch.</p>';
     rankedGrants.forEach(function(g) { html += grantWatchCard(g); });
     document.getElementById('webscan-results').innerHTML = html;
