@@ -545,7 +545,7 @@ async function pollUntilDone(runId, maxAttempts) {
 
 async function scanWebsite() {
   const url = document.getElementById('scan-url').value.trim();
-  if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization's website URL.</div>'; return; }
+  if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization&#39;s website URL.</div>'; return; }
 
   const btn = document.getElementById('scan-btn');
   btn.disabled = true;
