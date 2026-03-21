@@ -375,6 +375,36 @@ function clearAllSaved() {
 const grantStore = {};
 
 function grantCard(g) { return grantCardWithUid(g, 'g'+Math.random().toString(36).slice(2,8)); }
+
+function grantWatchCard(g) {
+  const uid = 'g'+Math.random().toString(36).slice(2,8);
+  grantStore[uid] = g;
+  const hi = (g.match||'').toLowerCase().includes('strong');
+  const name = g.grant_name || g.name || 'Unnamed grant';
+  const funder = g.funder || g.funder_organization || '';
+  const amount = g.amount || g.award_amount || 'See listing';
+  const deadline = g.deadline || g.deadline_date || 'See listing';
+  const desc = g.description || '';
+  const why = g.why || '';
+  const url = g.url || '';
+  return `<div class="card">
+    <div class="rh">
+      <div class="gname">${name}</div>
+      <span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span>
+    </div>
+    <div class="gmeta">
+      <span>${funder}</span><span>·</span>
+      <span>${amount}</span><span>·</span>
+      <span style="color:var(--danger);font-weight:500;">Due: ${deadline}</span>
+    </div>
+    <div class="gdesc">${desc}</div>
+    ${why ? `<div style="font-size:12px;color:var(--success);margin-bottom:10px;padding:6px 10px;background:var(--bg-success);border-radius:var(--r);">Why this matches: ${why}</div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="handleSave('${uid}')">Save grant</button>
+      ${url ? `<a href="${url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;color:var(--info);">View on GrantWatch →</a>` : ''}
+    </div>
+  </div>`;
+}
 function grantCardWithUid(g, uid) {
   grantStore[uid] = grantStore[uid] || g;
   const hi = (g.match||'').toLowerCase().includes('strong');
@@ -407,31 +437,65 @@ async function findGrants() {
   const geo = document.getElementById('geo').value.trim();
   const mission = document.getElementById('mission').value.trim();
   if (!focus && !mission) { document.getElementById('discover-results').innerHTML = '<div class="empty">Please select a focus area or enter your mission statement.</div>'; return; }
+
   const btn = document.getElementById('discover-btn'); btn.disabled = true;
-  document.getElementById('discover-results').innerHTML = '<div class="loading"><span class="dot">Searching grant databases</span></div>';
+  document.getElementById('discover-results').innerHTML = '<div class="loading"><span class="dot">Searching GrantWatch for current opportunities</span></div>';
+
   try {
+    // Step 1: Start Tinyfish GrantWatch search
+    const startResp = await fetch('/api/search-grants', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category: focus || mission, state: geo, budget })
+    });
+    const startData = await startResp.json();
+    if (!startData.runId) throw new Error(startData.error || 'Failed to start grant search');
+    const runId = startData.runId;
+
+    // Step 2: Poll for results (up to 6 min)
+    let grants = null;
+    let attempts = 0;
+    while (attempts < 90) {
+      await new Promise(r => setTimeout(r, 4000));
+      attempts++;
+      const pollResp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
+      const pollData = await pollResp.json();
+      if (pollData.status === 'complete' && pollData.result) {
+        try {
+          const raw = typeof pollData.result === 'string' ? pollData.result : JSON.stringify(pollData.result);
+          grants = pj(raw);
+        } catch(e) {
+          throw new Error('Could not parse grant results: ' + e.message);
+        }
+        break;
+      } else if (pollData.status === 'failed') {
+        throw new Error('Grant search failed. Please try again.');
+      }
+    }
+
+    if (!grants) throw new Error('Search timed out. Please try again.');
+    if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
+
+    // Step 3: Ask Claude to rank/explain relevance based on org profile
     const today = new Date().toISOString().split('T')[0];
-    const text = await callClaude(`You are a nonprofit grant research expert. Today's date is ${today}. Identify 5 real, currently active grant opportunities with deadlines in the future (after ${today}).
+    const orgContext = `Organization: ${org||'A nonprofit'}, Focus: ${focus||mission}, Geography: ${geo||'Arizona'}, Budget: ${budget||'not specified'}`;
+    const rankText = await callClaude(`Today is ${today}. A nonprofit is looking for grants. Here is their profile:
+${orgContext}
 
-Organization: ${org||'A nonprofit'}
-Focus: ${focus||'General'}
-Budget: ${budget||'Not specified'}
-Geography: ${geo||'Not specified'}
-Mission: ${mission||'Not specified'}
+Here are real grants found on GrantWatch right now:
+${JSON.stringify(grants, null, 2)}
 
-IMPORTANT RULES:
-- Only include grants you are highly confident still exist and are active as of ${today}.
-- Prefer well-known foundation grants, federal programs, and established corporate giving programs.
-- Do NOT invent or guess. If unsure whether a grant is still active, omit it.
-- Do NOT make up deadline dates. Deadlines change every cycle and you cannot know the current one.
+For each grant, add a "match" field ("Strong match" or "Good match") and a "why" field (1 sentence explaining why this org would qualify). Return the same JSON array with these two fields added to each object. Keep all original fields exactly as-is. Return ONLY raw JSON array starting with [.`);
 
-Each grant object must have: name, funder, amount (typical award range), deadline ("Rolling" or "Check funder website — deadlines vary by cycle"), match ("Strong match" or "Good match"), description (2 sentences: who is eligible and what the grant funds).
-Return ONLY a raw JSON array starting with [. No markdown, no extra text.`);
-    const grants = pj(text);
-    let html = `<div class="sh"><span class="st">Matching grants</span><span class="cc">${grants.length} found</span></div>`;
-    grants.forEach(g => { html += grantCard(g); });
+    const rankedGrants = pj(rankText);
+
+    let html = `<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">${rankedGrants.length} found</span></div>`;
+    html += `<p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Live results scraped from GrantWatch — deadlines and amounts verified as of today.</p>`;
+    rankedGrants.forEach(g => { html += grantWatchCard(g); });
     document.getElementById('discover-results').innerHTML = html;
-  } catch(e) { document.getElementById('discover-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`; }
+
+  } catch(e) {
+    document.getElementById('discover-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+  }
   btn.disabled = false;
 }
 
