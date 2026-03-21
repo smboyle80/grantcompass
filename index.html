@@ -281,7 +281,23 @@ async function callClaude(prompt) {
   return d.content.map(b => b.text || '').join('');
 }
 
-function pj(text) { return JSON.parse(text.replace(/```json|```/g,'').trim()); }
+function pj(text) {
+  // Strip markdown code fences and find the first valid JSON object/array
+  let clean = text.replace(/```json|```/gi, '').trim();
+  // Find the first { or [ and last } or ]
+  const firstBrace = clean.indexOf('{');
+  const firstBracket = clean.indexOf('[');
+  let start = -1;
+  if (firstBrace === -1) start = firstBracket;
+  else if (firstBracket === -1) start = firstBrace;
+  else start = Math.min(firstBrace, firstBracket);
+  if (start === -1) throw new Error('No JSON found in response: ' + clean.slice(0, 100));
+  const isArray = start === firstBracket && (firstBrace === -1 || firstBracket < firstBrace);
+  const end = isArray ? clean.lastIndexOf(']') : clean.lastIndexOf('}');
+  if (end === -1) throw new Error('Incomplete JSON in response');
+  clean = clean.slice(start, end + 1);
+  return JSON.parse(clean);
+}
 
 function switchTab(tab) {
   const ids = ['discover','webscan','review','checklist','saved'];
@@ -380,7 +396,7 @@ Budget: ${budget||'Not specified'}
 Geography: ${geo||'Not specified'}
 Mission: ${mission||'Not specified'}
 
-Return a JSON array of 5 grants. Each: name, funder, amount, deadline, match ("Strong match" or "Good match"), description (2 sentences). Only valid JSON.`);
+Return a JSON array of 5 grants. Each: name, funder, amount, deadline, match ("Strong match" or "Good match"), description (2 sentences). Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
     const grants = pj(text);
     let html = `<div class="sh"><span class="st">Matching grants</span><span class="cc">${grants.length} found</span></div>`;
     grants.forEach(g => { html += grantCard(g); });
@@ -483,7 +499,7 @@ Based on this real information about the organization, return a JSON object:
 - strengths: array of 4 grant-relevant strengths you identified from the content
 - grants: array of 6 grant objects (name, funder, amount, deadline, match, description — 2 sentences tying each grant specifically to what you found)
 
-Return only valid JSON.`);
+Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
 
     const analysis = pj(text);
     setStep(4, 'done');
@@ -563,7 +579,7 @@ async function reviewWriting() {
 PROPOSAL:
 ${proposal}
 
-Return JSON: { overallScore (0-100), clarity (0-100), impact (0-100), specificity (0-100), feedback: array of 6 (type:"strength"|"improvement"|"missing", title:5-7 words, detail:2-3 sentences), suggestedRevision: one sentence rewritten }. Only valid JSON.`);
+Return JSON: { overallScore (0-100), clarity (0-100), impact (0-100), specificity (0-100), feedback: array of 6 (type:"strength"|"improvement"|"missing", title:5-7 words, detail:2-3 sentences), suggestedRevision: one sentence rewritten }. Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
     const r = pj(text);
     const score = Math.round(r.overallScore)||0;
     const c = Math.round(r.clarity)||0, imp = Math.round(r.impact)||0, sp = Math.round(r.specificity)||0;
@@ -605,7 +621,7 @@ async function buildChecklist() {
 Grant: ${grant||'General foundation grant'}
 Project: ${desc||'Not specified'}
 
-Return JSON: { categories: [ { category, items: [ { task, detail (15-20 words), priority:"high"|"medium"|"low" } ] } ] }. 4-5 categories, 3-5 items each. Only valid JSON.`);
+Return JSON: { categories: [ { category, items: [ { task, detail (15-20 words), priority:"high"|"medium"|"low" } ] } ] }. 4-5 categories, 3-5 items each. Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
     const result = pj(text);
     let html = '';
     (result.categories||[]).forEach(cat => {
