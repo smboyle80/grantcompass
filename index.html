@@ -345,15 +345,17 @@ function updateBadge() {
 function renderSaved() {
   const el = document.getElementById('saved-list');
   if (!saved.length) { el.innerHTML = '<div class="empty">No saved grants yet. Find grants and click Save to add them here.</div>'; return; }
-  el.innerHTML = '<div class="card">' + saved.map((g,i) => {
+  el.innerHTML = '<div class="card">' + saved.map(function(g,i) {
     const searchQ = encodeURIComponent((g.funder||'') + ' ' + (g.name||'') + ' grant apply');
     const linkHtml = g.url
-      ? `<a href="${g.url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">View &rarr;</a>`
-      : `<a href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">Search &rarr;</a>`;
-    return `<div class="sv-row">
-      <div class="sv-info"><div class="sv-name">${g.name}</div><div class="sv-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Deadline: ${g.deadline||'Check funder'} &nbsp;·&nbsp; Saved ${g.savedAt}</div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">${linkHtml}<button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(${i})">Remove</button></div>
-    </div>`;
+      ? '<a href="' + g.url + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">View &rarr;</a>'
+      : '<a href="https://www.google.com/search?q=' + searchQ + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">Search &rarr;</a>';
+    return '<div class="sv-row">' +
+      '<div class="sv-info"><div class="sv-name">' + (g.name||'') + '</div>' +
+      '<div class="sv-meta">' + (g.funder||'') + ' &nbsp;&middot;&nbsp; ' + (g.amount||'') + ' &nbsp;&middot;&nbsp; Deadline: ' + (g.deadline||'Check funder') + ' &nbsp;&middot;&nbsp; Saved ' + (g.savedAt||'') + '</div></div>' +
+      '<div style="display:flex;gap:6px;flex-shrink:0;">' + linkHtml +
+      '<button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(' + i + ')">Remove</button></div>' +
+      '</div>';
   }).join('') + '</div>';
 }
 
@@ -387,23 +389,21 @@ function grantWatchCard(g) {
   const desc = g.description || '';
   const why = g.why || '';
   const url = g.url || '';
-  return `<div class="card">
-    <div class="rh">
-      <div class="gname">${name}</div>
-      <span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span>
-    </div>
-    <div class="gmeta">
-      <span>${funder}</span><span>·</span>
-      <span>${amount}</span><span>·</span>
-      <span style="color:var(--danger);font-weight:500;">Due: ${deadline}</span>
-    </div>
-    <div class="gdesc">${desc}</div>
-    ${why ? `<div style="font-size:12px;color:var(--success);margin-bottom:10px;padding:6px 10px;background:var(--bg-success);border-radius:var(--r);">Why this matches: ${why}</div>` : ''}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="handleSave('${uid}')">Save grant</button>
-      ${url ? `<a href="${url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;color:var(--info);">View on GrantWatch →</a>` : ''}
-    </div>
-  </div>`;
+  const whyHtml = why
+    ? '<div style="font-size:12px;color:var(--success);margin-bottom:10px;padding:6px 10px;background:var(--bg-success);border-radius:var(--r);">Why this matches: ' + why + '</div>'
+    : '';
+  const linkHtml = url
+    ? '<a href="' + url + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;color:var(--info);">View on GrantWatch →</a>'
+    : '';
+  return '<div class="card">' +
+    '<div class="rh"><div class="gname">' + name + '</div><span class="badge ' + (hi?'b-high':'b-med') + '">' + (g.match||'Good match') + '</span></div>' +
+    '<div class="gmeta"><span>' + funder + '</span><span>·</span><span>' + amount + '</span><span>·</span><span style="color:var(--danger);font-weight:500;">Due: ' + deadline + '</span></div>' +
+    '<div class="gdesc">' + desc + '</div>' +
+    whyHtml +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+    '<button class="btn btn-g" id="sb-' + uid + '" style="font-size:12px;padding:5px 12px;" onclick="handleSave('' + uid + '')">Save grant</button>' +
+    linkHtml +
+    '</div></div>';
 }
 function grantCardWithUid(g, uid) {
   grantStore[uid] = grantStore[uid] || g;
