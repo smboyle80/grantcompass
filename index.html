@@ -328,8 +328,8 @@ function clearReview() {
   document.getElementById('pdf-drop').className = 'file-drop';
 }
 
-function savegrant(gj) {
-  const g = JSON.parse(gj);
+function savegrant(g) {
+  if (typeof g === 'string') { try { g = JSON.parse(g); } catch(e) { return false; } }
   if (saved.find(s => s.name === g.name)) return false;
   saved.push({...g, savedAt: new Date().toLocaleDateString()});
   try { localStorage.setItem('gc_saved', JSON.stringify(saved)); } catch(e) {}
@@ -345,11 +345,16 @@ function updateBadge() {
 function renderSaved() {
   const el = document.getElementById('saved-list');
   if (!saved.length) { el.innerHTML = '<div class="empty">No saved grants yet. Find grants and click Save to add them here.</div>'; return; }
-  el.innerHTML = '<div class="card">' + saved.map((g,i) => `
-    <div class="sv-row">
-      <div class="sv-info"><div class="sv-name">${g.name}</div><div class="sv-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Saved ${g.savedAt}</div></div>
-      <button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(${i})">Remove</button>
-    </div>`).join('') + '</div>';
+  el.innerHTML = '<div class="card">' + saved.map((g,i) => {
+    const searchQ = encodeURIComponent((g.funder||'') + ' ' + (g.name||'') + ' grant apply');
+    const linkHtml = g.url
+      ? `<a href="${g.url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">View &rarr;</a>`
+      : `<a href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">Search &rarr;</a>`;
+    return `<div class="sv-row">
+      <div class="sv-info"><div class="sv-name">${g.name}</div><div class="sv-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Due: ${g.deadline||'—'} &nbsp;·&nbsp; Saved ${g.savedAt}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">${linkHtml}<button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(${i})">Remove</button></div>
+    </div>`;
+  }).join('') + '</div>';
 }
 
 function removeSaved(i) {
@@ -366,20 +371,35 @@ function clearAllSaved() {
   updateBadge(); renderSaved();
 }
 
+// Store grants by id so onclick doesn't need inline JSON
+const grantStore = {};
+
 function grantCard(g) {
   const uid = 'g'+Math.random().toString(36).slice(2,8);
+  grantStore[uid] = g;
   const hi = (g.match||'').toLowerCase().includes('strong');
-  const gj = JSON.stringify(JSON.stringify(g));
-  const linkHtml = g.url ? `<a href="${g.url}" target="_blank" rel="noopener" style="font-size:12px;color:var(--info);text-decoration:none;border:0.5px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:inherit;font-weight:500;">View grant &rarr;</a>` : '';
+  // Build a safe search URL using funder + grant name
+  const searchQ = encodeURIComponent((g.funder||'') + ' ' + (g.name||'') + ' grant apply');
+  const linkHtml = g.url
+    ? `<a href="${g.url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;">View grant &rarr;</a>`
+    : `<a href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;">Search grant &rarr;</a>`;
   return `<div class="card">
     <div class="rh"><div class="gname">${g.name}</div><span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span></div>
     <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--success);font-weight:500;">Due: ${g.deadline}</span></div>
     <div class="gdesc">${g.description}</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="(function(b){const ok=savegrant(${gj});b.outerHTML=ok?'<span class=\'saved-ok\'>Saved</span>':'<span class=\'saved-ok\'>Already saved</span>';})(document.getElementById('sb-${uid}'))">Save grant</button>
+      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="handleSave('${uid}')">Save grant</button>
       ${linkHtml}
     </div>
   </div>`;
+}
+
+function handleSave(uid) {
+  const g = grantStore[uid];
+  const btn = document.getElementById('sb-'+uid);
+  if (!g || !btn) return;
+  const ok = savegrant(g);
+  btn.outerHTML = ok ? '<span class="saved-ok">Saved</span>' : '<span class="saved-ok">Already saved</span>';
 }
 
 async function findGrants() {
