@@ -491,7 +491,7 @@ async function scanWebsite() {
     // Step 2-3: Poll scan-status every 4s until complete
     let result = null;
     let attempts = 0;
-    const maxAttempts = 45; // ~3 min
+    const maxAttempts = 90; // ~6 min
 
     while (attempts < maxAttempts) {
       await new Promise(r => setTimeout(r, 4000));

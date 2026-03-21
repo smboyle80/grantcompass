@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
       body: JSON.stringify({
         url,
-        goal: 'Visit this nonprofit website. Extract: organization name, mission statement, programs and services, populations served, geographic area, impact statistics, budget if mentioned, year founded, current initiatives, existing funders or partners. Check About/Programs/Impact/Mission pages. Return structured JSON.',
+        goal: 'Visit the homepage and About page of this nonprofit. Extract: organization name, mission statement, main programs, populations served, and location. Return as JSON.',
         browser_profile: 'lite',
       }),
     });
