@@ -421,6 +421,15 @@ async function scanWebsite() {
   }, 1000);
 
   try {
+    // Helper to safely extract error message from any response
+    function errMsg(data) {
+      if (!data) return 'Unknown error';
+      if (typeof data.error === 'string') return data.error;
+      if (typeof data.error === 'object') return JSON.stringify(data.error);
+      if (typeof data.message === 'string') return data.message;
+      return JSON.stringify(data);
+    }
+
     // Step 1: Start Tinyfish scan — /run-async returns run_id instantly
     setStep(1, 'active');
     const startResp = await fetch('/api/scan-start', {
@@ -429,7 +438,7 @@ async function scanWebsite() {
       body: JSON.stringify({ url })
     });
     const startData = await startResp.json();
-    if (!startData.runId) throw new Error(startData.error || 'Failed to start scan');
+    if (!startData.runId) throw new Error('Start failed: ' + errMsg(startData));
     const runId = startData.runId;
     setStep(1, 'done'); setStep(2, 'active');
 
@@ -449,6 +458,8 @@ async function scanWebsite() {
         setStep(2, 'done'); setStep(3, 'active');
       }
 
+      if (pollData.error) throw new Error('Poll failed: ' + errMsg(pollData));
+
       if (pollData.status === 'complete') {
         result = pollData.result;
         break;
@@ -457,7 +468,7 @@ async function scanWebsite() {
       }
     }
 
-    if (!result) throw new Error('Scan timed out. Please try again.');
+    if (!result) throw new Error('Scan timed out after 3 minutes. Please try again.');
     setStep(3, 'done'); setStep(4, 'active');
 
     // Step 4: Claude analysis
