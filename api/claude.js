@@ -1,43 +1,22 @@
-const https = require("https");
-
-exports.handler = async function (event) {
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { statusCode: 500, body: JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }) };
+  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
   try {
-    const payload = event.body;
-
-    const rawText = await new Promise((resolve, reject) => {
-      const options = {
-        hostname: "api.anthropic.com",
-        path: "/v1/messages",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(payload),
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-      };
-      const req = https.request(options, (res) => {
-        let body = "";
-        res.on("data", (chunk) => { body += chunk; });
-        res.on("end", () => resolve(body));
-        res.on("error", reject);
-      });
-      req.on("error", reject);
-      req.write(payload);
-      req.end();
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(req.body),
     });
-
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: rawText,
-    };
+    const data = await response.json();
+    return res.status(response.status).json(data);
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return res.status(500).json({ error: err.message });
   }
-};
+}

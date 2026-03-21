@@ -1,57 +1,32 @@
-const https = require("https");
+export default async function handler(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
 
-exports.handler = async function (event) {
-  if (event.httpMethod !== "GET") return { statusCode: 405, body: "Method Not Allowed" };
+  const key = process.env.TINYFISH_API_KEY;
+  if (!key) return res.status(500).json({ error: 'TINYFISH_API_KEY not configured' });
 
-  const tinyfishKey = process.env.TINYFISH_API_KEY;
-  if (!tinyfishKey) return { statusCode: 500, body: JSON.stringify({ error: "TINYFISH_API_KEY not configured" }) };
-
-  const runId = event.queryStringParameters && event.queryStringParameters.runId;
-  if (!runId) return { statusCode: 400, body: JSON.stringify({ error: "runId is required" }) };
+  const { runId } = req.query;
+  if (!runId) return res.status(400).json({ error: 'runId is required' });
 
   try {
-    const rawText = await new Promise((resolve, reject) => {
-      const options = {
-        hostname: "agent.tinyfish.ai",
-        path: "/v1/automation/run/" + runId,
-        method: "GET",
-        headers: { "X-API-Key": tinyfishKey },
-      };
-      const req = https.request(options, (res) => {
-        let body = "";
-        res.on("data", (chunk) => { body += chunk; });
-        res.on("end", () => resolve(body));
-        res.on("error", reject);
-      });
-      req.on("error", reject);
-      req.end();
+    const response = await fetch('https://agent.tinyfish.ai/v1/automation/run/' + runId, {
+      headers: { 'X-API-Key': key },
     });
 
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (e) {
-      return { statusCode: 500, body: JSON.stringify({ error: "Non-JSON from Tinyfish: " + rawText.slice(0, 200) }) };
-    }
-
-    const status = (data.status || "").toUpperCase();
-    const isComplete = status === "COMPLETED";
-    const isFailed = status === "FAILED" || status === "ERROR" || status === "CANCELLED";
+    const data = await response.json();
+    const status = (data.status || '').toUpperCase();
+    const isComplete = status === 'COMPLETED';
+    const isFailed = status === 'FAILED' || status === 'ERROR' || status === 'CANCELLED';
 
     let result = null;
     if (isComplete && data.result) {
-      result = typeof data.result === "string" ? data.result : JSON.stringify(data.result);
+      result = typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
     }
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status: isComplete ? "complete" : isFailed ? "failed" : "running",
-        result,
-      }),
-    };
+    return res.status(200).json({
+      status: isComplete ? 'complete' : isFailed ? 'failed' : 'running',
+      result,
+    });
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return res.status(500).json({ error: err.message });
   }
-};
+}
