@@ -374,59 +374,13 @@ function clearAllSaved() {
 // Store grants by id so onclick doesn't need inline JSON
 const grantStore = {};
 
-// After grants are rendered, use Tinyfish to find real URLs and update cards
-async function lookupGrantUrls(grants, cardUids) {
-  try {
-    // Start URL lookup runs
-    const startResp = await fetch('/api/find-grant-urls', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ grants })
-    });
-    const { runIds } = await startResp.json();
-    if (!runIds || !runIds.length) return;
-
-    // Poll until all done (max 90s)
-    let attempts = 0;
-    while (attempts < 18) {
-      await new Promise(r => setTimeout(r, 5000));
-      attempts++;
-      const pollResp = await fetch('/api/get-grant-urls', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runIds })
-      });
-      const { allDone, results } = await pollResp.json();
-
-      // Update each card that now has a URL
-      results.forEach(({ grantName, url, done }) => {
-        if (!url) return;
-        // Find the card uid for this grant
-        const uid = cardUids[grantName];
-        if (!uid) return;
-        // Update the stored grant
-        if (grantStore[uid]) grantStore[uid].url = url;
-        // Update the link button in the DOM
-        const linkEl = document.getElementById('link-'+uid);
-        if (linkEl) {
-          linkEl.href = url;
-          linkEl.textContent = 'View grant →';
-          linkEl.style.color = 'var(--info)';
-        }
-      });
-
-      if (allDone) break;
-    }
-  } catch(e) {
-    // Silent fail — search links still work as fallback
-  }
-}
-
 function grantCard(g) { return grantCardWithUid(g, 'g'+Math.random().toString(36).slice(2,8)); }
 function grantCardWithUid(g, uid) {
   grantStore[uid] = grantStore[uid] || g;
   const hi = (g.match||'').toLowerCase().includes('strong');
   // Build a safe search URL using funder + grant name
-  const searchQ = encodeURIComponent((g.funder||'') + ' ' + (g.name||'') + ' grant apply 2026');
-  const linkHtml = `<a id="link-${uid}" href="${g.url || 'https://www.google.com/search?q='+searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;color:${g.url?'var(--info)':'var(--text2)'};">${g.url ? 'View grant →' : 'Searching... →'}</a>`;
+  const searchQ = encodeURIComponent('"' + (g.funder||'') + '" "' + (g.name||'') + '" grant application');
+  const linkHtml = `<a id="link-${uid}" href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;">Find application →</a>`;
   return `<div class="card">
     <div class="rh"><div class="gname">${g.name}</div><span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span></div>
     <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--success);font-weight:500;">Due: ${g.deadline}</span></div>
@@ -465,21 +419,18 @@ Budget: ${budget||'Not specified'}
 Geography: ${geo||'Not specified'}
 Mission: ${mission||'Not specified'}
 
-IMPORTANT: Only include grants that are currently accepting applications or will open soon. All deadlines must be after today (${today}). Do NOT include expired grants.
+IMPORTANT RULES:
+- Only include grants currently open or opening within 6 months. Deadlines must be after ${today}.
+- Only include grants you are highly confident still exist and are active in 2026.
+- Prefer well-known foundation grants, federal programs, and established corporate giving programs.
+- Do NOT invent or guess at grants. If unsure, omit it.
 
-Return a JSON array of 5 grants. Each object must have: name, funder, amount (typical award range), deadline (specific month and year, e.g. "June 15, 2026" or "Rolling — reconfirm annually"), match ("Strong match" or "Good match"), description (2 sentences on eligibility and what it funds). Return ONLY raw JSON starting with [.`);
+Each grant object must have: name, funder, amount (typical award range), deadline (e.g. "June 2026" or "Rolling"), match ("Strong match" or "Good match"), description (2 sentences: who is eligible and what the grant funds).
+Return ONLY a raw JSON array starting with [. No markdown, no extra text.`);
     const grants = pj(text);
-    const cardUids = {};
     let html = `<div class="sh"><span class="st">Matching grants</span><span class="cc">${grants.length} found</span></div>`;
-    grants.forEach(g => {
-      const uid = 'g'+Math.random().toString(36).slice(2,8);
-      grantStore[uid] = g;
-      cardUids[g.name] = uid;
-      html += grantCardWithUid(g, uid);
-    });
+    grants.forEach(g => { html += grantCard(g); });
     document.getElementById('discover-results').innerHTML = html;
-    // Kick off Tinyfish URL lookup in background
-    lookupGrantUrls(grants, cardUids);
   } catch(e) { document.getElementById('discover-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`; }
   btn.disabled = false;
 }
@@ -599,15 +550,8 @@ Return ONLY raw JSON starting with {.`);
       </div>`;
     }
     html += `<div class="sh"><span class="st">Grants matched to your site</span><span class="cc">${(analysis.grants||[]).length} found</span></div>`;
-    const scanCardUids = {};
-    (analysis.grants||[]).forEach(g => {
-      const uid = 'g'+Math.random().toString(36).slice(2,8);
-      grantStore[uid] = g;
-      scanCardUids[g.name] = uid;
-      html += grantCardWithUid(g, uid);
-    });
+    (analysis.grants||[]).forEach(g => { html += grantCard(g); });
     document.getElementById('webscan-results').innerHTML = html;
-    lookupGrantUrls(analysis.grants||[], scanCardUids);
 
   } catch(e) {
     clearInterval(scanTimerInterval);
