@@ -421,8 +421,7 @@ async function scanWebsite() {
   }, 1000);
 
   try {
-    // Step 1: Call Edge function to start Tinyfish scan and get run_id
-    // Edge runtime has no timeout so it can hold the SSE stream server-side
+    // Step 1: Start Tinyfish scan — /run-async returns run_id instantly
     setStep(1, 'active');
     const startResp = await fetch('/api/scan-start', {
       method: 'POST',

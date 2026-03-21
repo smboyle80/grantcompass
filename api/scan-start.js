@@ -1,25 +1,15 @@
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-  }
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   const key = process.env.TINYFISH_API_KEY;
-  if (!key) {
-    return new Response(JSON.stringify({ error: 'TINYFISH_API_KEY not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-  }
+  if (!key) return res.status(500).json({ error: 'TINYFISH_API_KEY not configured' });
 
   try {
-    const { url } = await req.json();
-    if (!url) {
-      return new Response(JSON.stringify({ error: 'url is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-    }
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'url is required' });
 
-    // Start the Tinyfish SSE stream server-side (no CORS issues, no timeout on Edge)
-    const sseResp = await fetch('https://agent.tinyfish.ai/v1/automation/run-sse', {
+    // /run-async returns run_id immediately — no streaming, no timeout issues
+    const response = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,42 +22,14 @@ export default async function handler(req) {
       }),
     });
 
-    if (!sseResp.ok) {
-      const errText = await sseResp.text();
-      return new Response(JSON.stringify({ error: 'Tinyfish error ' + sseResp.status + ': ' + errText.slice(0, 200) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(500).json({ error: data.error || data.message || 'Tinyfish error ' + response.status });
     }
 
-    // Read SSE stream line by line until we get run_id
-    const reader = sseResp.body.getReader();
-    const decoder = new TextDecoder();
-    let buf = '';
-    let runId = null;
-
-    while (!runId) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const d = JSON.parse(line.slice(6));
-            if (d.run_id) { runId = d.run_id; break; }
-          } catch (e) {}
-        }
-      }
-    }
-
-    reader.cancel();
-
-    if (!runId) {
-      return new Response(JSON.stringify({ error: 'No run_id received from Tinyfish' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    return new Response(JSON.stringify({ runId }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-
+    return res.status(200).json({ runId: data.run_id });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return res.status(500).json({ error: err.message });
   }
 }
