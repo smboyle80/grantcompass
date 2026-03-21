@@ -1,3 +1,5 @@
+export const config = { api: { bodyParser: true } };
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
 
@@ -14,9 +16,8 @@ export default async function handler(req, res) {
 
     const text = await response.text();
     let data;
-    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Tinyfish non-JSON: ' + text.slice(0, 200) }); }
-
-    if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + (data.message || data.error || text.slice(0, 200)) });
+    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Non-JSON from Tinyfish: ' + text.slice(0, 200) }); }
+    if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + JSON.stringify(data).slice(0, 200) });
 
     const status = (data.status || '').toUpperCase();
     const isComplete = status === 'COMPLETED';
