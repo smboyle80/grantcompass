@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GrantCompass — AI Grant Assistant for Nonprofits</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f5f5f4;
+      --color-background-tertiary: #eeece8;
+      --color-background-success: #eaf3de;
+      --color-background-warning: #faeeda;
+      --color-background-danger: #fcebeb;
+      --color-background-info: #e6f1fb;
+      --color-text-primary: #1a1a18;
+      --color-text-secondary: #5f5e5a;
+      --color-text-tertiary: #888780;
+      --color-text-success: #3b6d11;
+      --color-text-warning: #854f0b;
+      --color-text-danger: #a32d2d;
+      --color-text-info: #185fa5;
+      --color-border-tertiary: rgba(0,0,0,0.12);
+      --color-border-secondary: rgba(0,0,0,0.22);
+      --color-border-primary: rgba(0,0,0,0.35);
+      --color-border-success: #639922;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-background-primary: #1e1e1c;
+        --color-background-secondary: #2a2a27;
+        --color-background-tertiary: #333330;
+        --color-background-success: #173404;
+        --color-background-warning: #412402;
+        --color-background-danger: #501313;
+        --color-background-info: #042c53;
+        --color-text-primary: #f0ede8;
+        --color-text-secondary: #b4b2a9;
+        --color-text-tertiary: #888780;
+        --color-text-success: #97c459;
+        --color-text-warning: #ef9f27;
+        --color-text-danger: #f09595;
+        --color-text-info: #85b7eb;
+        --color-border-tertiary: rgba(255,255,255,0.1);
+        --color-border-secondary: rgba(255,255,255,0.18);
+        --color-border-primary: rgba(255,255,255,0.28);
+        --color-border-success: #3b6d11;
+      }
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-background-tertiary);
+      color: var(--color-text-primary);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    #app {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--color-background-primary);
+      border-radius: var(--border-radius-lg);
+      border: 0.5px solid var(--color-border-tertiary);
+      padding: 2rem;
+    }
+
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem; }
+    .logo-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--color-background-success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .header-text h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+    .header-text p { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+
+    .api-notice {
+      background: var(--color-background-warning);
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--color-text-warning);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .api-key-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 1.5rem; }
+    .api-key-row .field-group { flex: 1; margin-bottom: 0; }
+
+    .tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; overflow-x: auto; }
+    .tab { padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -0.5px; white-space: nowrap; font-family: var(--font-sans); transition: color 0.15s; }
+    .tab.active { color: var(--color-text-success); border-bottom-color: var(--color-text-success); }
+    .tab:hover:not(.active) { color: var(--color-text-primary); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .field-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    input[type=text], input[type=url], input[type=password], select, textarea {
+      width: 100%;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      padding: 8px 12px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--color-border-success); }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+
+    .grid-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+    @media (max-width: 520px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; font-family: var(--font-sans); font-size: 13px; font-weight: 500; border-radius: var(--border-radius-md); cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--color-text-success); color: #fff; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-ghost { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+    .btn-ghost:hover { color: var(--color-text-primary); }
+    .btn-danger { background: var(--color-background-danger); color: var(--color-text-danger); border: none; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+    .result-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+    .result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+    .grant-name { font-size: 14px; font-weight: 500; flex: 1; }
+    .match-badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .match-high { background: var(--color-background-success); color: var(--color-text-success); }
+    .match-med { background: var(--color-background-warning); color: var(--color-text-warning); }
+    .grant-meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+    .grant-desc { font-size: 13px; line-height: 1.65; color: var(--color-text-secondary); margin-bottom: 10px; }
+    .saved-indicator { font-size: 12px; color: var(--color-text-success); font-weight: 500; }
+
+    .review-section { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+    .review-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+    .tag-strength { background: var(--color-background-success); color: var(--color-text-success); }
+    .tag-improve { background: var(--color-background-warning); color: var(--color-text-warning); }
+    .tag-missing { background: var(--color-background-danger); color: var(--color-text-danger); }
+    .review-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .review-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; }
+
+    .score-bar-wrap { margin: 0.75rem 0; }
+    .score-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+    .score-track { height: 5px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 99px; background: var(--color-text-success); }
+
+    .loading-msg { text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 14px; }
+    .dot-anim::after { content: ''; animation: dots 1.4s infinite; }
+    @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
+
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--color-text-secondary); font-size: 13px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .section-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .char-count { font-size: 11px; color: var(--color-text-tertiary); }
+
+    .url-row { display: flex; gap: 8px; align-items: flex-end; }
+    .url-row .field-group { flex: 1; margin-bottom: 0; }
+
+    .scan-info { display: flex; gap: 10px; align-items: flex-start; background: var(--color-background-info); border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: var(--color-text-info); }
+
+    .file-drop { border: 1px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 1.25rem; text-align: center; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); transition: background 0.15s; margin-bottom: 1rem; }
+    .file-drop:hover { background: var(--color-background-secondary); }
+    .file-drop.has-file { border-style: solid; border-color: var(--color-border-success); background: var(--color-background-success); color: var(--color-text-success); }
+
+    .progress-wrap { display: none; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 13px; color: var(--color-text-secondary); }
+    .progress-wrap.visible { display: flex; }
+    .progress-track { flex: 1; height: 4px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--color-text-success); border-radius: 99px; animation: progress-anim 2s ease-in-out infinite; }
+    @keyframes progress-anim { 0%{width:5%} 50%{width:80%} 100%{width:95%} }
+
+    .checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-text { flex: 1; }
+    .checklist-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .checklist-sub { font-size: 12px; color: var(--color-text-secondary); }
+    .priority-badge { font-size: 10px; padding: 2px 6px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+    .p-high { background: var(--color-background-danger); color: var(--color-text-danger); }
+    .p-med { background: var(--color-background-warning); color: var(--color-text-warning); }
+    .p-low { background: var(--color-background-info); color: var(--color-text-info); }
+
+    .saved-grant-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+    .saved-grant-row:last-child { border-bottom: none; }
+    .saved-grant-info { flex: 1; }
+    .saved-grant-name { font-size: 13px; font-weight: 500; }
+    .saved-grant-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+
+    footer { text-align: center; font-size: 12px; color: var(--color-text-tertiary); margin-top: 2rem; }
+    footer a { color: var(--color-text-info); text-decoration: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="var(--color-text-success)"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>GrantCompass</h1>
+      <p>AI grant discovery, checklist builder &amp; writing assistant for nonprofits</p>
+    </div>
+  </div>
+
+  <div class="api-notice">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="var(--color-text-warning)" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="var(--color-text-warning)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    This tool requires an Anthropic API key. Your key is stored only in your browser (localStorage) and never sent anywhere except directly to Anthropic's API.
+  </div>
+
+  <div class="api-key-row">
+    <div class="field-group">
+      <label>Anthropic API key</label>
+      <input type="password" id="api-key" placeholder="sk-ant-..." oninput="saveKey(this.value)" />
+    </div>
+    <button class="btn btn-ghost" onclick="testKey()">Test key</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('discover')">Find grants</button>
+    <button class="tab" onclick="switchTab('webscan')">Scan website</button>
+    <button class="tab" onclick="switchTab('review')">Review writing</button>
+    <button class="tab" onclick="switchTab('checklist')">Checklist builder</button>
+    <button class="tab" onclick="switchTab('saved')">Saved grants <span id="saved-count-badge" style="display:none;background:var(--color-background-success);color:var(--color-text-success);font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;">0</span></button>
+  </div>
+
+  <!-- FIND GRANTS -->
+  <div id="panel-discover" class="panel active">
+    <div class="grid-2">
+      <div class="field-group"><label>Organization name</label><input type="text" id="org-name" placeholder="e.g. Green Valley Food Bank"/></div>
+      <div class="field-group"><label>Focus area</label>
+        <select id="focus-area">
+          <option value="">Select a category</option>
+          <option>Food security &amp; hunger relief</option>
+          <option>Education &amp; youth development</option>
+          <option>Environmental conservation</option>
+          <option>Healthcare &amp; mental health</option>
+          <option>Housing &amp; homelessness</option>
+          <option>Arts &amp; culture</option>
+          <option>Workforce development</option>
+          <option>Racial equity &amp; justice</option>
+          <option>Disaster relief</option>
+          <option>Animal welfare</option>
+          <option>LGBTQ+ advocacy</option>
+          <option>Immigrant &amp; refugee services</option>
+          <option>Disability services</option>
+          <option>Veterans services</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field-group"><label>Annual budget</label>
+        <select id="budget">
+          <option value="">Select range</option>
+          <option>Under $100K</option>
+          <option>$100K – $500K</option>
+          <option>$500K – $1M</option>
+          <option>$1M – $5M</option>
+          <option>Over $5M</option>
+        </select>
+      </div>
+      <div class="field-group"><label>Geography served</label><input type="text" id="geo" placeholder="e.g. Chicago, IL or National"/></div>
+    </div>
+    <div class="field-group">
+      <label>Mission statement <span class="char-count" id="mission-count">(0/400)</span></label>
+      <textarea id="mission" maxlength="400" placeholder="Describe your organization's mission and communities you serve..." oninput="document.getElementById('mission-count').textContent='('+this.value.length+'/400)'"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="discover-btn" onclick="findGrants()">Find matching grants</button>
+      <button class="btn btn-ghost" onclick="clearDiscover()">Clear</button>
+    </div>
+    <div id="discover-results"></div>
+  </div>
+
+  <!-- SCAN WEBSITE -->
+  <div id="panel-webscan" class="panel">
+    <div class="scan-info">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="var(--color-text-info)" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="var(--color-text-info)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Enter your organization's website URL. GrantCompass will scan it to understand your programs and impact, then find grants you may not have considered.
+    </div>
+    <div class="url-row">
+      <div class="field-group"><label>Organization website URL</label><input type="url" id="scan-url" placeholder="https://yourorganization.org"/></div>
+      <button class="btn btn-primary" id="scan-btn" onclick="scanWebsite()" style="flex-shrink:0;margin-bottom:0;">Scan website</button>
+    </div>
+    <div class="progress-wrap" id="scan-progress">
+      <div class="progress-track"><div class="progress-bar"></div></div>
+      <span id="scan-progress-label">Reading website...</span>
+    </div>
+    <div id="webscan-results"></div>
+  </div>
+
+  <!-- REVIEW WRITING -->
+  <div id="panel-review" class="panel">
+    <div id="pdf-drop" class="file-drop" onclick="document.getElementById('pdf-input').click()" ondragover="event.preventDefault();this.style.background='var(--color-background-secondary)'" ondragleave="this.style.background=''" ondrop="handlePdfDrop(event)">
+      <input type="file" id="pdf-input" accept=".pdf,.txt" style="display:none" onchange="handlePdfFile(this)"/>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block;margin-right:6px;vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--color-text-secondary)" stroke-width="1.5"/><polyline points="14 2 14 8 20 8" stroke="var(--color-text-secondary)" stroke-width="1.5"/></svg>
+      <span id="drop-label">Upload PDF or TXT grant proposal — or drag &amp; drop</span>
+    </div>
+    <div class="field-group"><label>Grant name / funder (optional)</label><input type="text" id="grant-target" placeholder="e.g. Robert Wood Johnson Foundation Health Equity Grant"/></div>
+    <div class="field-group">
+      <label>Grant proposal text <span class="char-count" id="proposal-count">(0 words)</span></label>
+      <textarea id="proposal-text" style="min-height:150px;" placeholder="Paste your grant narrative here, or upload a file above..." oninput="updateWordCount(this)"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="review-btn" onclick="reviewWriting()">Review my writing</button>
+      <button class="btn btn-ghost" onclick="clearReview()">Clear</button>
+    </div>
+    <div id="review-results"></div>
+  </div>
+
+  <!-- CHECKLIST BUILDER -->
+  <div id="panel-checklist" class="panel">
+    <div class="field-group"><label>Grant or funder name</label><input type="text" id="checklist-grant" placeholder="e.g. USDA Community Facilities Grant"/></div>
+    <div class="field-group">
+      <label>Describe your project or program</label>
+      <textarea id="checklist-desc" style="min-height:90px;" placeholder="What project are you applying for? Who does it serve? What outcomes do you expect?"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="checklist-btn" onclick="buildChecklist()">Build checklist</button>
+      <button class="btn btn-ghost" onclick="clearChecklist()">Clear</button>
+    </div>
+    <div id="checklist-results"></div>
+  </div>
+
+  <!-- SAVED GRANTS -->
+  <div id="panel-saved" class="panel">
+    <div class="section-header">
+      <span class="section-title">Saved grants</span>
+      <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px;" onclick="clearAllSaved()">Clear all</button>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<footer>
+  <p>GrantCompass &mdash; Built with the <a href="https://docs.anthropic.com" target="_blank">Anthropic API</a>. Your API key is stored locally and never shared.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const MODEL = 'claude-sonnet-4-20250514';
+let savedGrants = [];
+
+try { savedGrants = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
+
+function getKey() { return document.getElementById('api-key').value.trim(); }
+
+function saveKey(val) {
+  try { if (val) localStorage.setItem('gc_apikey', val); else localStorage.removeItem('gc_apikey'); } catch(e) {}
+}
+
+async function callClaude(prompt, systemPrompt) {
+  const key = getKey();
+  if (!key) { alert('Please enter your Anthropic API key above.'); throw new Error('No API key'); }
+  const body = { model: MODEL, max_tokens: 1200, messages: [{ role: 'user', content: prompt }] };
+  if (systemPrompt) body.system = systemPrompt;
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || 'API error'); }
+  const data = await resp.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+async function testKey() {
+  const key = getKey();
+  if (!key) { alert('Please enter an API key first.'); return; }
+  try {
+    await callClaude('Say "Key works!" and nothing else.');
+    alert('API key is valid and working.');
+  } catch(e) { alert('Key test failed: ' + e.message); }
+}
+
+function parseJSON(text) {
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+function switchTab(tab) {
+  const ids = ['discover','webscan','review','checklist','saved'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i] === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  if (tab === 'saved') renderSaved();
+}
+
+function updateWordCount(el) {
+  const w = el.value.trim().split(/\s+/).filter(w=>w).length;
+  document.getElementById('proposal-count').textContent = '('+w+' words)';
+}
+
+function clearDiscover() {
+  ['org-name','geo','mission'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('focus-area').value = '';
+  document.getElementById('budget').value = '';
+  document.getElementById('mission-count').textContent = '(0/400)';
+  document.getElementById('discover-results').innerHTML = '';
+}
+
+function clearReview() {
+  document.getElementById('grant-target').value = '';
+  document.getElementById('proposal-text').value = '';
+  document.getElementById('proposal-count').textContent = '(0 words)';
+  document.getElementById('review-results').innerHTML = '';
+  document.getElementById('drop-label').textContent = 'Upload PDF or TXT grant proposal — or drag & drop';
+  document.getElementById('pdf-drop').className = 'file-drop';
+}
+
+function clearChecklist() {
+  document.getElementById('checklist-grant').value = '';
+  document.getElementById('checklist-desc').value = '';
+  document.getElementById('checklist-results').innerHTML = '';
+}
+
+function saveGrant(grantJson) {
+  const g = JSON.parse(grantJson);
+  if (savedGrants.find(s => s.name === g.name)) return false;
+  savedGrants.push({ ...g, savedAt: new Date().toLocaleDateString() });
+  try { localStorage.setItem('gc_saved', JSON.stringify(savedGrants)); } catch(e) {}
+  updateSavedBadge();
+  return true;
+}
+
+function updateSavedBadge() {
+  const badge = document.getElementById('saved-count-badge');
+  if (savedGrants.length > 0) { badge.style.display = 'inline'; badge.textContent = savedGrants.length; }
+  else badge.style.display = 'none';
+}
+
+function renderSaved() {
+  const el = document.getElementById('saved-list');
+  if (!savedGrants.length) { el.innerHTML = '<div class="empty-state">No saved grants yet. Find grants and click "Save" to add them here.</div>'; return; }
+  el.innerHTML = '<div class="result-card">' + savedGrants.map((g,i) => `
+    <div class="saved-grant-row">
+      <div class="saved-grant-info">
+        <div class="saved-grant-name">${g.name}</div>
+        <div class="saved-grant-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Saved ${g.savedAt}</div>
+      </div>
+      <button class="btn btn-danger" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(${i})">Remove</button>
+    </div>`).join('') + '</div>';
+}
+
+function removeSaved(i) {
+  savedGrants.splice(i,1);
+  try { localStorage.setItem('gc_saved', JSON.stringify(savedGrants)); } catch(e) {}
+  updateSavedBadge(); renderSaved();
+}
+
+function clearAllSaved() {
+  if (!savedGrants.length) return;
+  if (!confirm('Remove all saved grants?')) return;
+  savedGrants = [];
+  try { localStorage.removeItem('gc_saved'); } catch(e) {}
+  updateSavedBadge(); renderSaved();
+}
+
+function grantCardHTML(g) {
+  const uid = 'g' + Math.random().toString(36).slice(2,8);
+  const isHigh = (g.match||'').toLowerCase().includes('strong');
+  const gj = JSON.stringify(JSON.stringify(g));
+  return `<div class="result-card">
+    <div class="result-header">
+      <div class="grant-name">${g.name}</div>
+      <span class="match-badge ${isHigh?'match-high':'match-med'}">${g.match||'Good match'}</span>
+    </div>
+    <div class="grant-meta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span>${g.deadline}</span></div>
+    <div class="grant-desc">${g.description}</div>
+    <button class="btn btn-ghost" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="(function(b){const ok=saveGrant(${gj});b.outerHTML=ok?'<span class=\'saved-indicator\'>Saved</span>':'<span class=\'saved-indicator\'>Already saved</span>';})(document.getElementById('sb-${uid}'))">Save grant</button>
+  </div>`;
+}
+
+async function findGrants() {
+  const orgName = document.getElementById('org-name').value.trim();
+  const focusArea = document.getElementById('focus-area').value;
+  const budget = document.getElementById('budget').value;
+  const geo = document.getElementById('geo').value.trim();
+  const mission = document.getElementById('mission').value.trim();
+  if (!focusArea && !mission) { document.getElementById('discover-results').innerHTML = '<div class="empty-state">Please select a focus area or enter your mission statement.</div>'; return; }
+  const btn = document.getElementById('discover-btn');
+  btn.disabled = true;
+  document.getElementById('discover-results').innerHTML = '<div class="loading-msg"><span class="dot-anim">Searching grant databases</span></div>';
+  try {
+    const text = await callClaude(`You are a nonprofit grant research expert. Identify 5 real, specific grant opportunities for this nonprofit.
+
+Organization: ${orgName||'A nonprofit'}
+Focus area: ${focusArea||'General'}
+Annual budget: ${budget||'Not specified'}
+Geography: ${geo||'Not specified'}
+Mission: ${mission||'Not specified'}
+
+Return a JSON array of exactly 5 grants. Each object: name, funder, amount (typical range), deadline (cycle), match ("Strong match" or "Good match"), description (2 sentences: eligibility + what it funds). Return only valid JSON.`);
+    const grants = parseJSON(text);
+    let html = `<div class="section-header"><span class="section-title">Matching grants</span><span class="char-count">${grants.length} found</span></div>`;
+    grants.forEach(g => { html += grantCardHTML(g); });
+    document.getElementById('discover-results').innerHTML = html;
+  } catch(e) {
+    document.getElementById('discover-results').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+  btn.disabled = false;
+}
+
+async function scanWebsite() {
+  const url = document.getElementById('scan-url').value.trim();
+  if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty-state">Please enter a website URL.</div>'; return; }
+  const btn = document.getElementById('scan-btn');
+  const progress = document.getElementById('scan-progress');
+  btn.disabled = true;
+  progress.className = 'progress-wrap visible';
+  document.getElementById('scan-progress-label').textContent = 'Reading website...';
+  document.getElementById('webscan-results').innerHTML = '';
+  let websiteText = '';
+  try {
+    const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
+    const data = await r.json();
+    const tmp = document.createElement('div');
+    tmp.innerHTML = data.contents || '';
+    websiteText = (tmp.innerText || '').slice(0, 4000);
+  } catch(e) {}
+  document.getElementById('scan-progress-label').textContent = 'Analyzing organization...';
+  const prompt = websiteText
+    ? `You are a nonprofit grant expert. Analyze this nonprofit's website content and identify 5 well-matched grant opportunities.
+
+Website URL: ${url}
+Website content:
+${websiteText}
+
+Return a JSON object with:
+- orgSummary: 2-sentence summary of the organization from the website
+- strengths: array of 3 grant-relevant strengths found in the content
+- grants: array of 5 grant objects (name, funder, amount, deadline, match, description — 2 sentences tying each grant to what you found on the site)
+
+Return only valid JSON.`
+    : `You are a nonprofit grant expert. The website at ${url} could not be accessed. Make reasonable inferences and suggest 5 possible grants.
+
+Return JSON: { orgSummary, strengths (array of 3), grants (array of 5 with name, funder, amount, deadline, match, description) }. Only valid JSON.`;
+  try {
+    const text = await callClaude(prompt);
+    const result = parseJSON(text);
+    let html = '';
+    if (result.orgSummary) {
+      html += `<div class="result-card" style="margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:8px;">What we found</div>
+        <p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary);margin-bottom:10px;">${result.orgSummary}</p>
+        ${(result.strengths||[]).map(s=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;"><span style="color:var(--color-text-success);font-size:13px;font-weight:500;">+</span><span style="font-size:13px;color:var(--color-text-secondary);">${s}</span></div>`).join('')}
+      </div>`;
+    }
+    html += `<div class="section-header"><span class="section-title">Grants matched to your site</span><span class="char-count">${(result.grants||[]).length} found</span></div>`;
+    (result.grants||[]).forEach(g => { html += grantCardHTML(g); });
+    document.getElementById('webscan-results').innerHTML = html;
+  } catch(e) {
+    document.getElementById('webscan-results').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+  progress.className = 'progress-wrap';
+  btn.disabled = false;
+}
+
+async function handlePdfFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const dropEl = document.getElementById('pdf-drop');
+  const label = document.getElementById('drop-label');
+  label.textContent = 'Reading ' + file.name + '...';
+  if (file.name.endsWith('.txt')) {
+    const text = await file.text();
+    document.getElementById('proposal-text').value = text.slice(0,8000);
+    updateWordCount(document.getElementById('proposal-text'));
+    label.textContent = file.name + ' loaded';
+    dropEl.className = 'file-drop has-file'; return;
+  }
+  try {
+    if (typeof pdfjsLib === 'undefined') throw new Error('PDF library not loaded');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    let fullText = '';
+    for (let i = 1; i <= Math.min(pdf.numPages,10); i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(item=>item.str).join(' ') + '\n';
+    }
+    document.getElementById('proposal-text').value = fullText.slice(0,8000);
+    updateWordCount(document.getElementById('proposal-text'));
+    label.textContent = file.name + ' loaded (' + pdf.numPages + ' pages)';
+    dropEl.className = 'file-drop has-file';
+  } catch(e) {
+    label.textContent = 'Could not read PDF — please paste text manually.';
+    dropEl.className = 'file-drop';
+  }
+}
+
+function handlePdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdf-drop').style.background = '';
+  const file = e.dataTransfer.files[0];
+  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('pdf-input').files = dt.files; handlePdfFile(document.getElementById('pdf-input')); }
+}
+
+async function reviewWriting() {
+  const proposal = document.getElementById('proposal-text').value.trim();
+  const grantTarget = document.getElementById('grant-target').value.trim();
+  if (!proposal || proposal.split(/\s+/).length < 15) { document.getElementById('review-results').innerHTML = '<div class="empty-state">Please paste your grant proposal text (at least 15 words).</div>'; return; }
+  const btn = document.getElementById('review-btn');
+  btn.disabled = true;
+  document.getElementById('review-results').innerHTML = '<div class="loading-msg"><span class="dot-anim">Analyzing your proposal</span></div>';
+  try {
+    const text = await callClaude(`You are an expert nonprofit grant writer. Review this proposal${grantTarget?' for the '+grantTarget:''}.
+
+PROPOSAL:
+${proposal}
+
+Return JSON:
+- overallScore: 0-100
+- clarity: 0-100
+- impact: 0-100
+- specificity: 0-100
+- feedback: array of 6 objects (type: "strength"|"improvement"|"missing", title: 5-7 words, detail: 2-3 specific sentences)
+- suggestedRevision: one sentence from the proposal rewritten as an improvement
+
+Return only valid JSON.`);
+    const review = parseJSON(text);
+    const score = Math.round(review.overallScore)||0;
+    const clarity = Math.round(review.clarity)||0;
+    const impact = Math.round(review.impact)||0;
+    const spec = Math.round(review.specificity)||0;
+    const scoreColor = score>=75?'var(--color-text-success)':score>=50?'var(--color-text-warning)':'var(--color-text-danger)';
+    let html = `<div class="review-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <span class="section-title">Overall score</span>
+        <span style="font-size:26px;font-weight:500;color:${scoreColor};">${score}<span style="font-size:13px;color:var(--color-text-secondary);">/100</span></span>
+      </div>
+      <div class="score-bar-wrap"><div class="score-label"><span>Clarity</span><span>${clarity}%</span></div><div class="score-track"><div class="score-fill" style="width:${clarity}%"></div></div></div>
+      <div class="score-bar-wrap"><div class="score-label"><span>Impact articulation</span><span>${impact}%</span></div><div class="score-track"><div class="score-fill" style="width:${impact}%;background:var(--color-text-info);"></div></div></div>
+      <div class="score-bar-wrap"><div class="score-label"><span>Specificity &amp; evidence</span><span>${spec}%</span></div><div class="score-track"><div class="score-fill" style="width:${spec}%;background:var(--color-text-warning);"></div></div></div>
+    </div>`;
+    if (review.suggestedRevision) {
+      html += `<div class="review-section" style="border-left:2px solid var(--color-border-success);border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0;">
+        <div class="section-title" style="margin-bottom:6px;">Suggested revision example</div>
+        <p style="font-size:13px;line-height:1.65;color:var(--color-text-secondary);">${review.suggestedRevision}</p>
+      </div>`;
+    }
+    html += `<div class="section-title" style="margin-bottom:10px;margin-top:4px;">Detailed feedback</div>`;
+    const tagClass = {strength:'tag-strength',improvement:'tag-improve',missing:'tag-missing'};
+    const tagLabel = {strength:'Strength',improvement:'Needs improvement',missing:'Missing element'};
+    (review.feedback||[]).forEach(f => {
+      html += `<div class="review-section"><span class="review-tag ${tagClass[f.type]||'tag-improve'}">${tagLabel[f.type]||f.type}</span><div class="review-title">${f.title}</div><div class="review-body">${f.detail}</div></div>`;
+    });
+    document.getElementById('review-results').innerHTML = html;
+  } catch(e) {
+    document.getElementById('review-results').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+  btn.disabled = false;
+}
+
+async function buildChecklist() {
+  const grantName = document.getElementById('checklist-grant').value.trim();
+  const desc = document.getElementById('checklist-desc').value.trim();
+  if (!grantName && !desc) { document.getElementById('checklist-results').innerHTML = '<div class="empty-state">Please enter a grant name or project description.</div>'; return; }
+  const btn = document.getElementById('checklist-btn');
+  btn.disabled = true;
+  document.getElementById('checklist-results').innerHTML = '<div class="loading-msg"><span class="dot-anim">Building your checklist</span></div>';
+  try {
+    const text = await callClaude(`You are a nonprofit grants manager. Build a comprehensive pre-submission checklist.
+
+Grant: ${grantName||'General foundation grant'}
+Project: ${desc||'Not specified'}
+
+Return JSON: { categories: [ { category: string, items: [ { task, detail (15-20 words), priority: "high"|"medium"|"low" } ] } ] }
+Include 4-5 categories (narrative, financials, organizational docs, budget, grant-specific), 3-5 items each. Only valid JSON.`);
+    const result = parseJSON(text);
+    let html = '';
+    (result.categories||[]).forEach(cat => {
+      html += `<div class="result-card" style="margin-bottom:10px;"><div class="section-title" style="margin-bottom:8px;">${cat.category}</div>`;
+      (cat.items||[]).forEach(item => {
+        const pid = 'ck' + Math.random().toString(36).slice(2,8);
+        html += `<div class="checklist-item">
+          <input type="checkbox" id="${pid}" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;margin-top:3px;" onchange="document.getElementById('lbl-${pid}').style.textDecoration=this.checked?'line-through':'none'"/>
+          <div class="checklist-text">
+            <div class="checklist-title" id="lbl-${pid}">${item.task}</div>
+            <div class="checklist-sub">${item.detail}</div>
+          </div>
+          <span class="priority-badge ${item.priority==='high'?'p-high':item.priority==='medium'?'p-med':'p-low'}">${item.priority}</span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    document.getElementById('checklist-results').innerHTML = html;
+  } catch(e) {
+    document.getElementById('checklist-results').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+  btn.disabled = false;
+}
+
+try {
+  const savedKey = localStorage.getItem('gc_apikey');
+  if (savedKey) document.getElementById('api-key').value = savedKey;
+  if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+} catch(e) {}
+updateSavedBadge();
+</script>
+</body>
+</html>
