@@ -4,16 +4,20 @@ export default async function handler(req, res) {
   const key = process.env.TINYFISH_API_KEY;
   if (!key) return res.status(500).json({ error: 'TINYFISH_API_KEY not configured' });
 
-  const { runId } = req.query;
+  const runId = req.query && req.query.runId;
   if (!runId) return res.status(400).json({ error: 'runId is required' });
 
   try {
-    // Correct URL per Tinyfish docs: /v1/runs/{id} not /v1/automation/run/{id}
     const response = await fetch('https://agent.tinyfish.ai/v1/runs/' + runId, {
       headers: { 'X-API-Key': key },
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Tinyfish non-JSON: ' + text.slice(0, 200) }); }
+
+    if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + (data.message || data.error || text.slice(0, 200)) });
+
     const status = (data.status || '').toUpperCase();
     const isComplete = status === 'COMPLETED';
     const isFailed = status === 'FAILED' || status === 'ERROR' || status === 'CANCELLED';
