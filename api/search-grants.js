@@ -12,39 +12,48 @@ export default async function handler(req, res) {
       try { body = JSON.parse(body || '{}'); } catch(e) { body = {}; }
     }
 
-    const { category, state, budget } = body;
-    if (!category) return res.status(400).json({ error: 'category required' });
+    const { category, state, budget, orgProfile } = body;
+    if (!category && !orgProfile) return res.status(400).json({ error: 'category or orgProfile required' });
 
-    // Derive GrantWatch subdomain from state
     const stateMap = {
       'arizona': 'arizona', 'az': 'arizona',
       'california': 'california', 'ca': 'california',
       'texas': 'texas', 'tx': 'texas',
       'florida': 'florida', 'fl': 'florida',
       'new york': 'new-york', 'ny': 'new-york',
+      'colorado': 'colorado', 'co': 'colorado',
+      'washington': 'washington', 'wa': 'washington',
+      'oregon': 'oregon', 'or': 'oregon',
+      'illinois': 'illinois', 'il': 'illinois',
+      'georgia': 'georgia', 'ga': 'georgia',
+      'ohio': 'ohio', 'oh': 'ohio',
+      'pennsylvania': 'pennsylvania', 'pa': 'pennsylvania',
+      'michigan': 'michigan', 'mi': 'michigan',
+      'north carolina': 'north-carolina', 'nc': 'north-carolina',
     };
     const stateKey = (state || '').toLowerCase().trim();
     const gwSubdomain = stateMap[stateKey] || 'grants';
     const searchUrl = `https://${gwSubdomain}.grantwatch.com/grant-search.php`;
+
+    const orgDesc = orgProfile || `Category: ${category}, State: ${state || 'any'}, Budget: ${budget || 'any'}`;
 
     const response = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
       body: JSON.stringify({
         url: searchUrl,
-        goal: `Search GrantWatch for currently open grants matching this nonprofit profile:
-- Category/focus: ${category}
-- State: ${state || 'any US state'}
-- Budget: ${budget || 'any size'}
+        goal: `Search GrantWatch for currently open grants matching this nonprofit:
 
-Use the search filters to find relevant results. Extract the first 8 grants shown. For each return:
-- grant_name
-- funder
-- amount (award amount)
-- deadline (exact date shown)
-- description
-- eligibility
-- url (full GrantWatch URL to the grant detail page)
+${orgDesc}
+
+Use the search box to search for relevant keywords from the mission above (e.g. "disability", "housing", "youth", "food" etc.). Look through the results and extract the 8 most relevant currently open grants. For each grant return:
+- grant_name: full name
+- funder: organization offering the grant
+- amount: award amount or range
+- deadline: exact deadline date shown on the page
+- description: the grant description
+- eligibility: eligibility requirements
+- url: full URL to the grant detail page on GrantWatch
 
 Return ONLY a JSON array. No markdown.`,
         browser_profile: 'lite',
@@ -53,7 +62,7 @@ Return ONLY a JSON array. No markdown.`,
 
     const text = await response.text();
     let data;
-    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Tinyfish non-JSON: ' + text.slice(0, 200) }); }
+    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Non-JSON from Tinyfish: ' + text.slice(0, 200) }); }
     if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + JSON.stringify(data).slice(0, 200) });
     if (!data.run_id) return res.status(500).json({ error: 'No run_id returned', raw: data });
     return res.status(200).json({ runId: data.run_id });
