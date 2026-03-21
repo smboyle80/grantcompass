@@ -351,7 +351,7 @@ function renderSaved() {
       ? `<a href="${g.url}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">View &rarr;</a>`
       : `<a href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">Search &rarr;</a>`;
     return `<div class="sv-row">
-      <div class="sv-info"><div class="sv-name">${g.name}</div><div class="sv-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Due: ${g.deadline||'—'} &nbsp;·&nbsp; Saved ${g.savedAt}</div></div>
+      <div class="sv-info"><div class="sv-name">${g.name}</div><div class="sv-meta">${g.funder} &nbsp;·&nbsp; ${g.amount} &nbsp;·&nbsp; Deadline: ${g.deadline||'Check funder'} &nbsp;·&nbsp; Saved ${g.savedAt}</div></div>
       <div style="display:flex;gap:6px;flex-shrink:0;">${linkHtml}<button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(${i})">Remove</button></div>
     </div>`;
   }).join('') + '</div>';
@@ -383,7 +383,7 @@ function grantCardWithUid(g, uid) {
   const linkHtml = `<a id="link-${uid}" href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;">Find application →</a>`;
   return `<div class="card">
     <div class="rh"><div class="gname">${g.name}</div><span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span></div>
-    <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--success);font-weight:500;">Due: ${g.deadline}</span></div>
+    <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--text2);">Deadline: ${g.deadline}</span></div>
     <div class="gdesc">${g.description}</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="handleSave('${uid}')">Save grant</button>
@@ -420,12 +420,12 @@ Geography: ${geo||'Not specified'}
 Mission: ${mission||'Not specified'}
 
 IMPORTANT RULES:
-- Only include grants currently open or opening within 6 months. Deadlines must be after ${today}.
-- Only include grants you are highly confident still exist and are active in 2026.
+- Only include grants you are highly confident still exist and are active as of ${today}.
 - Prefer well-known foundation grants, federal programs, and established corporate giving programs.
-- Do NOT invent or guess at grants. If unsure, omit it.
+- Do NOT invent or guess. If unsure whether a grant is still active, omit it.
+- Do NOT make up deadline dates. Deadlines change every cycle and you cannot know the current one.
 
-Each grant object must have: name, funder, amount (typical award range), deadline (e.g. "June 2026" or "Rolling"), match ("Strong match" or "Good match"), description (2 sentences: who is eligible and what the grant funds).
+Each grant object must have: name, funder, amount (typical award range), deadline ("Rolling" or "Check funder website — deadlines vary by cycle"), match ("Strong match" or "Good match"), description (2 sentences: who is eligible and what the grant funds).
 Return ONLY a raw JSON array starting with [. No markdown, no extra text.`);
     const grants = pj(text);
     let html = `<div class="sh"><span class="st">Matching grants</span><span class="cc">${grants.length} found</span></div>`;
@@ -530,7 +530,11 @@ Based on this real information, return a JSON object with:
 - strengths: array of 4 grant-relevant strengths from the content
 - grants: array of 6 grant objects, each with: name, funder, amount, deadline (specific future date after ${today2}), match ("Strong match" or "Good match"), description (2 sentences tying the grant to what you found on the site)
 
-IMPORTANT: Only include grants currently accepting applications with deadlines AFTER ${today2}. Absolutely no expired grants.
+IMPORTANT RULES:
+- Only include grants you are highly confident still exist and are active as of ${today2}.
+- Do NOT make up deadline dates — deadlines change every grant cycle and you cannot know the current one.
+- Use "Rolling" or "Check funder website" for the deadline field on every grant.
+- Only include grants you are very confident about. If unsure, omit it.
 Return ONLY raw JSON starting with {.`);
 
     const analysis = pj(text);
