@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   if (!runId) return res.status(400).json({ error: 'runId is required' });
 
   try {
-    const response = await fetch('https://agent.tinyfish.ai/v1/automation/run/' + runId, {
+    // Correct URL per Tinyfish docs: /v1/runs/{id} not /v1/automation/run/{id}
+    const response = await fetch('https://agent.tinyfish.ai/v1/runs/' + runId, {
       headers: { 'X-API-Key': key },
     });
 
