@@ -513,6 +513,36 @@ function setStep(n, state) {
   else icon.innerHTML = n;
 }
 
+// Shared helpers for scan workflow
+function errMsg(d) {
+  if (!d) return 'Unknown error';
+  if (typeof d.error === 'string') return d.error;
+  if (typeof d.error === 'object') return JSON.stringify(d.error);
+  return JSON.stringify(d);
+}
+
+async function startRun(endpoint, body) {
+  const resp = await fetch(endpoint, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await resp.json();
+  if (!data.runId) throw new Error('Failed to start: ' + errMsg(data));
+  return data.runId;
+}
+
+async function pollUntilDone(runId, maxAttempts) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    const resp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
+    const data = await resp.json();
+    if (data.error) throw new Error(errMsg(data));
+    if (data.status === 'complete') return data.result;
+    if (data.status === 'failed') throw new Error('Run failed. Please try again.');
+  }
+  return null;
+}
+
 async function scanWebsite() {
   const url = document.getElementById('scan-url').value.trim();
   if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization's website URL.</div>'; return; }
@@ -526,35 +556,6 @@ async function scanWebsite() {
   document.getElementById('scan-timer').textContent = '0s';
   clearInterval(scanTimerInterval);
   scanTimerInterval = setInterval(() => { scanSeconds++; document.getElementById('scan-timer').textContent = scanSeconds + 's'; }, 1000);
-
-  function errMsg(d) {
-    if (!d) return 'Unknown error';
-    if (typeof d.error === 'string') return d.error;
-    if (typeof d.error === 'object') return JSON.stringify(d.error);
-    return JSON.stringify(d);
-  }
-
-  async function startRun(endpoint, body) {
-    const r = await fetch(endpoint, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const d = await r.json();
-    if (!d.runId) throw new Error('Failed to start: ' + errMsg(d));
-    return d.runId;
-  }
-
-  async function pollUntilDone(runId, maxAttempts) {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(r => setTimeout(r, 4000));
-      const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
-      const d = await r.json();
-      if (d.error) throw new Error(errMsg(d));
-      if (d.status === 'complete') return d.result;
-      if (d.status === 'failed') throw new Error('Run failed. Please try again.');
-    }
-    return null;
-  }
 
   try {
     // Step 1: Start BOTH Tinyfish runs in parallel immediately
