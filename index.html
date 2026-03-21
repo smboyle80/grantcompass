@@ -272,7 +272,7 @@ let saved = [];
 try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
 
 async function callClaude(prompt) {
-  const r = await fetch('/.netlify/functions/claude', {
+  const r = await fetch('/api/claude', {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
   });
@@ -424,7 +424,7 @@ async function scanWebsite() {
     // Step 1: Get API key from Netlify, then open SSE stream directly in browser
     // This avoids Netlify function timeouts — browser holds the stream, not the server
     setStep(1, 'active');
-    const keyResp = await fetch('/.netlify/functions/get-tinyfish-key');
+    const keyResp = await fetch('/api/get-tinyfish-key');
     const keyData = await keyResp.json();
     if (!keyData.key) throw new Error(keyData.error || 'Could not retrieve scan credentials');
 
@@ -475,7 +475,7 @@ async function scanWebsite() {
       await new Promise(r => setTimeout(r, 4000));
       attempts++;
 
-      const pollResp = await fetch('/.netlify/functions/scan-status?runId=' + encodeURIComponent(runId));
+      const pollResp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
       const pollData = await pollResp.json();
 
       if (scanSeconds > 15 && document.getElementById('step-2-icon').className.includes('active')) {

@@ -2,71 +2,43 @@
 
 AI-powered grant discovery and writing assistant for nonprofits. Powered by Anthropic Claude + Tinyfish web agent.
 
-## Features
+## Deploying to Vercel (free)
 
-- **Find grants** — match grants to your org's mission, focus area, budget, and geography
-- **Scan website** *(Tinyfish-powered)* — a real browser agent navigates your website, reads About/Programs/Impact pages, and surfaces grants tailored to what it actually finds
-- **Review writing** — upload a PDF or paste a draft proposal for scored feedback
-- **Checklist builder** — generate a prioritized pre-submission checklist for any grant
-- **Saved grants** — bookmark grants across sessions
+### 1. Push to GitHub
+1. Create a new repo at github.com
+2. Upload or push all files in this folder to the repo root
 
----
-
-## Deploying to Netlify
-
-### 1. Get your API keys
-
-**Anthropic API key**
-- Sign up at [console.anthropic.com](https://console.anthropic.com)
-- Create an API key (starts with `sk-ant-...`)
-
-**Tinyfish API key**
-- Log in to your Tinyfish account and copy your API key
-
-### 2. Deploy to Netlify
-1. Go to [netlify.com](https://netlify.com) → **Add new site** → **Deploy manually**
-2. Drag and drop this entire `grantcompass` folder into the deploy window
-3. Netlify detects `netlify.toml` and configures automatically
+### 2. Deploy on Vercel
+1. Go to [vercel.com](https://vercel.com) and sign up with your GitHub account
+2. Click **Add New Project** → import your GitHub repo
+3. Leave all build settings as default — Vercel auto-detects everything
+4. Click **Deploy**
 
 ### 3. Add environment variables
-In your Netlify dashboard: **Site settings** → **Environment variables** → add both:
+In your Vercel project dashboard: **Settings** → **Environment Variables** → add:
 
 | Key | Value |
 |-----|-------|
 | `ANTHROPIC_API_KEY` | your Anthropic key (`sk-ant-...`) |
 | `TINYFISH_API_KEY` | your Tinyfish API key |
 
-Then go to **Deploys** → **Trigger deploy**.
-
----
+Then go to **Deployments** → click the three dots on the latest deploy → **Redeploy**.
 
 ## File structure
 
 ```
 grantcompass/
-├── index.html                        # Main app
-├── netlify.toml                      # Netlify config
+├── index.html          # Main app
+├── vercel.json         # Vercel config (30s function timeout)
 ├── README.md
-└── netlify/
-    └── functions/
-        ├── claude.js                 # Proxies Claude API (hides Anthropic key)
-        ├── scan-start.js             # Starts a Tinyfish website scan
-        └── scan-status.js            # Polls Tinyfish for scan completion
+└── api/
+    ├── claude.js           # Proxies Anthropic API calls
+    ├── get-tinyfish-key.js # Vends Tinyfish key to browser
+    └── scan-status.js      # Polls Tinyfish run status
 ```
 
-## How it works
-
-- **Grant discovery, writing review, checklist**: all routed through `claude.js` → Anthropic API
-- **Website scanning**: `scan-start.js` launches a Tinyfish browser agent on the nonprofit's URL; `scan-status.js` polls until done; the extracted content is then sent to Claude for grant matching
-
-Both API keys stay server-side and are never exposed to the browser.
-
----
-
-## Cost estimate
-
-| Service | Cost per use | 50 orgs × 20 uses/mo |
-|---------|-------------|----------------------|
-| Anthropic API | ~$0.01–0.03 | ~$10–30/mo |
-| Tinyfish scans | varies by plan | check your plan limits |
-| Netlify functions | free tier: 125k/mo | free |
+## How the website scanner works
+1. Browser fetches Tinyfish key from `/api/get-tinyfish-key`
+2. Browser opens SSE stream directly to Tinyfish (no server timeout)
+3. Once run_id arrives, browser polls `/api/scan-status` every 4s
+4. On completion, result is sent to Claude for grant matching
