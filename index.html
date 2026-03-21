@@ -274,7 +274,7 @@ try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {
 async function callClaude(prompt) {
   const r = await fetch('/api/claude', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
   });
   if (!r.ok) { const e = await r.json(); throw new Error(e.error || 'Claude request failed'); }
   const d = await r.json();
@@ -370,11 +370,15 @@ function grantCard(g) {
   const uid = 'g'+Math.random().toString(36).slice(2,8);
   const hi = (g.match||'').toLowerCase().includes('strong');
   const gj = JSON.stringify(JSON.stringify(g));
+  const linkHtml = g.url ? `<a href="${g.url}" target="_blank" rel="noopener" style="font-size:12px;color:var(--info);text-decoration:none;border:0.5px solid var(--border2);border-radius:var(--r);padding:5px 12px;font-family:inherit;font-weight:500;">View grant &rarr;</a>` : '';
   return `<div class="card">
     <div class="rh"><div class="gname">${g.name}</div><span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span></div>
-    <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span>${g.deadline}</span></div>
+    <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--success);font-weight:500;">Due: ${g.deadline}</span></div>
     <div class="gdesc">${g.description}</div>
-    <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="(function(b){const ok=savegrant(${gj});b.outerHTML=ok?'<span class=\'saved-ok\'>Saved</span>':'<span class=\'saved-ok\'>Already saved</span>';})(document.getElementById('sb-${uid}'))">Save grant</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="(function(b){const ok=savegrant(${gj});b.outerHTML=ok?'<span class=\'saved-ok\'>Saved</span>':'<span class=\'saved-ok\'>Already saved</span>';})(document.getElementById('sb-${uid}'))">Save grant</button>
+      ${linkHtml}
+    </div>
   </div>`;
 }
 
@@ -388,7 +392,8 @@ async function findGrants() {
   const btn = document.getElementById('discover-btn'); btn.disabled = true;
   document.getElementById('discover-results').innerHTML = '<div class="loading"><span class="dot">Searching grant databases</span></div>';
   try {
-    const text = await callClaude(`You are a nonprofit grant research expert. Identify 5 real, specific grant opportunities.
+    const today = new Date().toISOString().split('T')[0];
+    const text = await callClaude(`You are a nonprofit grant research expert. Today's date is ${today}. Identify 5 real, currently active grant opportunities with deadlines in the future (after ${today}).
 
 Organization: ${org||'A nonprofit'}
 Focus: ${focus||'General'}
@@ -396,7 +401,9 @@ Budget: ${budget||'Not specified'}
 Geography: ${geo||'Not specified'}
 Mission: ${mission||'Not specified'}
 
-Return a JSON array of 5 grants. Each: name, funder, amount, deadline, match ("Strong match" or "Good match"), description (2 sentences). Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
+IMPORTANT: Only include grants that are currently accepting applications or will open soon. All deadlines must be after today (${today}). Do NOT include expired grants.
+
+Return a JSON array of 5 grants. Each object must have: name, funder, amount (typical award range), deadline (specific month and year, e.g. "June 15, 2026" or "Rolling"), match ("Strong match" or "Good match"), description (2 sentences on eligibility and what it funds), url (the direct URL to the grant application or funder page — must be a real URL). Return ONLY raw JSON starting with [.`);
     const grants = pj(text);
     let html = `<div class="sh"><span class="st">Matching grants</span><span class="cc">${grants.length} found</span></div>`;
     grants.forEach(g => { html += grantCard(g); });
@@ -488,18 +495,20 @@ async function scanWebsite() {
     setStep(3, 'done'); setStep(4, 'active');
 
     // Step 4: Claude analysis
-    const text = await callClaude(`You are a nonprofit grant expert. A web agent has browsed this nonprofit's website and extracted the following information.
+    const today2 = new Date().toISOString().split('T')[0];
+    const text = await callClaude(`You are a nonprofit grant expert. Today's date is ${today2}. A web agent has browsed this nonprofit's website and extracted the following information.
 
 Website URL: ${url}
 Extracted content:
 ${typeof result === 'string' ? result.slice(0, 5000) : JSON.stringify(result).slice(0, 5000)}
 
-Based on this real information about the organization, return a JSON object:
+Based on this real information, return a JSON object with:
 - orgSummary: 2-sentence summary of the organization
-- strengths: array of 4 grant-relevant strengths you identified from the content
-- grants: array of 6 grant objects (name, funder, amount, deadline, match, description — 2 sentences tying each grant specifically to what you found)
+- strengths: array of 4 grant-relevant strengths from the content
+- grants: array of 6 grant objects, each with: name, funder, amount, deadline (specific future date after ${today2}), match ("Strong match" or "Good match"), description (2 sentences tying the grant to what you found on the site), url (direct URL to grant application or funder page — must be a real working URL)
 
-Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
+IMPORTANT: Only include grants currently accepting applications with deadlines AFTER ${today2}. Absolutely no expired grants.
+Return ONLY raw JSON starting with {.`);
 
     const analysis = pj(text);
     setStep(4, 'done');
