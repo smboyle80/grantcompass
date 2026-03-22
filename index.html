@@ -876,7 +876,7 @@ function doScan() {
   var url = document.getElementById('f-url').value.trim();
   if (!url) {document.getElementById('res-scan').innerHTML='<div class="err">Please enter your organization website URL.</div>';return;}
 
-  var scanResult = null, searchResult = null;
+  var scanResult = null, searchResult = null, detectedState = '';
 
   var btn = document.getElementById('btn-scan');
   btn.disabled=true;
@@ -948,7 +948,7 @@ function doScan() {
 
     // Detect keyword and state from org profile for other sources
     var orgText = (obj.orgProfile||'').toLowerCase();
-    var detectedState = obj.detectedState || '';
+    detectedState = obj.detectedState || '';
     var kw = keyword(orgText);
 
     // Fetch federal + state results in parallel
