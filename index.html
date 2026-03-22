@@ -294,18 +294,36 @@ var store = {};
 function grantCard(g) {
   var uid = 'g'+Math.random().toString(36).slice(2,9);
   store[uid] = g;
-  var name = g.grant_name || g.name || 'Unnamed grant';
-  var funder = g.funder || '';
-  var amount = g.amount || 'See listing';
-  var deadline = g.deadline || 'See listing';
-  var desc = g.description || '';
+  // Handle any field name Tinyfish might return
+  var name = g.grant_name || g.name || g.title || g.grant_title || g.program_name || '';
+  var funder = g.funder || g.funder_organization || g.organization || g.sponsor || g.agency || '';
+  var amount = g.amount || g.award_amount || g.funding_amount || g.grant_amount || g.award || '';
+  var deadline = g.deadline || g.deadline_date || g.due_date || g.close_date || g.expiration_date || '';
+  var desc = g.description || g.summary || g.overview || g.details || '';
   var why = g.why || '';
-  var url = g.url || '';
+  // Find URL — check every possible field
+  var url = '';
+  var urlFields = ['url','link','href','grant_url','detail_url','application_url','source_url','grantwatch_url'];
+  for (var fi=0; fi<urlFields.length; fi++) {
+    if (g[urlFields[fi]] && g[urlFields[fi]].indexOf('http') === 0) { url = g[urlFields[fi]]; break; }
+  }
+  // Also scan all string values for a grantwatch.com URL
+  if (!url) {
+    Object.keys(g).forEach(function(k) {
+      if (!url && typeof g[k] === 'string' && g[k].indexOf('grantwatch.com') !== -1) url = g[k];
+    });
+  }
+  // Use name from URL path as fallback if name is empty
+  if (!name && url) {
+    var parts = url.split('/');
+    name = parts[parts.length-1].replace(/-/g,' ').replace(/\.html?$/,'') || 'Grant listing';
+  }
+  if (!name) name = 'Grant listing';
   var isStrong = (g.match||'').toLowerCase().indexOf('strong') !== -1;
-  var sq = encodeURIComponent('"'+funder+'" "'+name+'" grant application');
+  var sq = encodeURIComponent('"'+funder+'" "'+name+'" grant application site:grantwatch.com');
   var link = url
     ? '<a class="cb" href="'+url+'" target="_blank">View on GrantWatch</a>'
-    : '<a class="cb" href="https://www.google.com/search?q='+sq+'" target="_blank">Find application</a>';
+    : '<a class="cb" href="https://www.google.com/search?q='+sq+'" target="_blank">Find on GrantWatch</a>';
   return '<div class="card">'
     +'<div class="card-top"><div class="card-name">'+esc(name)+'</div><span class="badge '+(isStrong?'strong':'good')+'">'+(g.match||'Good match')+'</span></div>'
     +'<div class="meta">'+esc(funder)+' &middot; '+esc(amount)+' &middot; <span style="color:#b91c1c;font-weight:600">Due: '+esc(deadline)+'</span></div>'
@@ -446,8 +464,9 @@ function doFind() {
     var raw = typeof result==='string'?result:JSON.stringify(result);
     var grants = pj(raw);
     if (!Array.isArray(grants)) grants = grants.grants||grants.data||Object.values(grants);
+    console.log('RAW GRANTS FROM TINYFISH:', JSON.stringify(grants, null, 2));
     var today = new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+orgProfile+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 short sentence) to each grant object. Return ONLY the JSON array starting with [.')
+    return callClaude('Today is '+today+'. Nonprofit:\n'+orgProfile+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd two fields to each grant object: "match" (value: "Strong match" or "Good match") and "why" (1 short sentence explaining why). Preserve ALL original fields exactly including url, grant_name, funder, amount, deadline. Return ONLY the complete JSON array starting with [.')
       .then(function(text){
         var ranked = pj(text);
         var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grants from GrantWatch</span><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span></div>';
@@ -530,7 +549,7 @@ function doScan() {
     var grants=pj(raw);
     if (!Array.isArray(grants)) grants=grants.grants||grants.data||Object.values(grants);
     var today=new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 short sentence) to each grant object. Return ONLY the JSON array starting with [.')
+    return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd two fields to each grant object: "match" (value: "Strong match" or "Good match") and "why" (1 short sentence explaining why). Preserve ALL original fields exactly including url, grant_name, funder, amount, deadline. Return ONLY the complete JSON array starting with [.')
       .then(function(text){
         var ranked=pj(text);
         stepSet(4,'done');clearInterval(scanTimer);
