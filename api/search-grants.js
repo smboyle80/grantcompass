@@ -3,7 +3,10 @@ module.exports = async function handler(req, res) {
   const key = process.env.TINYFISH_API_KEY;
   if (!key) return res.status(500).json({ error: 'TINYFISH_API_KEY not configured' });
   try {
-    const { category, state, orgProfile } = req.body || {};
+    var body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) { body = {}; } }
+    if (!body || typeof body !== 'object') body = {};
+    const { category, state, orgProfile } = body;
     if (!category && !orgProfile) return res.status(400).json({ error: 'category or orgProfile required' });
 
     const stateMap = {

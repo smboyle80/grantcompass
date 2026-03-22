@@ -302,12 +302,12 @@ function pollUntilDone(runId, max) {
   function poll() {
     if (attempts >= max) return Promise.resolve(null);
     attempts++;
-    return new Promise(function(res) { setTimeout(res, 4000); }).then(function() {
+    return new Promise(function(res) { setTimeout(res, 5000); }).then(function() {
       return fetch('/api/scan-status?runId=' + encodeURIComponent(runId)).then(function(r) { return r.json(); });
     }).then(function(d) {
       if (d.error) throw new Error(errMsg(d));
       if (d.status === 'complete') return d.result;
-      if (d.status === 'failed') throw new Error('Run failed');
+      if (d.status === 'failed') throw new Error('Run failed. Please try again.');
       return poll();
     });
   }
@@ -442,7 +442,7 @@ function findGrants() {
   document.getElementById('disc-res').innerHTML = '<div class="loading"><span class="dot">Searching GrantWatch for current opportunities</span></div>';
   var orgProfile = (org ? 'Organization: ' + org + '\n' : '') + (focus ? 'Focus: ' + focus + '\n' : '') + (budget ? 'Budget: ' + budget + '\n' : '') + (geo ? 'State: ' + geo + '\n' : '') + (mission ? 'Mission: ' + mission : '');
   startRun('/api/search-grants', {category: focus || mission, state: geo, orgProfile: orgProfile}).then(function(runId) {
-    return pollUntilDone(runId, 90);
+    return pollUntilDone(runId, 96);
   }).then(function(result) {
     if (!result) throw new Error('Search timed out. Please try again.');
     var raw = typeof result === 'string' ? result : JSON.stringify(result);
@@ -472,31 +472,87 @@ function scanWebsite() {
   scanTimer = setInterval(function() { scanSecs++; document.getElementById('scan-timer').textContent = scanSecs + 's'; }, 1000);
 
   setStep(1,'active');
-  startRun('/api/scan-and-search', {phase:'scan', url:url}).then(function(runId) {
-    return pollUntilDone(runId, 60);
-  }).then(function(scanResult) {
+  var scanRunId, searchRunId, orgProfile;
+
+  fetch('/api/scan-and-search', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({phase:'start', url:url})
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.error) throw new Error(errMsg(d));
+    scanRunId = d.scanRunId;
+    searchRunId = d.searchRunId;
     setStep(1,'done'); setStep(2,'active');
-    var orgData = scanResult;
-    try { if (typeof scanResult === 'string') orgData = pj(scanResult); } catch(e) {}
-    var orgProfile = typeof orgData === 'string' ? orgData : JSON.stringify(orgData,null,2);
-    var orgText = orgProfile.toLowerCase();
-    var stateMatch = orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
-    var detectedState = stateMatch ? stateMatch[1] : '';
-    document.getElementById('scan-res').innerHTML = '<div class="card" style="margin-bottom:12px"><div class="st" style="margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:var(--tx2);white-space:pre-wrap;line-height:1.5">' + orgProfile.slice(0,600) + (orgProfile.length > 600 ? '...' : '') + '</pre></div><div class="loading"><span class="dot">Searching GrantWatch</span></div>';
-    setStep(2,'done'); setStep(3,'active');
-    return startRun('/api/search-grants', {category: orgProfile, state: detectedState, orgProfile: orgProfile}).then(function(runId) {
-      return pollUntilDone(runId, 60).then(function(result) {
-        return {result: result, orgProfile: orgProfile};
+
+    var scanDone = false, searchDone = false;
+    var scanResult = null, searchResult = null;
+
+    function pollBoth() {
+      var ps = [];
+      if (!scanDone) ps.push(
+        fetch('/api/scan-status?runId=' + encodeURIComponent(scanRunId)).then(function(r){return r.json();}).then(function(d) {
+          if (d.status === 'complete') { scanResult = d.result; scanDone = true; setStep(2,'done'); setStep(3,'active'); }
+          else if (d.status === 'failed') scanDone = true;
+        }).catch(function(){scanDone=true;})
+      );
+      if (!searchDone) ps.push(
+        fetch('/api/scan-status?runId=' + encodeURIComponent(searchRunId)).then(function(r){return r.json();}).then(function(d) {
+          if (d.status === 'complete') { searchResult = d.result; searchDone = true; }
+          else if (d.status === 'failed') searchDone = true;
+        }).catch(function(){searchDone=true;})
+      );
+      return Promise.all(ps).then(function() {
+        if (scanDone && searchDone) return;
+        return new Promise(function(res){setTimeout(res,5000);}).then(pollBoth);
       });
+    }
+
+    var timeoutId;
+    var timeoutP = new Promise(function(_,reject) {
+      timeoutId = setTimeout(function() { reject(new Error('Scan timed out. Please try again.')); }, 480000);
     });
+    return Promise.race([pollBoth().then(function(){clearTimeout(timeoutId);}), timeoutP]);
+
+  }).then(function() {
+    if (scanResult) {
+      var orgData = scanResult;
+      try { if (typeof scanResult === 'string') orgData = pj(scanResult); } catch(e) {}
+      orgProfile = typeof orgData === 'string' ? orgData : JSON.stringify(orgData,null,2);
+      document.getElementById('scan-res').innerHTML = '<div class="card" style="margin-bottom:12px"><div class="st" style="margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:var(--tx2);white-space:pre-wrap;line-height:1.5">' + orgProfile.slice(0,500) + (orgProfile.length > 500 ? '...' : '') + '</pre></div><div class="loading"><span class="dot">Matching grants to your organization</span></div>';
+    }
+    var orgText = (orgProfile || '').toLowerCase();
+    var stateMatch = orgText.match(/(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)/);
+    var detectedState = stateMatch ? stateMatch[1] : '';
+    var km = [['disability','disability'],['intellectual','disability'],['developmental','disability'],['food','food'],['hunger','food'],['housing','housing'],['homeless','housing'],['youth','youth'],['children','youth'],['education','education'],['health','health'],['mental health','mental health'],['environment','environment'],['veteran','veterans'],['refugee','refugee'],['arts','arts'],['workforce','workforce'],['animal','animal welfare']];
+    var kw = 'nonprofit';
+    for (var i = 0; i < km.length; i++) { if (orgText.indexOf(km[i][0]) !== -1) { kw = km[i][1]; break; } }
+
+    if (searchResult) { setStep(3,'done'); return {result:searchResult}; }
+
+    setStep(3,'active');
+    return fetch('/api/scan-and-search', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({phase:'search', keyword:kw, state:detectedState})
+    }).then(function(r){return r.json();}).then(function(d) {
+      if (d.error) throw new Error(errMsg(d));
+      return pollUntilDone(d.runId, 96);
+    }).then(function(result) { return {result:result}; });
+
   }).then(function(obj) {
-    if (!obj.result) throw new Error('GrantWatch search timed out. Please try again.');
+    if (!obj || !obj.result) throw new Error('Could not retrieve grants. Please try again.');
     setStep(3,'done'); setStep(4,'active');
     var raw = typeof obj.result === 'string' ? obj.result : JSON.stringify(obj.result);
     var grants = pj(raw);
     if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
     var today = new Date().toISOString().split('T')[0];
-    return callClaude('Today is ' + today + '. Nonprofit profile:\n' + obj.orgProfile.slice(0,1000) + '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants,null,2).slice(0,3000) + '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence) to each grant. Return same JSON array with these two fields added. Return ONLY raw JSON array starting with [.').then(function(text) {
+    var ctx = orgProfile ? orgProfile.slice(0,800) : 'Organization from: ' + url;
+    return callClaude('Today is ' + today + '. Nonprofit: ' + ctx + '
+
+Real grants from GrantWatch:
+' + JSON.stringify(grants,null,2).slice(0,3000) + '
+
+Add "match" ("Strong match" or "Good match") and "why" (1 sentence) to each grant. Return same JSON array. Return ONLY raw JSON array starting with [.').then(function(text) {
       var ranked = pj(text);
       setStep(4,'done'); clearInterval(scanTimer);
       var html = '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + ranked.length + ' found</span></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px">Live results matched to your organization.</p>';
