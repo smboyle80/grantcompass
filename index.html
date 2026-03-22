@@ -185,8 +185,16 @@ footer{text-align:center;font-size:12px;color:#aaa;margin-top:24px}
       <label class="fl">Mission statement <span id="f-wc" style="font-weight:400;text-transform:none;letter-spacing:0;color:#bbb">(0/400)</span></label>
       <textarea id="f-mission" maxlength="400" placeholder="Describe your mission and communities served..." oninput="document.getElementById('f-wc').textContent='('+this.value.length+'/400)'"></textarea>
     </div>
+    <div style="margin-bottom:14px">
+      <label class="fl" style="margin-bottom:8px">Sources to search</label>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="src-grantwatch" checked style="width:14px;height:14px;margin:0"> GrantWatch</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="src-federal" checked style="width:14px;height:14px;margin:0"> Grants.gov (federal)</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="src-state" style="width:14px;height:14px;margin:0"> State portal</label>
+      </div>
+    </div>
     <div class="btns">
-      <button class="p" id="btn-find" onclick="doFind()">Search GrantWatch</button>
+      <button class="p" id="btn-find" onclick="showScreener()">Search grants</button>
       <button class="s" onclick="clearFind()">Clear</button>
     </div>
     <div class="res" id="res-find"></div>
@@ -278,6 +286,63 @@ footer{text-align:center;font-size:12px;color:#aaa;margin-top:24px}
       </div>
     </div>
   </div>
+
+  <!-- Eligibility Screener Modal -->
+  <div id="screener-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;padding:28px;width:92%;max-width:460px">
+      <div style="margin-bottom:18px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">Quick eligibility check</div>
+        <div style="font-size:13px;color:#888">Takes 20 seconds. Filters out grants you won't qualify for.</div>
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="fl">501(c)(3) status</label>
+        <select id="eq-status" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="yes">Yes, we are a registered 501(c)(3)</option>
+          <option value="fiscal">We use a fiscal sponsor</option>
+          <option value="pending">Pending / in process</option>
+          <option value="no">No, we are not a 501(c)(3)</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="fl">Years operating</label>
+        <select id="eq-years" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="under1">Less than 1 year</option>
+          <option value="1to2">1-2 years</option>
+          <option value="3to5">3-5 years</option>
+          <option value="over5">More than 5 years</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="fl">Annual operating budget</label>
+        <select id="eq-budget" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="under50k">Under $50K</option>
+          <option value="50to250k">$50K - $250K</option>
+          <option value="250to1m">$250K - $1M</option>
+          <option value="1to5m">$1M - $5M</option>
+          <option value="over5m">Over $5M</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:20px">
+        <label class="fl">Geographic focus</label>
+        <select id="eq-geo" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="local">Local / single city or county</option>
+          <option value="regional">Regional / multi-county</option>
+          <option value="statewide">Statewide</option>
+          <option value="national">National</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="s" onclick="skipScreener()">Skip</button>
+        <button class="p" onclick="submitScreener()">Search with eligibility filter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Source selector (shown in search results header) -->
 </div>
 <footer>GrantCompass &mdash; free for nonprofits &nbsp;|&nbsp; <span style="color:#3b6d11;font-weight:600">v20260322-FRESH</span></footer>
 
@@ -602,6 +667,67 @@ function stepSet(n, state) {
   else {el.className='si';el.textContent=String(n);}
 }
 
+// ── Eligibility screener ────────────────────────────────────────────────────
+var eligibilityProfile = null;
+var pendingSearch = null;
+
+function showScreener() {
+  // Check if minimum fields filled in Find Grants
+  var focus = document.getElementById('f-focus').value;
+  var mission = document.getElementById('f-mission').value.trim();
+  if (!focus && !mission) {
+    document.getElementById('res-find').innerHTML = '<div class="err">Please select a focus area or enter your mission statement.</div>';
+    return;
+  }
+  document.getElementById('screener-modal').style.display = 'flex';
+}
+
+function skipScreener() {
+  eligibilityProfile = null;
+  document.getElementById('screener-modal').style.display = 'none';
+  doFind();
+}
+
+function submitScreener() {
+  var status = document.getElementById('eq-status').value;
+  var years  = document.getElementById('eq-years').value;
+  var budget = document.getElementById('eq-budget').value;
+  var geo    = document.getElementById('eq-geo').value;
+  if (!status || !years || !budget || !geo) {
+    alert('Please answer all four questions to filter results accurately.');
+    return;
+  }
+  var budgetLabels = {under50k:'Under $50K','50to250k':'$50K-$250K','250to1m':'$250K-$1M','1to5m':'$1M-$5M',over5m:'Over $5M'};
+  var geoLabels = {local:'Local',regional:'Regional',statewide:'Statewide',national:'National'};
+  var yearLabels = {under1:'<1 year','1to2':'1-2 years','3to5':'3-5 years',over5:'5+ years'};
+  eligibilityProfile = {
+    status: status,
+    years: years,
+    budget: budget,
+    geo: geo,
+    summary: '501c3: ' + status + ', Years: ' + (yearLabels[years]||years) + ', Budget: ' + (budgetLabels[budget]||budget) + ', Reach: ' + (geoLabels[geo]||geo)
+  };
+  document.getElementById('screener-modal').style.display = 'none';
+  doFind();
+}
+
+// Close screener on backdrop click
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('screener-modal');
+  if (m && e.target === m) { m.style.display = 'none'; }
+});
+
+// ── Source badge helper ───────────────────────────────────────────────────
+function sourceBadge(source) {
+  var colors = {
+    'Grants.gov': 'background:#dbeafe;color:#1d4ed8',
+    'GrantWatch':  'background:#eaf3de;color:#3b6d11',
+    'State':       'background:#ede9fe;color:#6d28d9'
+  };
+  var style = colors[source] || 'background:#f0ede8;color:#555';
+  return '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+style+'">'+esc(source)+'</span>';
+}
+
 // ── Find Grants ────────────────────────────────────────────────────────────
 function clearFind() {
   ['f-org','f-state','f-mission'].forEach(function(id){document.getElementById(id).value='';});
@@ -609,54 +735,138 @@ function clearFind() {
   document.getElementById('f-budget').value='';
   document.getElementById('f-wc').textContent='(0/400)';
   document.getElementById('res-find').innerHTML='';
+  eligibilityProfile = null;
 }
 
 function doFind() {
-  var focus = document.getElementById('f-focus').value;
-  var mission = document.getElementById('f-mission').value.trim();
-  var org = document.getElementById('f-org').value.trim();
+  var focus  = document.getElementById('f-focus').value;
+  var mission= document.getElementById('f-mission').value.trim();
+  var org    = document.getElementById('f-org').value.trim();
   var budget = document.getElementById('f-budget').value;
-  var state = document.getElementById('f-state').value.trim();
+  var state  = document.getElementById('f-state').value.trim();
 
-  if (!focus && !mission) {
-    document.getElementById('res-find').innerHTML='<div class="err">Please select a focus area or enter your mission statement.</div>';
+  var useGrantWatch = document.getElementById('src-grantwatch').checked;
+  var useFederal    = document.getElementById('src-federal').checked;
+  var useState      = document.getElementById('src-state').checked;
+
+  if (!useGrantWatch && !useFederal && !useState) {
+    document.getElementById('res-find').innerHTML='<div class="err">Please select at least one source to search.</div>';
     return;
   }
 
   var btn = document.getElementById('btn-find');
   btn.disabled = true;
-  document.getElementById('res-find').innerHTML='<div class="loading">Searching GrantWatch for current opportunities...</div>';
+
+  var sourceList = [useGrantWatch?'GrantWatch':'', useFederal?'Grants.gov':'', useState?'State portal':''].filter(Boolean).join(', ');
+  document.getElementById('res-find').innerHTML='<div class="loading">Searching '+esc(sourceList)+'...</div>';
 
   var orgProfile = [
     org?'Organization: '+org:'',
     focus?'Focus: '+focus:'',
     budget?'Budget: '+budget:'',
     state?'State: '+state:'',
-    mission?'Mission: '+mission:''
+    mission?'Mission: '+mission:'',
+    eligibilityProfile?'Eligibility: '+eligibilityProfile.summary:''
   ].filter(Boolean).join('\n');
 
-  var kw = keyword(focus||mission);
+  var kw  = keyword(focus||mission);
   var sub = stateSubdomain(state);
+  var sources = [];
+  if (useFederal) sources.push('federal');
+  if (useState)   sources.push('state');
 
-  startRun('/api/search-grants',{keyword:kw,subdomain:sub,orgProfile:orgProfile})
-  .then(function(runId){return poll(runId,96);})
-  .then(function(result){
-    if (!result) throw new Error('Search timed out. Please try again.');
-    var raw = typeof result==='string'?result:JSON.stringify(result);
-    var grants = pj(raw);
-    if (!Array.isArray(grants)) grants = grants.grants||grants.data||Object.values(grants);
-    console.log('RAW GRANTS FROM TINYFISH:', JSON.stringify(grants, null, 2));
+  // Run GrantWatch and federal/state searches in parallel
+  var promises = [];
+  var allGrants = [];
+
+  if (useGrantWatch) {
+    promises.push(
+      startRun('/api/search-grants', {keyword:kw, subdomain:sub})
+      .then(function(runId){ return poll(runId, 96); })
+      .then(function(result){
+        if (!result) return;
+        var raw = typeof result==='string'?result:JSON.stringify(result);
+        try {
+          var grants = pj(raw);
+          if (!Array.isArray(grants)) grants = grants.grants||grants.data||Object.values(grants);
+          grants.forEach(function(g){ g.source = g.source||'GrantWatch'; allGrants.push(g); });
+        } catch(e) {}
+      }).catch(function(){})
+    );
+  }
+
+  if (useFederal || useState) {
+    promises.push(
+      fetch('/api/search-federal', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({keyword:kw, state:state, sources:sources})
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        // Federal results come back immediately
+        if (d.federal && Array.isArray(d.federal)) {
+          d.federal.forEach(function(g){ g.source='Grants.gov'; allGrants.push(g); });
+        }
+        // State results need polling
+        if (d.stateRunId) {
+          return poll(d.stateRunId, 60).then(function(result){
+            if (!result) return;
+            var raw = typeof result==='string'?result:JSON.stringify(result);
+            try {
+              var grants = pj(raw);
+              if (!Array.isArray(grants)) grants = grants.grants||grants.data||Object.values(grants);
+              grants.forEach(function(g){ g.source=d.statePortalName||'State'; allGrants.push(g); });
+            } catch(e) {}
+          }).catch(function(){});
+        }
+      }).catch(function(){})
+    );
+  }
+
+  Promise.all(promises).then(function(){
+    if (!allGrants.length) throw new Error('No grants found. Try different keywords or sources.');
+
+    // Build eligibility filter instruction for Claude
+    var eligNote = '';
+    if (eligibilityProfile) {
+      eligNote = '\n\nELIGIBILITY FILTER: Only include grants this org can qualify for given: ' + eligibilityProfile.summary +
+        '. Remove any grant that requires: 501c3 if status is pending/no, more years operating than they have, larger budget than theirs, or broader geographic scope than their reach. If unsure, keep the grant.';
+    }
+
     var today = new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+orgProfile+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd two fields to each grant object: "match" (value: "Strong match" or "Good match") and "why" (1 short sentence explaining why). Preserve ALL original fields exactly including url, grant_name, funder, amount, deadline. Return ONLY the complete JSON array starting with [.')
-      .then(function(text){
-        var ranked = pj(text);
-        var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grants from GrantWatch</span><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span></div>';
-        ranked.forEach(function(g){h+=grantCard(g);});
-        document.getElementById('res-find').innerHTML=h;
+    return callClaude(
+      'Today is '+today+'. Nonprofit:\n'+orgProfile+
+      '\n\nGrants from multiple sources:\n'+JSON.stringify(allGrants,null,2).slice(0,4000)+
+      eligNote+
+      '\n\nFor each grant that passes eligibility: add "match" ("Strong match" or "Good match") and "why" (1 short sentence). Preserve ALL original fields exactly. Rank strongest matches first. Return ONLY the complete JSON array starting with [.'
+    ).then(function(text){
+      var ranked = pj(text);
+      // Group by source
+      var bySource = {};
+      ranked.forEach(function(g){
+        var src = g.source||'Unknown';
+        if (!bySource[src]) bySource[src] = [];
+        bySource[src].push(g);
       });
+      var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+        +'<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span>'
+        +'<span style="font-size:12px;color:#aaa">'+ranked.length+' found across '+Object.keys(bySource).length+' source(s)</span>'
+        +'</div>';
+      if (eligibilityProfile) {
+        h += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin-bottom:14px">'
+          +'&#10003; Filtered for eligibility &mdash; '+esc(eligibilityProfile.summary)+'</div>';
+      }
+      Object.keys(bySource).forEach(function(src){
+        h += '<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px">'+sourceBadge(src)
+          +'<span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';
+        bySource[src].forEach(function(g){ h += grantCard(g); });
+        h += '<div style="margin-bottom:16px"></div>';
+      });
+      document.getElementById('res-find').innerHTML = h;
+    });
   })
-  .catch(function(e){document.getElementById('res-find').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
-  .finally(function(){btn.disabled=false;});
+  .catch(function(e){ document.getElementById('res-find').innerHTML='<div class="err">'+esc(e.message)+'</div>'; })
+  .finally(function(){ btn.disabled=false; });
 }
 
 // ── Scan Website ───────────────────────────────────────────────────────────
