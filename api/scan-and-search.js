@@ -1,86 +1,79 @@
-export const config = { api: { bodyParser: true } };
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-
   const key = process.env.TINYFISH_API_KEY;
   if (!key) return res.status(500).json({ error: 'TINYFISH_API_KEY not configured' });
 
   try {
-    let body = req.body;
-    if (!body || typeof body !== 'object') {
-      try { body = JSON.parse(body || '{}'); } catch(e) { body = {}; }
-    }
+    const { url, phase, orgProfile, state, keyword } = req.body || {};
 
-    const { url, state } = body;
-    if (!url) return res.status(400).json({ error: 'url is required' });
+    // Phase: start — kick off BOTH runs in parallel immediately
+    if (phase === 'start') {
+      if (!url) return res.status(400).json({ error: 'url is required' });
 
-    const stateMap = {
-      'arizona': 'arizona', 'az': 'arizona', 'california': 'california', 'ca': 'california',
-      'texas': 'texas', 'tx': 'texas', 'florida': 'florida', 'fl': 'florida',
-      'new york': 'new-york', 'ny': 'new-york', 'colorado': 'colorado', 'co': 'colorado',
-      'washington': 'washington', 'wa': 'washington', 'oregon': 'oregon', 'or': 'oregon',
-    };
+      // Derive GrantWatch subdomain from URL domain as best guess while site scan runs
+      const stateMap = {
+        'arizona':'arizona','az':'arizona','california':'california','ca':'california',
+        'texas':'texas','tx':'texas','florida':'florida','fl':'florida',
+        'new york':'new-york','ny':'new-york','colorado':'colorado','co':'colorado',
+        'washington':'washington','wa':'washington','oregon':'oregon','or':'oregon',
+      };
 
-    // We don't know the state yet — start org scan first, derive state from result
-    // But we CAN start both jobs in parallel if we default to 'grants' subdomain
-    // and use the org scan result to refine later. For now: start both simultaneously.
-    const gwSubdomain = stateMap[(state||'').toLowerCase().trim()] || 'grants';
-    const gwUrl = `https://${gwSubdomain}.grantwatch.com/grant-search.php`;
-
-    // Launch BOTH jobs at once using Tinyfish batch endpoint
-    const batchResp = await fetch('https://agent.tinyfish.ai/v1/automation/batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
-      body: JSON.stringify({
-        runs: [
-          {
-            url,
-            goal: 'Visit this nonprofit website homepage and About page. Extract and return as JSON: organization_name, mission_statement, main_programs (array), populations_served (array), geographic_area, focus_areas (array).',
-            browser_profile: 'lite',
-          },
-          {
-            url: gwUrl,
-            goal: 'Search GrantWatch for currently open grants for nonprofits. Browse the listings shown. Extract the first 8 grants. For each return: grant_name, funder, amount, deadline (exact date), description, eligibility, url (full GrantWatch URL). Return ONLY a JSON array.',
-            browser_profile: 'lite',
-          }
-        ]
-      }),
-    });
-
-    // If batch endpoint doesn't exist, fall back to two separate run-async calls
-    if (!batchResp.ok) {
-      const [r1, r2] = await Promise.all([
-        fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
-          body: JSON.stringify({
-            url,
-            goal: 'Visit this nonprofit website homepage and About page. Extract and return as JSON: organization_name, mission_statement, main_programs (array), populations_served (array), geographic_area, focus_areas (array).',
-            browser_profile: 'lite',
-          }),
+      // Run 1: scan the nonprofit site
+      const r1 = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+        body: JSON.stringify({
+          url,
+          goal: 'Visit this nonprofit website homepage and About page. Extract as JSON: organization name, mission statement (1-2 sentences), main programs (list), populations served, geographic area (city/state). Be brief.',
+          browser_profile: 'lite',
         }),
-        fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
-          body: JSON.stringify({
-            url: gwUrl,
-            goal: 'Search GrantWatch for currently open grants for nonprofits. Browse the listings shown. Extract the first 8 grants. For each return: grant_name, funder, amount, deadline (exact date), description, eligibility, url (full GrantWatch URL). Return ONLY a JSON array.',
-            browser_profile: 'lite',
-          }),
-        })
-      ]);
-      const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+      });
+      const d1 = await r1.json();
+      if (!d1.run_id) return res.status(500).json({ error: 'Scan start failed: ' + JSON.stringify(d1).slice(0,200) });
+
+      // Run 2: broad GrantWatch search in parallel using nonprofit as keyword
+      const r2 = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+        body: JSON.stringify({
+          url: 'https://grants.grantwatch.com/grant-search.php',
+          goal: 'Go to GrantWatch. In the search box type "nonprofit" and press search. Wait for results to load. Extract the first 6 grants from the results list. For each return: grant_name, funder, amount, deadline, description, url (the full GrantWatch URL). Do NOT click individual grants. Return ONLY a JSON array.',
+          browser_profile: 'lite',
+        }),
+      });
+      const d2 = await r2.json();
+      if (!d2.run_id) return res.status(500).json({ error: 'Search start failed: ' + JSON.stringify(d2).slice(0,200) });
+
       return res.status(200).json({ scanRunId: d1.run_id, searchRunId: d2.run_id });
     }
 
-    const batchData = await batchResp.json();
-    const runs = batchData.runs || batchData;
-    return res.status(200).json({
-      scanRunId: runs[0]?.run_id || runs[0]?.id,
-      searchRunId: runs[1]?.run_id || runs[1]?.id,
-    });
+    // Phase: search — start a targeted GrantWatch search once we know the org profile
+    if (phase === 'search') {
+      if (!keyword) return res.status(400).json({ error: 'keyword required' });
+      const stateMap = {
+        'arizona':'arizona','az':'arizona','california':'california','ca':'california',
+        'texas':'texas','tx':'texas','florida':'florida','fl':'florida',
+        'new york':'new-york','ny':'new-york','colorado':'colorado','co':'colorado',
+        'washington':'washington','wa':'washington','oregon':'oregon','or':'oregon',
+        'illinois':'illinois','il':'illinois','georgia':'georgia','ga':'georgia',
+      };
+      const stateKey = (state || '').toLowerCase().trim();
+      const gwSubdomain = stateMap[stateKey] || 'grants';
+      const r = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+        body: JSON.stringify({
+          url: 'https://' + gwSubdomain + '.grantwatch.com/grant-search.php',
+          goal: 'Go to GrantWatch. In the search box type "' + keyword + '" and press search. Wait for results. Extract the first 6 grants. For each: grant_name, funder, amount, deadline, description, url (full GrantWatch URL). Return ONLY a JSON array.',
+          browser_profile: 'lite',
+        }),
+      });
+      const d = await r.json();
+      if (!d.run_id) return res.status(500).json({ error: 'Search start failed: ' + JSON.stringify(d).slice(0,200) });
+      return res.status(200).json({ runId: d.run_id });
+    }
 
+    return res.status(400).json({ error: 'phase must be start or search' });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
