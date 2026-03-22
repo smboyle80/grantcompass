@@ -7,13 +7,12 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#f0ede8;min-height:100vh;padding:24px 16px}
-#app{max-width:780px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e0ddd8;padding:28px}
+#app{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e0ddd8;padding:28px}
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:24px}
 .logo{width:38px;height:38px;background:#eaf3de;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-h1{font-size:19px;font-weight:600}
-.sub{font-size:13px;color:#777;margin-top:2px}
-.tabs{display:flex;gap:0;border-bottom:1px solid #e0ddd8;margin-bottom:24px;overflow-x:auto}
-button.tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 13px;font-size:13px;font-weight:500;color:#888;cursor:pointer;font-family:inherit;margin-bottom:-1px;white-space:nowrap}
+h1{font-size:19px;font-weight:600}.sub{font-size:13px;color:#777;margin-top:2px}
+.tabs{display:flex;gap:0;border-bottom:1px solid #e0ddd8;margin-bottom:24px;overflow-x:auto;flex-wrap:nowrap}
+button.tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 13px;font-size:13px;font-weight:500;color:#888;cursor:pointer;font-family:inherit;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
 button.tab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 button.tab:hover:not(.active){color:#333}
 .panel{display:none}.panel.active{display:block}
@@ -23,12 +22,12 @@ input:focus,select:focus,textarea:focus{border-color:#639922}
 textarea{resize:vertical;line-height:1.6;margin-bottom:0}
 select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:500px){.g2{grid-template-columns:1fr}}
+@media(max-width:520px){.g2{grid-template-columns:1fr}}
 .fg{margin-bottom:0}.fg input,.fg select,.fg textarea{margin-bottom:0}
 .row{display:flex;gap:8px;align-items:flex-end;margin-bottom:16px}
 .row .fg{flex:1;margin-bottom:0}
 .btns{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
-button.p{background:#3b6d11;color:#fff;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+button.p{background:#3b6d11;color:#fff;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
 button.p:hover{background:#2f5a0d}
 button.p:disabled{opacity:.5;cursor:not-allowed}
 button.s{background:#f0ede8;color:#555;border:1px solid #d0cdc8;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
@@ -39,6 +38,7 @@ button.s:disabled{opacity:.5;cursor:not-allowed}
 .empty{padding:28px;text-align:center;color:#888;font-size:14px}
 .err{padding:14px 16px;background:#fef2f2;border-radius:8px;color:#b91c1c;font-size:13px;margin-top:8px;border:1px solid #fecaca}
 .info{background:#eff6ff;border-radius:8px;padding:10px 14px;font-size:13px;color:#1d4ed8;margin-bottom:14px;display:flex;gap:8px}
+.suc{background:#f0fdf4;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:14px;border:1px solid #bbf7d0}
 .card{border:1px solid #e0ddd8;border-radius:10px;padding:16px;margin-bottom:10px}
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
 .card-name{font-size:14px;font-weight:600;flex:1}
@@ -47,7 +47,7 @@ button.s:disabled{opacity:.5;cursor:not-allowed}
 .meta{font-size:12px;color:#888;margin-bottom:6px}
 .desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:10px}
 .why{font-size:12px;color:#3b6d11;background:#eaf3de;border-radius:6px;padding:6px 10px;margin-bottom:10px}
-.score-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;border:2px solid}
+.score-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;border:1.5px solid}
 .card-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .cb{font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;border:1px solid #d0cdc8;background:#f9f9f7;color:#555}
 .cb:hover{background:#f0ede8}
@@ -59,8 +59,7 @@ a.cb{text-decoration:none;display:inline-block}
 .steps{list-style:none}
 .step{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;color:#888}
 .si{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:#e0ddd8;color:#999}
-.si.active{background:#dbeafe;color:#1d4ed8}
-.si.done{background:#eaf3de;color:#3b6d11}
+.si.active{background:#dbeafe;color:#1d4ed8}.si.done{background:#eaf3de;color:#3b6d11}
 .score-row{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:3px}
 .bar{height:5px;background:#e0ddd8;border-radius:99px;margin-bottom:10px}
 .bar-fill{height:100%;border-radius:99px;background:#3b6d11}
@@ -79,11 +78,6 @@ a.cb{text-decoration:none;display:inline-block}
 .cl-title{font-size:13px;font-weight:600;margin-bottom:1px}.cl-detail{font-size:12px;color:#888}
 .pri{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .ph{background:#fef2f2;color:#b91c1c}.pm{background:#fef3c7;color:#92400e}.pl{background:#dbeafe;color:#1d4ed8}
-.sv-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0ede8}
-.sv-item:last-child{border:none}.sv-info{flex:1}
-.sv-name{font-size:13px;font-weight:600}.sv-meta{font-size:12px;color:#888;margin-top:2px}
-.drop{border:1.5px dashed #d0cdc8;border-radius:8px;padding:20px;text-align:center;cursor:pointer;font-size:13px;color:#888;margin-bottom:12px}
-.drop:hover,.drop.over{background:#f5f5f3}.drop.loaded{border-color:#639922;background:#eaf3de;color:#3b6d11}
 .col{background:#f7f6f3;border-radius:10px;padding:12px;min-height:160px}
 .col-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
@@ -102,33 +96,47 @@ a.cb{text-decoration:none;display:inline-block}
 .pcard-notes{font-size:11px;color:#999;margin-top:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .move-btns{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
 .mb{font-size:10px;padding:3px 7px;border-radius:4px;cursor:pointer;border:1px solid #e0ddd8;background:#f9f9f7;color:#666;font-family:inherit}
-.mb:hover{background:#f0ede8}.mb.del{color:#b91c1c;border-color:#fecaca;background:#fef2f2}.mb.del:hover{background:#fee2e2}
-@media(max-width:600px){#pipeline-board{grid-template-columns:1fr 1fr}}
-@media(max-width:400px){#pipeline-board{grid-template-columns:1fr}}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:12px}
+.mb:hover{background:#f0ede8}.mb.del{color:#b91c1c;border-color:#fecaca;background:#fef2f2}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}
 .cal-hdr{font-size:10px;font-weight:600;text-align:center;color:#888;padding:4px 0}
 .cal-day{min-height:52px;border-radius:6px;padding:4px;border:1px solid #f0ede8;font-size:11px}
 .cal-day.other{background:#fafafa;color:#ccc}.cal-day.today-cell{border-color:#3b6d11;background:#f0fdf4}
 .cal-num{font-weight:600;margin-bottom:2px}.cal-dot{font-size:10px;background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 4px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cal-dot.urgent{background:#fef2f2;color:#b91c1c}
-.tab-sub{display:flex;gap:0;border-bottom:1px solid #e0ddd8;margin-bottom:20px}
-button.stab{background:none;border:none;border-bottom:2px solid transparent;padding:7px 12px;font-size:12px;font-weight:500;color:#888;cursor:pointer;font-family:inherit;margin-bottom:-1px}
+.tab-sub{display:flex;gap:0;border-bottom:1px solid #e0ddd8;margin-bottom:20px;overflow-x:auto}
+button.stab{background:none;border:none;border-bottom:2px solid transparent;padding:7px 12px;font-size:12px;font-weight:500;color:#888;cursor:pointer;font-family:inherit;margin-bottom:-1px;white-space:nowrap}
 button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 .spanel{display:none}.spanel.active{display:block}
 .export-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid #f0ede8}
-@media print{body{background:#fff;padding:0}#app{border:none;padding:0;max-width:100%}.tabs,.btns,.export-bar,.card-btns,.move-btns,.hdr button{display:none!important}.panel{display:block!important}}
-
-/* ── Help panel ─────────────────────────────────────────── */
-.help-section{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f0ede8}
-.help-section:last-child{border-bottom:none}
-.help-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:2px}
-.help-title{font-size:14px;font-weight:600;margin-bottom:5px}
-.help-body{font-size:13px;color:#555;line-height:1.65;margin-bottom:8px}
-.help-tips{display:flex;flex-direction:column;gap:5px}
-.tip{font-size:12px;color:#666;background:#fafaf8;border-radius:6px;padding:5px 10px;border-left:2px solid #d0cdc8}
-
-
-/* ── Accordion ───────────────────────────────────────────── */
+.drop{border:1.5px dashed #d0cdc8;border-radius:8px;padding:20px;text-align:center;cursor:pointer;font-size:13px;color:#888;margin-bottom:12px}
+.drop:hover,.drop.over{background:#f5f5f3}.drop.loaded{border-color:#639922;background:#eaf3de;color:#3b6d11}
+/* Chat */
+.chat-wrap{display:flex;flex-direction:column;height:420px;border:1px solid #e0ddd8;border-radius:10px;overflow:hidden}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:82%;font-size:13px;line-height:1.65;padding:10px 14px;border-radius:10px}
+.msg.user{background:#eaf3de;color:#1a1a18;align-self:flex-end;border-bottom-right-radius:3px}
+.msg.ai{background:#f5f5f3;color:#1a1a18;align-self:flex-start;border-bottom-left-radius:3px}
+.msg.ai.loading{color:#888}
+.chat-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid #e0ddd8;background:#fafaf8}
+.chat-input-row input{margin:0;flex:1}
+/* Org profile banner */
+.profile-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.profile-banner-text{font-size:12px;color:#166534}
+.profile-banner-name{font-weight:600;font-size:13px;color:#166534}
+/* 990 results */
+.org990{border:1px solid #e0ddd8;border-radius:10px;padding:14px;margin-bottom:10px}
+.org990-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.org990-meta{font-size:12px;color:#888;margin-bottom:8px}
+.org990-grants{font-size:13px;color:#555;line-height:1.7}
+/* Timeline */
+.tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0ede8}
+.tl-item:last-child{border:none}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tl-content{flex:1}
+.tl-date{font-size:11px;font-weight:600;color:#888;margin-bottom:2px}
+.tl-task{font-size:13px;font-weight:600;margin-bottom:2px}
+.tl-detail{font-size:12px;color:#666}
+/* Accordion */
 .acc-item{border:1px solid #e5e2dc;border-radius:10px;margin-bottom:8px;overflow:hidden}
 .acc-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:#fff;user-select:none;transition:background .15s}
 .acc-hdr:hover{background:#fafaf8}
@@ -137,60 +145,115 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 .acc-title{font-size:14px;font-weight:600;flex:1;color:#1a1a18}
 .acc-arrow{font-size:12px;color:#aaa;transition:transform .2s;flex-shrink:0}
 .acc-hdr.open .acc-arrow{transform:rotate(180deg)}
-.acc-body{display:none;padding:16px}
-.acc-body.open{display:block}
+.acc-body{display:none;padding:16px}.acc-body.open{display:block}
 .acc-desc{font-size:13px;color:#555;line-height:1.65;margin-bottom:12px}
 .acc-tips{display:flex;flex-direction:column;gap:6px}
 .acc-tip{font-size:12px;color:#555;background:#fafaf8;border-radius:6px;padding:6px 10px;border-left:2px solid #d0cdc8;line-height:1.5}
-
+@media print{body{background:#fff;padding:0}#app{border:none;padding:0;max-width:100%}.tabs,.btns,.export-bar,.card-btns,.move-btns{display:none!important}.panel{display:block!important}}
 </style>
 </head>
 <body>
 <div id="app">
   <div class="hdr">
-    <div class="logo">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#3b6d11"/></svg>
-    </div>
+    <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#3b6d11"/></svg></div>
     <div><h1>GrantCompass</h1><div class="sub">AI grant discovery &amp; writing assistant for nonprofits</div></div>
+    <div style="margin-left:auto"><button class="s" style="font-size:12px;padding:5px 12px" onclick="showTab('profile')">&#128100; My Org</button></div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs" id="main-tabs">
     <button class="tab active" id="tb-discover" onclick="showTab('discover')">Find grants</button>
     <button class="tab" id="tb-webscan" onclick="showTab('webscan')">Scan website</button>
     <button class="tab" id="tb-review" onclick="showTab('review')">Review writing</button>
+    <button class="tab" id="tb-generate" onclick="showTab('generate')">Generate</button>
     <button class="tab" id="tb-tools" onclick="showTab('tools')">Tools</button>
+    <button class="tab" id="tb-copilot" onclick="showTab('copilot')">&#129302; Co-pilot</button>
     <button class="tab" id="tb-saved" onclick="showTab('saved')">Pipeline <span id="sbadge" style="display:none;background:#eaf3de;color:#3b6d11;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:3px">0</span></button>
-    <button class="tab" id="tb-helpMain" onclick="showTab('helpMain')">Help &amp; tips</button>
+    <button class="tab" id="tb-helpMain" onclick="showTab('helpMain')">Help</button>
+  </div>
+
+  <!-- ORG PROFILE -->
+  <div id="pn-profile" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div><div style="font-size:15px;font-weight:700">Organization Profile</div><div style="font-size:13px;color:#888;margin-top:2px">Saved automatically. Auto-fills all search forms.</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="p" onclick="saveProfile()">Save profile</button>
+        <button class="s" onclick="showTab('discover')">Done</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Organization name</label><input id="pr-name" type="text" placeholder="e.g. Green Valley Food Bank" style="margin-bottom:0"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Primary focus area</label>
+        <select id="pr-focus" style="margin-bottom:0">
+          <option value="">Select category...</option>
+          <option>Food security &amp; hunger relief</option><option>Education &amp; youth development</option>
+          <option>Environmental conservation</option><option>Healthcare &amp; mental health</option>
+          <option>Housing &amp; homelessness</option><option>Arts &amp; culture</option>
+          <option>Workforce development</option><option>Racial equity &amp; justice</option>
+          <option>Disability services</option><option>Veterans services</option>
+          <option>Immigrant &amp; refugee services</option><option>Animal welfare</option>
+          <option>LGBTQ+ advocacy</option><option>Disaster relief</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="fg" style="margin-bottom:12px"><label class="fl">State</label><input id="pr-state" type="text" placeholder="e.g. Arizona" style="margin-bottom:0"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Annual budget</label>
+        <select id="pr-budget" style="margin-bottom:0">
+          <option value="">Select range...</option>
+          <option>Under $100K</option><option>$100K - $500K</option>
+          <option>$500K - $1M</option><option>$1M - $5M</option><option>Over $5M</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="fg" style="margin-bottom:12px"><label class="fl">501(c)(3) status</label>
+        <select id="pr-status" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="yes">Yes, registered 501(c)(3)</option>
+          <option value="fiscal">Using a fiscal sponsor</option>
+          <option value="pending">Pending / in process</option>
+          <option value="no">Not a 501(c)(3)</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Years operating</label>
+        <select id="pr-years" style="margin-bottom:0">
+          <option value="">Select...</option>
+          <option value="under1">Less than 1 year</option><option value="1to2">1-2 years</option>
+          <option value="3to5">3-5 years</option><option value="over5">More than 5 years</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label class="fl">Website URL</label><input id="pr-website" type="url" placeholder="https://yourorg.org" style="margin-bottom:0"/></div>
+    <div class="fg" style="margin-bottom:12px"><label class="fl">EIN (optional)</label><input id="pr-ein" type="text" placeholder="e.g. 12-3456789" style="margin-bottom:0"/></div>
+    <div class="fg" style="margin-bottom:16px"><label class="fl">Mission statement</label><textarea id="pr-mission" style="min-height:90px" placeholder="Describe your mission and communities served..."></textarea></div>
+    <div class="fg" style="margin-bottom:0"><label class="fl">Key programs (one per line)</label><textarea id="pr-programs" style="min-height:70px" placeholder="After-school tutoring&#10;Summer literacy camp&#10;Family reading nights"></textarea></div>
+    <div id="profile-saved-msg" style="display:none" class="suc" style="margin-top:12px">&#10003; Profile saved</div>
   </div>
 
   <!-- FIND GRANTS -->
   <div id="pn-discover" class="panel active">
+    <div id="profile-banner-find" class="profile-banner" style="display:none">
+      <div><div class="profile-banner-name" id="pbn-find-name"></div><div class="profile-banner-text">Profile auto-filled &mdash; <button onclick="showTab('profile')" style="background:none;border:none;color:#166534;cursor:pointer;font-size:12px;padding:0;text-decoration:underline">edit</button></div></div>
+      <button class="s" style="font-size:12px;padding:4px 10px" onclick="clearProfileFill('find')">Clear</button>
+    </div>
     <div class="g2">
       <div class="fg"><label class="fl">Organization name</label><input id="f-org" type="text" placeholder="e.g. Green Valley Food Bank"/></div>
       <div class="fg"><label class="fl">Focus area</label>
         <select id="f-focus">
           <option value="">Select category...</option>
-          <option>Food security &amp; hunger relief</option>
-          <option>Education &amp; youth development</option>
-          <option>Environmental conservation</option>
-          <option>Healthcare &amp; mental health</option>
-          <option>Housing &amp; homelessness</option>
-          <option>Arts &amp; culture</option>
-          <option>Workforce development</option>
-          <option>Racial equity &amp; justice</option>
-          <option>Disability services</option>
-          <option>Veterans services</option>
-          <option>Immigrant &amp; refugee services</option>
-          <option>Animal welfare</option>
-          <option>LGBTQ+ advocacy</option>
-          <option>Disaster relief</option>
+          <option>Food security &amp; hunger relief</option><option>Education &amp; youth development</option>
+          <option>Environmental conservation</option><option>Healthcare &amp; mental health</option>
+          <option>Housing &amp; homelessness</option><option>Arts &amp; culture</option>
+          <option>Workforce development</option><option>Racial equity &amp; justice</option>
+          <option>Disability services</option><option>Veterans services</option>
+          <option>Immigrant &amp; refugee services</option><option>Animal welfare</option>
+          <option>LGBTQ+ advocacy</option><option>Disaster relief</option>
         </select>
       </div>
     </div>
     <div class="g2" style="margin-bottom:12px">
       <div class="fg"><label class="fl">Annual budget</label>
-        <select id="f-budget">
-          <option value="">Select range...</option>
+        <select id="f-budget"><option value="">Select range...</option>
           <option>Under $100K</option><option>$100K - $500K</option>
           <option>$500K - $1M</option><option>$1M - $5M</option><option>Over $5M</option>
         </select>
@@ -199,7 +262,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
     </div>
     <div class="fg" style="margin-bottom:14px">
       <label class="fl">Mission statement <span id="f-wc" style="font-weight:400;text-transform:none;letter-spacing:0;color:#bbb">(0/400)</span></label>
-      <textarea id="f-mission" maxlength="400" style="min-height:80px" placeholder="Describe your mission and communities served..." oninput="document.getElementById('f-wc').textContent='('+this.value.length+'/400)'"></textarea>
+      <textarea id="f-mission" maxlength="400" style="min-height:80px" placeholder="Describe your mission..." oninput="document.getElementById('f-wc').textContent='('+this.value.length+'/400)'"></textarea>
     </div>
     <div style="margin-bottom:14px">
       <label class="fl" style="margin-bottom:8px">Sources to search</label>
@@ -218,8 +281,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 
   <!-- SCAN WEBSITE -->
   <div id="pn-webscan" class="panel">
-    <div class="info">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#1d4ed8" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <div class="info"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#1d4ed8" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>
       Enter your website URL. We scan your site to learn your mission, then search GrantWatch, Grants.gov, and your state portal simultaneously.
     </div>
     <div class="row">
@@ -245,8 +307,6 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
       <button class="stab" id="stb-sections" onclick="showSubTab('review','sections')">Section feedback</button>
       <button class="stab" id="stb-rewrite" onclick="showSubTab('review','rewrite')">Funder rewrite</button>
     </div>
-
-    <!-- Overall review sub-tab -->
     <div id="spn-review" class="spanel active">
       <div class="drop" id="drop-zone" onclick="document.getElementById('f-file').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)">
         <input type="file" id="f-file" accept=".pdf,.txt" style="display:none" onchange="handleFile(this)"/>
@@ -263,36 +323,25 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
       </div>
       <div class="res" id="res-review"></div>
     </div>
-
-    <!-- Section feedback sub-tab -->
     <div id="spn-sections" class="spanel">
-      <div class="fg" style="margin-bottom:12px">
-        <label class="fl">Section type</label>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Section type</label>
         <select id="f-section-type" style="margin-bottom:0">
-          <option value="need">Statement of need</option>
-          <option value="goals">Goals &amp; objectives</option>
-          <option value="methods">Methods &amp; activities</option>
-          <option value="evaluation">Evaluation plan</option>
-          <option value="budget">Budget narrative</option>
-          <option value="org">Organizational capacity</option>
+          <option value="need">Statement of need</option><option value="goals">Goals &amp; objectives</option>
+          <option value="methods">Methods &amp; activities</option><option value="evaluation">Evaluation plan</option>
+          <option value="budget">Budget narrative</option><option value="org">Organizational capacity</option>
           <option value="exec">Executive summary</option>
         </select>
       </div>
-      <div class="fg" style="margin-bottom:16px">
-        <label class="fl">Section text</label>
-        <textarea id="f-section-text" style="min-height:160px" placeholder="Paste this section of your proposal..."></textarea>
-      </div>
+      <div class="fg" style="margin-bottom:16px"><label class="fl">Section text</label><textarea id="f-section-text" style="min-height:160px" placeholder="Paste this section of your proposal..."></textarea></div>
       <div class="btns">
         <button class="p" id="btn-section" onclick="doSectionFeedback()">Get section feedback</button>
         <button class="s" onclick="document.getElementById('f-section-text').value='';document.getElementById('res-sections').innerHTML=''">Clear</button>
       </div>
       <div class="res" id="res-sections"></div>
     </div>
-
-    <!-- Funder rewrite sub-tab -->
     <div id="spn-rewrite" class="spanel">
-      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder name &amp; focus area</label><input id="f-funder-name" type="text" placeholder="e.g. Gates Foundation — global health equity"/></div>
-      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder priorities / guidelines (paste key phrases)</label><textarea id="f-funder-priorities" style="min-height:80px" placeholder="e.g. Prefers community-led solutions, data-driven outcomes, equity focus..."></textarea></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder name &amp; focus area</label><input id="f-funder-name" type="text" placeholder="e.g. Gates Foundation &mdash; global health equity"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder priorities / guidelines</label><textarea id="f-funder-priorities" style="min-height:80px" placeholder="e.g. Prefers community-led solutions, data-driven outcomes..."></textarea></div>
       <div class="fg" style="margin-bottom:16px"><label class="fl">Your proposal text</label><textarea id="f-rewrite-proposal" style="min-height:140px" placeholder="Paste your existing narrative to rewrite for this funder..."></textarea></div>
       <div class="btns">
         <button class="p" id="btn-rewrite" onclick="doFunderRewrite()">Rewrite for this funder</button>
@@ -302,171 +351,127 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
     </div>
   </div>
 
+  <!-- GENERATE TAB -->
+  <div id="pn-generate" class="panel">
+    <div class="tab-sub">
+      <button class="stab active" id="stb-loi" onclick="showSubTab('generate','loi')">Letter of Inquiry</button>
+      <button class="stab" id="stb-cover" onclick="showSubTab('generate','cover')">Cover letter</button>
+      <button class="stab" id="stb-timeline" onclick="showSubTab('generate','timeline')">Timeline builder</button>
+      <button class="stab" id="stb-digest" onclick="showSubTab('generate','digest')">Email digest</button>
+    </div>
+
+    <!-- LOI -->
+    <div id="spn-loi" class="spanel active">
+      <div id="profile-banner-loi" class="profile-banner" style="display:none"><div><div class="profile-banner-name" id="pbn-loi-name"></div><div class="profile-banner-text">Using saved profile &mdash; <button onclick="showTab('profile')" style="background:none;border:none;color:#166534;cursor:pointer;font-size:12px;padding:0;text-decoration:underline">edit</button></div></div></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder name</label><input id="loi-funder" type="text" placeholder="e.g. Robert Wood Johnson Foundation"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Grant program name (if known)</label><input id="loi-program" type="text" placeholder="e.g. Health Equity Initiative"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Grant amount requested</label><input id="loi-amount" type="text" placeholder="e.g. $75,000"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Project name</label><input id="loi-project" type="text" placeholder="e.g. Mobile Health Clinic Expansion"/></div>
+      <div class="fg" style="margin-bottom:16px"><label class="fl">Project description (2-4 sentences)</label><textarea id="loi-desc" style="min-height:90px" placeholder="What will this funding support? Who will it serve? What outcomes are expected?"></textarea></div>
+      <div class="btns"><button class="p" id="btn-loi" onclick="doLOI()">Generate LOI</button><button class="s" onclick="clearLOI()">Clear</button></div>
+      <div class="res" id="res-loi"></div>
+    </div>
+
+    <!-- Cover letter -->
+    <div id="spn-cover" class="spanel">
+      <div id="profile-banner-cover" class="profile-banner" style="display:none"><div><div class="profile-banner-name" id="pbn-cover-name"></div><div class="profile-banner-text">Using saved profile &mdash; <button onclick="showTab('profile')" style="background:none;border:none;color:#166534;cursor:pointer;font-size:12px;padding:0;text-decoration:underline">edit</button></div></div></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder / grant name</label><input id="cov-funder" type="text" placeholder="e.g. USDA Community Facilities Grant"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Contact name &amp; title (optional)</label><input id="cov-contact" type="text" placeholder="e.g. Dr. Jane Smith, Program Officer"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Amount requested</label><input id="cov-amount" type="text" placeholder="e.g. $150,000"/></div>
+      <div class="fg" style="margin-bottom:16px"><label class="fl">One-sentence project description</label><input id="cov-project" type="text" placeholder="e.g. Expand our mobile health clinic to serve 500 uninsured rural residents annually"/></div>
+      <div class="btns"><button class="p" id="btn-cover" onclick="doCoverLetter()">Generate cover letter</button><button class="s" onclick="clearCover()">Clear</button></div>
+      <div class="res" id="res-cover"></div>
+    </div>
+
+    <!-- Timeline builder -->
+    <div id="spn-timeline" class="spanel">
+      <div class="g2">
+        <div class="fg" style="margin-bottom:12px"><label class="fl">Grant / funder name</label><input id="tl-grant" type="text" placeholder="e.g. HHS Maternal Health Grant" style="margin-bottom:0"/></div>
+        <div class="fg" style="margin-bottom:12px"><label class="fl">Submission deadline</label><input id="tl-deadline" type="date" style="margin-bottom:0"/></div>
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Application type</label>
+        <select id="tl-type" style="margin-bottom:0">
+          <option value="full">Full proposal</option><option value="loi">Letter of inquiry first</option>
+          <option value="simple">Simple / short application</option><option value="federal">Federal grant (complex)</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:16px"><label class="fl">Special requirements (optional)</label><input id="tl-special" type="text" placeholder="e.g. Board approval needed, external evaluator required" style="margin-bottom:0"/></div>
+      <div class="btns"><button class="p" id="btn-timeline" onclick="doTimeline()">Build timeline</button><button class="s" onclick="clearTimeline()">Clear</button></div>
+      <div class="res" id="res-timeline"></div>
+    </div>
+
+    <!-- Email digest -->
+    <div id="spn-digest" class="spanel">
+      <div class="info" style="margin-bottom:16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#1d4ed8" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Generates a formatted email digest of your pipeline status and upcoming deadlines, ready to copy and send to your team or board.
+      </div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Recipient name / team</label><input id="dig-to" type="text" placeholder="e.g. Board of Directors, Sarah &amp; Team"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Your name / sender</label><input id="dig-from" type="text" placeholder="e.g. Maria Chen, Development Director"/></div>
+      <div class="fg" style="margin-bottom:16px"><label class="fl">Additional notes to include (optional)</label><textarea id="dig-notes" style="min-height:60px" placeholder="e.g. We submitted the RWJF application last week..."></textarea></div>
+      <div class="btns"><button class="p" id="btn-digest" onclick="doDigest()">Generate digest</button></div>
+      <div class="res" id="res-digest"></div>
+    </div>
+  </div>
+
   <!-- TOOLS TAB -->
   <div id="pn-tools" class="panel">
     <div class="tab-sub">
       <button class="stab active" id="stb-budget" onclick="showSubTab('tools','budget')">Budget narrative</button>
-      <button class="stab" id="stb-checklist" onclick="showSubTab('tools','checklist')">Checklist builder</button>
-      <button class="stab" id="stb-calendar" onclick="showSubTab('tools','calendar')">Deadline calendar</button>
+      <button class="stab" id="stb-checklist" onclick="showSubTab('tools','checklist')">Checklist</button>
+      <button class="stab" id="stb-990" onclick="showSubTab('tools','990')">Funder 990</button>
+      <button class="stab" id="stb-calendar" onclick="showSubTab('tools','calendar')">Calendar</button>
     </div>
-
-    <!-- Budget narrative -->
     <div id="spn-budget" class="spanel active">
       <div class="fg" style="margin-bottom:12px"><label class="fl">Project / program name</label><input id="b-project" type="text" placeholder="e.g. Youth Literacy After-School Program"/></div>
-      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder name (optional)</label><input id="b-funder" type="text" placeholder="e.g. Community Foundation of Arizona"/></div>
-      <div class="fg" style="margin-bottom:12px"><label class="fl">Budget items (one per line: Item, Amount)</label><textarea id="b-items" style="min-height:130px" placeholder="Program coordinator salary, $45,000&#10;Benefits (25%), $11,250&#10;Curriculum materials, $3,500&#10;Transportation, $2,000&#10;Indirect costs (10%), $6,175"></textarea></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Funder name (optional)</label><input id="b-funder" type="text" placeholder="e.g. Arizona Community Foundation"/></div>
+      <div class="fg" style="margin-bottom:12px"><label class="fl">Budget items (one per line: Item, Amount)</label><textarea id="b-items" style="min-height:130px" placeholder="Program coordinator salary, $45,000&#10;Benefits (25%), $11,250&#10;Curriculum materials, $3,500&#10;Indirect costs (10%), $6,175"></textarea></div>
       <div class="fg" style="margin-bottom:16px"><label class="fl">Project description (2-3 sentences)</label><textarea id="b-desc" style="min-height:80px" placeholder="Briefly describe what the project does and who it serves..."></textarea></div>
-      <div class="btns">
-        <button class="p" id="btn-budget" onclick="doBudgetNarrative()">Generate budget narrative</button>
-        <button class="s" onclick="clearBudget()">Clear</button>
-      </div>
+      <div class="btns"><button class="p" id="btn-budget" onclick="doBudgetNarrative()">Generate budget narrative</button><button class="s" onclick="clearBudget()">Clear</button></div>
       <div class="res" id="res-budget"></div>
     </div>
-
-    <!-- Checklist builder -->
     <div id="spn-checklist" class="spanel">
       <div class="fg" style="margin-bottom:12px"><label class="fl">Grant or funder name</label><input id="f-clgrant" type="text" placeholder="e.g. USDA Community Facilities Grant"/></div>
       <div class="fg" style="margin-bottom:16px"><label class="fl">Describe your project</label><textarea id="f-cldesc" style="min-height:88px" placeholder="What project are you applying for? Who does it serve?"></textarea></div>
-      <div class="btns">
-        <button class="p" id="btn-cl" onclick="doChecklist()">Build checklist</button>
-        <button class="s" onclick="clearChecklist()">Clear</button>
-      </div>
+      <div class="btns"><button class="p" id="btn-cl" onclick="doChecklist()">Build checklist</button><button class="s" onclick="clearChecklist()">Clear</button></div>
       <div class="res" id="res-cl"></div>
     </div>
-
-    <!-- Deadline calendar -->
+    <div id="spn-990" class="spanel">
+      <div class="info" style="margin-bottom:14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="#1d4ed8" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Search public 990 data via ProPublica to see a funder&#39;s giving history, total assets, and recent grants awarded.
+      </div>
+      <div class="row">
+        <div class="fg"><label class="fl">Funder / foundation name</label><input id="f-990" type="text" placeholder="e.g. Robert Wood Johnson Foundation" style="margin-bottom:0" onkeydown="if(event.key==='Enter')do990()"/></div>
+        <button class="p" id="btn-990" onclick="do990()" style="flex-shrink:0">Look up</button>
+      </div>
+      <div class="res" id="res-990"></div>
+    </div>
     <div id="spn-calendar" class="spanel">
       <div id="cal-nav" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <button class="s" id="cal-prev" onclick="calNav(-1)" style="padding:5px 12px;font-size:13px">&larr; Prev</button>
+        <button class="s" onclick="calNav(-1)" style="padding:5px 12px;font-size:13px">&larr; Prev</button>
         <span id="cal-month-label" style="font-size:14px;font-weight:600;color:#333"></span>
-        <button class="s" id="cal-next" onclick="calNav(1)" style="padding:5px 12px;font-size:13px">Next &rarr;</button>
+        <button class="s" onclick="calNav(1)" style="padding:5px 12px;font-size:13px">Next &rarr;</button>
       </div>
       <div id="cal-container"></div>
     </div>
+  </div>
 
-    <!-- Help & tips -->
-    <div id="spn-help" class="spanel">
-      <div style="max-width:600px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:4px">How to use GrantCompass</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px">Tips for getting the most out of each feature</div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#eaf3de;color:#3b6d11">&#128269;</div>
-          <div>
-            <div class="help-title">Find Grants</div>
-            <div class="help-body">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div>
-              <div class="tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div>
-              <div class="tip">&#128161; Click <strong>Save to pipeline</strong> on any grant to track it in the Pipeline tab</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#eff6ff;color:#1d4ed8">&#127760;</div>
-          <div>
-            <div class="help-title">Scan Website</div>
-            <div class="help-body">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Works best when your website clearly describes your mission and service area</div>
-              <div class="tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div>
-              <div class="tip">&#128161; State portal results depend on your geography being detectable from the site</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#9997;&#65039;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Overall Review</div>
-            <div class="help-body">Paste your full proposal (or upload a PDF/TXT) and click <strong>Review my writing</strong>. You get an overall score, sub-scores for clarity, impact, and specificity, a before/after panel showing your weakest sentence rewritten, and six detailed feedback items. Enter the funder name for targeted advice.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Aim for a score above 75 before submitting</div>
-              <div class="tip">&#128161; The before/after panel shows the single highest-impact change you can make</div>
-              <div class="tip">&#128161; Use <strong>Export PDF</strong> to share the review with your ED or board</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128203;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Section Feedback</div>
-            <div class="help-body">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div>
-              <div class="tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div>
-              <div class="tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128196;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Funder Rewrite</div>
-            <div class="help-body">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div>
-              <div class="tip">&#128161; Aim for 80%+ alignment score before submitting</div>
-              <div class="tip">&#128161; Download the rewrite as .txt to edit further in Word</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128176;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Budget Narrative</div>
-            <div class="help-body">Enter your project name, list budget line items (one per line in &ldquo;Item, $Amount&rdquo; format), and a short project description. The tool writes a complete paragraph-by-paragraph budget narrative justifying each cost. Add the funder name for a more targeted narrative.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Include indirect/overhead costs in your line items &mdash; they need the most justification</div>
-              <div class="tip">&#128161; Format items as &ldquo;Program Coordinator (0.75 FTE), $38,250&rdquo; for best results</div>
-              <div class="tip">&#128161; Download as .txt and paste directly into your application</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#9989;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Checklist Builder</div>
-            <div class="help-body">Enter a grant name and brief project description to generate a customized pre-submission checklist. Items are prioritized high/medium/low and organized by category (narrative, attachments, approvals, etc.). Check off items as you complete them &mdash; checkmarks persist in your session.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Build the checklist at the start of writing, not the end</div>
-              <div class="tip">&#128161; Export as PDF and share with everyone working on the application</div>
-              <div class="tip">&#128161; High-priority items are typically required &mdash; missing any is a disqualifier</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128197;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Deadline Calendar</div>
-            <div class="help-body">Shows all grants in your Pipeline that have deadlines set. Navigate forward and backward through months using the arrows. Color coding: <span style="background:#fef2f2;color:#b91c1c;padding:1px 6px;border-radius:4px;font-size:12px">red</span> = due within 2 weeks or overdue, <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:12px">yellow</span> = due within 30 days, <span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:4px;font-size:12px">green</span> = plenty of time.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Always set deadline dates when saving grants to the pipeline</div>
-              <div class="tip">&#128161; Use the Pipeline tab to update deadlines after saving</div>
-              <div class="tip">&#128161; Check the calendar weekly to stay ahead of upcoming submissions</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#dcfce7;color:#166534">&#128202;</div>
-          <div>
-            <div class="help-title">Pipeline</div>
-            <div class="help-body">Your grant pipeline has four stages: Researching, Writing, Submitted, and Awarded. Save grants from search results using <strong>Save to pipeline</strong>, or add them manually with <strong>+ Add grant</strong>. Click any card to edit details or add notes. Move grants between stages using the arrow buttons.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Add internal notes to each grant (contacts, requirements, assigned writer)</div>
-              <div class="tip">&#128161; Pipeline data is saved in your browser &mdash; it persists across sessions on this device</div>
-              <div class="tip">&#128161; Use the Deadline Calendar to see all pipeline grants with dates at a glance</div>
-            </div>
-          </div>
-        </div>
-
+  <!-- CO-PILOT -->
+  <div id="pn-copilot" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div><div style="font-size:15px;font-weight:700">Grant Writing Co-pilot</div><div style="font-size:13px;color:#888;margin-top:2px">Ask anything about grant writing, strategy, or your application</div></div>
+      <button class="s" style="font-size:12px;padding:5px 10px" onclick="clearChat()">Clear chat</button>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label class="fl">Grant context (optional &mdash; paste a grant description or your draft)</label>
+      <textarea id="copilot-context" style="min-height:70px" placeholder="Paste a grant description, your draft narrative, or any context you want the co-pilot to know about..."></textarea>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="msg ai">Hi! I&#39;m your grant writing co-pilot. I can help you with strategy, language, specific sections, funder research questions, or anything else about your application. What are you working on?</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ask me anything about your grant..." onkeydown="if(event.key==='Enter'&&!event.shiftKey)sendChat()" style="margin:0"/>
+        <button class="p" onclick="sendChat()" style="padding:8px 16px;flex-shrink:0">Send</button>
       </div>
     </div>
   </div>
@@ -477,28 +482,26 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
       <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant Pipeline</span>
       <div style="display:flex;gap:8px">
         <button class="s" style="font-size:12px;padding:5px 10px" onclick="addManualGrant()">+ Add grant</button>
+        <button class="s" style="font-size:12px;padding:5px 10px" onclick="exportPipelineCSV()">Export CSV</button>
         <button class="s" style="font-size:12px;padding:5px 10px" onclick="clearSaved()">Clear all</button>
       </div>
     </div>
     <div id="pipeline-board" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:200px"></div>
   </div>
 
-  <!-- HELP PANEL -->
+  <!-- HELP -->
   <div id="pn-helpMain" class="panel">
     <div style="max-width:640px">
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">How to use GrantCompass</div>
       <div style="font-size:13px;color:#888;margin-bottom:20px">Click any section to expand tips and guidance</div>
-      <div class="acc-item"><div class="acc-hdr open" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#eaf3de;color:#3b6d11">&#128269;</div><div class="acc-title">Find Grants</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body open"><div class="acc-desc">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div><div class="acc-tips"><div class="acc-tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div><div class="acc-tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div><div class="acc-tip">&#128161; Click <strong>Save to pipeline</strong> on any grant to track it in the Pipeline tab</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#eff6ff;color:#1d4ed8">&#127760;</div><div class="acc-title">Scan Website</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div><div class="acc-tips"><div class="acc-tip">&#128161; Works best when your website clearly describes your mission and service area</div><div class="acc-tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div><div class="acc-tip">&#128161; State portal results depend on your geography being detectable from the site</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#9997;&#65039;</div><div class="acc-title">Review Writing &mdash; Overall Review</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Paste your full proposal (or upload a PDF/TXT) and click <strong>Review my writing</strong>. You get an overall score, sub-scores for clarity, impact, and specificity, a before/after panel showing your weakest sentence rewritten, and six detailed feedback items. Enter the funder name for targeted advice.</div><div class="acc-tips"><div class="acc-tip">&#128161; Aim for a score above 75 before submitting</div><div class="acc-tip">&#128161; The before/after panel shows the single highest-impact change you can make</div><div class="acc-tip">&#128161; Use <strong>Export PDF</strong> to share the review with your ED or board</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#128203;</div><div class="acc-title">Review Writing &mdash; Section Feedback</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div><div class="acc-tips"><div class="acc-tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div><div class="acc-tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div><div class="acc-tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#128196;</div><div class="acc-title">Review Writing &mdash; Funder Rewrite</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div><div class="acc-tips"><div class="acc-tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div><div class="acc-tip">&#128161; Aim for 80%+ alignment score before submitting</div><div class="acc-tip">&#128161; Download the rewrite as .txt to edit further in Word</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#128176;</div><div class="acc-title">Tools &mdash; Budget Narrative</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter your project name, list budget line items (one per line in "Item, $Amount" format), and a short project description. The tool writes a complete paragraph-by-paragraph budget narrative justifying each cost. Add the funder name for a more targeted narrative.</div><div class="acc-tips"><div class="acc-tip">&#128161; Include indirect/overhead costs in your line items &mdash; they need the most justification</div><div class="acc-tip">&#128161; Format items as "Program Coordinator (0.75 FTE), $38,250" for best results</div><div class="acc-tip">&#128161; Download as .txt and paste directly into your application</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#9989;</div><div class="acc-title">Tools &mdash; Checklist Builder</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter a grant name and brief project description to generate a customized pre-submission checklist. Items are prioritized high/medium/low and organized by category. Check off items as you complete them &mdash; checkmarks persist in your session.</div><div class="acc-tips"><div class="acc-tip">&#128161; Build the checklist at the start of writing, not the end</div><div class="acc-tip">&#128161; Export as PDF and share with everyone working on the application</div><div class="acc-tip">&#128161; High-priority items are typically required &mdash; missing any is a disqualifier</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#128197;</div><div class="acc-title">Tools &mdash; Deadline Calendar</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Shows all grants in your Pipeline that have deadlines set. Navigate forward and backward through months using the arrows. Color coding: <span style="background:#fef2f2;color:#b91c1c;padding:1px 6px;border-radius:4px;font-size:11px">red</span> = due within 2 weeks or overdue, <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:11px">yellow</span> = due within 30 days, <span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:4px;font-size:11px">green</span> = plenty of time.</div><div class="acc-tips"><div class="acc-tip">&#128161; Always set deadline dates when saving grants to the pipeline</div><div class="acc-tip">&#128161; Use the Pipeline tab to edit grants and update deadlines</div><div class="acc-tip">&#128161; Check the calendar weekly to stay ahead of upcoming submissions</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#dcfce7;color:#166534">&#128202;</div><div class="acc-title">Pipeline</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Your grant pipeline has four stages: Researching, Writing, Submitted, and Awarded. Save grants from search results using <strong>Save to pipeline</strong>, or add them manually with <strong>+ Add grant</strong>. Click any card to edit details or add notes. Move grants between stages using the arrow buttons.</div><div class="acc-tips"><div class="acc-tip">&#128161; Add internal notes to each grant (contacts, requirements, assigned writer)</div><div class="acc-tip">&#128161; Pipeline data is saved in your browser &mdash; it persists across sessions on this device</div><div class="acc-tip">&#128161; Use the Deadline Calendar to see all pipeline grants with dates at a glance</div></div></div></div>
+      <div id="help-accordion"></div>
     </div>
   </div>
 
   <!-- ELIGIBILITY SCREENER MODAL -->
   <div id="screener-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center">
     <div style="background:#fff;border-radius:12px;padding:28px;width:92%;max-width:460px">
-      <div style="margin-bottom:18px">
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px">Quick eligibility check</div>
-        <div style="font-size:13px;color:#888">Takes 20 seconds. Filters out grants you won't qualify for.</div>
-      </div>
+      <div style="margin-bottom:18px"><div style="font-size:16px;font-weight:700;margin-bottom:4px">Quick eligibility check</div><div style="font-size:13px;color:#888">Filters out grants you won&#39;t qualify for.</div></div>
       <div class="fg" style="margin-bottom:12px"><label class="fl">501(c)(3) status</label>
         <select id="eq-status" style="margin-bottom:0"><option value="">Select...</option>
           <option value="yes">Yes, registered 501(c)(3)</option><option value="fiscal">Using a fiscal sponsor</option>
@@ -555,40 +558,107 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
     </div>
   </div>
 </div>
-<footer style="text-align:center;font-size:12px;color:#aaa;margin-top:24px">GrantCompass &mdash; free for nonprofits &nbsp;|&nbsp; <span style="color:#3b6d11;font-weight:600">v20260322-FULL</span></footer>
+<footer style="text-align:center;font-size:12px;color:#aaa;margin-top:24px">GrantCompass &mdash; free for nonprofits &nbsp;|&nbsp; <span style="color:#3b6d11;font-weight:600">v20260322-V2</span></footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 
+// ── Org Profile ────────────────────────────────────────────────────────────
+var orgProfile = {};
+try { orgProfile = JSON.parse(localStorage.getItem('gc_profile') || '{}'); } catch(e) {}
 
-// ── Accordion ─────────────────────────────────────────────────────────────
-function toggleAcc(hdr) {
-  var body = hdr.nextElementSibling;
-  var isOpen = hdr.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.acc-hdr.open').forEach(function(h) {
-    h.classList.remove('open');
-    h.nextElementSibling.classList.remove('open');
+function saveProfile() {
+  orgProfile = {
+    name: document.getElementById('pr-name').value.trim(),
+    focus: document.getElementById('pr-focus').value,
+    state: document.getElementById('pr-state').value.trim(),
+    budget: document.getElementById('pr-budget').value,
+    status: document.getElementById('pr-status').value,
+    years: document.getElementById('pr-years').value,
+    website: document.getElementById('pr-website').value.trim(),
+    ein: document.getElementById('pr-ein').value.trim(),
+    mission: document.getElementById('pr-mission').value.trim(),
+    programs: document.getElementById('pr-programs').value.trim()
+  };
+  try { localStorage.setItem('gc_profile', JSON.stringify(orgProfile)); } catch(e) {}
+  var msg = document.getElementById('profile-saved-msg');
+  msg.style.display = 'block';
+  setTimeout(function() { msg.style.display = 'none'; }, 2500);
+  applyProfileBanners();
+}
+
+function loadProfileForm() {
+  if (!orgProfile.name) return;
+  ['name','focus','state','budget','status','years','website','ein','mission','programs'].forEach(function(k) {
+    var el = document.getElementById('pr-'+k);
+    if (el && orgProfile[k]) el.value = orgProfile[k];
   });
-  // Open clicked if it was closed
-  if (!isOpen) {
-    hdr.classList.add('open');
-    body.classList.add('open');
+}
+
+function applyProfileBanners() {
+  if (!orgProfile.name) return;
+  ['find','loi','cover'].forEach(function(tab) {
+    var banner = document.getElementById('profile-banner-'+tab);
+    var nameEl = document.getElementById('pbn-'+tab+'-name');
+    if (banner && nameEl) {
+      nameEl.textContent = orgProfile.name;
+      banner.style.display = 'flex';
+    }
+  });
+  // Auto-fill find grants form
+  if (orgProfile.name) document.getElementById('f-org').value = orgProfile.name;
+  if (orgProfile.focus) document.getElementById('f-focus').value = orgProfile.focus;
+  if (orgProfile.state) document.getElementById('f-state').value = orgProfile.state;
+  if (orgProfile.budget) document.getElementById('f-budget').value = orgProfile.budget;
+  if (orgProfile.mission) document.getElementById('f-mission').value = orgProfile.mission.slice(0,400);
+}
+
+function clearProfileFill(tab) {
+  ['f-org','f-focus','f-state','f-budget','f-mission'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var banner = document.getElementById('profile-banner-'+tab);
+  if (banner) banner.style.display = 'none';
+}
+
+function getOrgContext() {
+  if (orgProfile.name) {
+    return [
+      orgProfile.name ? 'Organization: '+orgProfile.name : '',
+      orgProfile.focus ? 'Focus: '+orgProfile.focus : '',
+      orgProfile.state ? 'State: '+orgProfile.state : '',
+      orgProfile.budget ? 'Budget: '+orgProfile.budget : '',
+      orgProfile.mission ? 'Mission: '+orgProfile.mission : '',
+      orgProfile.programs ? 'Programs: '+orgProfile.programs : ''
+    ].filter(Boolean).join('\n');
   }
+  return '';
 }
 
 // ── Navigation ─────────────────────────────────────────────────────────────
+var ALL_TABS = ['profile','discover','webscan','review','generate','tools','copilot','saved','helpMain'];
+
 function showTab(id) {
-  ['discover','webscan','review','tools','saved','helpMain'].forEach(function(t) {
-    document.getElementById('tb-'+t).classList.toggle('active', t===id);
-    document.getElementById('pn-'+t).classList.toggle('active', t===id);
+  ALL_TABS.forEach(function(t) {
+    var tb = document.getElementById('tb-'+t);
+    var pn = document.getElementById('pn-'+t);
+    if (tb) tb.classList.toggle('active', t===id);
+    if (pn) pn.classList.toggle('active', t===id);
   });
   if (id==='saved') renderSaved();
   if (id==='tools') renderCalendar();
+  if (id==='helpMain') renderHelp();
+  if (id==='profile') loadProfileForm();
 }
 
 function showSubTab(tabId, subId) {
-  var prefix = tabId==='review' ? ['review','sections','rewrite'] : ['budget','checklist','calendar'];
+  var groups = {
+    review: ['review','sections','rewrite'],
+    generate: ['loi','cover','timeline','digest'],
+    tools: ['budget','checklist','990','calendar']
+  };
+  var prefix = groups[tabId] || [];
   prefix.forEach(function(s) {
     var stb = document.getElementById('stb-'+s);
     var spn = document.getElementById('spn-'+s);
@@ -598,7 +668,7 @@ function showSubTab(tabId, subId) {
   if (subId==='calendar') renderCalendar();
 }
 
-// ── Pipeline / Saved ───────────────────────────────────────────────────────
+// ── Pipeline ───────────────────────────────────────────────────────────────
 var saved = [];
 try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
 var STAGES = [
@@ -641,9 +711,9 @@ function dlLabel(dl) {
 function saveGrant(g) {
   var key = (g.grant_name||g.name||g.title||'').trim();
   if (!key||saved.find(function(s){return s.name===key;})) return false;
-  saved.push({name:key,funder:g.funder||g.organization||'',amount:g.amount||g.award_amount||'',
-    deadline:g.deadline||g.deadline_date||'',url:g.url||g.link||'',notes:'',stage:'researching',
-    addedAt:new Date().toLocaleDateString()});
+  saved.push({name:key,funder:g.funder||g.organization||g.agencyName||'',
+    amount:g.amount||g.award_amount||'',deadline:g.deadline||g.deadline_date||g.closeDate||'',
+    url:g.url||g.link||'',notes:'',stage:'researching',addedAt:new Date().toLocaleDateString()});
   persist(); return true;
 }
 
@@ -679,6 +749,21 @@ function moveGrant(idx,dir){var g=saved[idx];if(!g)return;var si=STAGES.findInde
 function removeGrant(idx){saved.splice(idx,1);persist();renderSaved();}
 function clearSaved(){if(!saved.length||!confirm('Remove all grants from your pipeline?'))return;saved=[];try{localStorage.removeItem('gc_saved');}catch(e){}saveBadge();renderSaved();}
 
+function exportPipelineCSV() {
+  if (!saved.length) { alert('No grants in your pipeline to export.'); return; }
+  var headers = ['Name','Funder','Amount','Deadline','Stage','URL','Notes','Added'];
+  var rows = saved.map(function(g) {
+    return [g.name,g.funder,g.amount,g.deadline,g.stage,g.url,g.notes,g.addedAt].map(function(v) {
+      return '"'+(v||'').replace(/"/g,'""')+'"';
+    }).join(',');
+  });
+  var csv = headers.join(',') + '\n' + rows.join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'grant-pipeline-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
 var editingIdx = -1;
 function openModal(g,idx){
   editingIdx=(idx!==undefined)?idx:-1;
@@ -710,193 +795,113 @@ function addManualGrant(){openModal({});}
 function editGrant(idx){if(saved[idx])openModal(saved[idx],idx);}
 
 // ── Deadline Calendar ──────────────────────────────────────────────────────
-var calOffset = 0; // months offset from current month
-
-function calNav(dir) {
-  calOffset += dir;
-  renderCalendar();
-}
+var calOffset = 0;
+function calNav(dir){calOffset+=dir;renderCalendar();}
 
 function renderCalendar() {
-  var el = document.getElementById('cal-container'); if (!el) return;
-  var base = new Date();
-  var year = base.getFullYear();
-  var month = base.getMonth() + calOffset;
-  // Normalise offset months into valid year/month
-  var date = new Date(year, month, 1);
-  year = date.getFullYear();
-  month = date.getMonth();
-
-  var now = new Date();
-  var isCurrentMonth = (year === now.getFullYear() && month === now.getMonth());
-
-  // Update nav label
-  var label = document.getElementById('cal-month-label');
-  if (label) label.textContent = date.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  var grants = saved.filter(function(g){return g.deadline;});
-  var byDate = {};
-  grants.forEach(function(g){
-    var d = new Date(g.deadline); if(isNaN(d))return;
-    if(d.getFullYear()===year && d.getMonth()===month){
-      var key=d.getDate(); if(!byDate[key])byDate[key]=[];byDate[key].push(g);
-    }
-  });
-
-  // Count grants in this month
-  var monthGrants = Object.values(byDate).reduce(function(sum,arr){return sum+arr.length;},0);
-
-  var first = new Date(year,month,1).getDay();
-  var days = new Date(year,month+1,0).getDate();
-
-  var h = '';
-  if (!grants.length) {
-    h = '<div class="empty">No grants with deadlines in your pipeline yet.<br>Add grants in the Pipeline tab and set deadline dates to see them here.</div>';
-    el.innerHTML=h; return;
-  }
-  if (!monthGrants) {
-    h = '<div class="empty" style="padding:20px">No grants due this month.</div>';
-  }
-
-  h += '<div style="font-size:12px;color:#888;margin-bottom:8px;text-align:center">'
-    + monthGrants + ' grant deadline' + (monthGrants!==1?'s':'') + ' this month'
-    + ' &nbsp;&middot;&nbsp; ' + grants.length + ' total in pipeline'
-    + '</div>';
-
-  h += '<div class="cal-grid">';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d){h+='<div class="cal-hdr">'+d+'</div>';});
-  for(var i=0;i<first;i++) h+='<div class="cal-day other"></div>';
-  for(var d=1;d<=days;d++){
-    var isToday = isCurrentMonth && (d===now.getDate());
-    h+='<div class="cal-day'+(isToday?' today-cell':'')+'"><div class="cal-num">'+d+'</div>';
-    if(byDate[d]){byDate[d].forEach(function(g){
-      var dc=dlClass(g.deadline);
-      h+='<div class="cal-dot'+(dc==='dl-urgent'?' urgent':'')+'" title="'+esc(g.name)+' | '+esc(g.funder||'')+'">'+esc(g.name.slice(0,14))+'</div>';
-    });}
+  var el=document.getElementById('cal-container');if(!el)return;
+  var base=new Date();
+  var d=new Date(base.getFullYear(),base.getMonth()+calOffset,1);
+  var year=d.getFullYear(),month=d.getMonth();
+  var isNow=(year===base.getFullYear()&&month===base.getMonth());
+  var label=document.getElementById('cal-month-label');
+  if(label)label.textContent=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  var grants=saved.filter(function(g){return g.deadline;});
+  var byDate={};
+  grants.forEach(function(g){var gd=new Date(g.deadline);if(isNaN(gd))return;if(gd.getFullYear()===year&&gd.getMonth()===month){var k=gd.getDate();if(!byDate[k])byDate[k]=[];byDate[k].push(g);}});
+  var monthGrants=Object.values(byDate).reduce(function(s,a){return s+a.length;},0);
+  var first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();
+  var h='<div style="font-size:12px;color:#888;margin-bottom:8px;text-align:center">'+monthGrants+' deadline'+(monthGrants!==1?'s':'')+ ' this month &middot; '+grants.length+' total in pipeline</div>';
+  if(!grants.length){h='<div class="empty">No grants with deadlines yet. Add grants to your pipeline and set deadline dates.</div>';el.innerHTML=h;return;}
+  h+='<div class="cal-grid">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(n){h+='<div class="cal-hdr">'+n+'</div>';});
+  for(var i=0;i<first;i++)h+='<div class="cal-day other"></div>';
+  for(var dy=1;dy<=days;dy++){
+    var isToday=isNow&&dy===base.getDate();
+    h+='<div class="cal-day'+(isToday?' today-cell':'')+'"><div class="cal-num">'+dy+'</div>';
+    if(byDate[dy])byDate[dy].forEach(function(g){var dc=dlClass(g.deadline);h+='<div class="cal-dot'+(dc==='dl-urgent'?' urgent':'')+'" title="'+esc(g.name)+' | '+esc(g.funder||'')+'">'+esc(g.name.slice(0,14))+'</div>';});
     h+='</div>';
   }
-  h += '</div>';
-  el.innerHTML = h;
+  h+='</div>';
+  el.innerHTML=h;
 }
 
 // ── Grant store & card ─────────────────────────────────────────────────────
 var store = {};
 
 function grantCard(g) {
-  var uid = 'g'+Math.random().toString(36).slice(2,9);
-  store[uid] = g;
-  var name = g.grant_name||g.name||g.title||g.grant_title||g.program_name||'';
-  var funder = g.funder||g.funder_organization||g.organization||g.sponsor||g.agencyName||'';
-  var amount = g.amount||g.award_amount||g.funding_amount||g.awardCeiling||'See listing';
-  var deadline = g.deadline||g.deadline_date||g.closeDate||g.due_date||'See listing';
-  var desc = g.description||g.synopsis||g.summary||'';
-  var why = g.why||'';
-  var successScore = g.successScore||g.success_score||null;
-  var url = '';
-  var urlFields = ['url','link','href','grant_url','detail_url','application_url'];
-  for(var fi=0;fi<urlFields.length;fi++){if(g[urlFields[fi]]&&String(g[urlFields[fi]]).indexOf('http')===0){url=g[urlFields[fi]];break;}}
-  if(!url){Object.keys(g).forEach(function(k){if(!url&&typeof g[k]==='string'&&g[k].indexOf('http')===0&&(g[k].indexOf('grantwatch')!==-1||g[k].indexOf('grants.gov')!==-1)){url=g[k];}});}
-  if(!name&&url){var parts=url.split('/');name=parts[parts.length-1].replace(/-/g,' ').replace(/\.html?$/,'')||'Grant listing';}
+  var uid='g'+Math.random().toString(36).slice(2,9);
+  store[uid]=g;
+  var name=g.grant_name||g.name||g.title||g.grant_title||g.program_name||'';
+  var funder=g.funder||g.funder_organization||g.organization||g.agencyName||'';
+  var amount=g.amount||g.award_amount||g.awardCeiling||'See listing';
+  var deadline=g.deadline||g.deadline_date||g.closeDate||'See listing';
+  var desc=g.description||g.synopsis||g.summary||'';
+  var why=g.why||'';
+  var successScore=g.successScore||null;
+  var url='';
+  ['url','link','href','grant_url','detail_url','application_url'].forEach(function(k){if(!url&&g[k]&&String(g[k]).indexOf('http')===0)url=g[k];});
+  if(!url)Object.keys(g).forEach(function(k){if(!url&&typeof g[k]==='string'&&g[k].indexOf('http')===0&&(g[k].indexOf('grantwatch')!==-1||g[k].indexOf('grants.gov')!==-1))url=g[k];});
+  if(!name&&url){var pts=url.split('/');name=pts[pts.length-1].replace(/-/g,' ').replace(/\.html?$/,'')||'Grant listing';}
   if(!name)name='Grant listing';
   var isStrong=(g.match||'').toLowerCase().indexOf('strong')!==-1;
   var sq=encodeURIComponent('"'+funder+'" "'+name+'" grant application');
   var link=url?'<a class="cb" href="'+esc(url)+'" target="_blank">View listing</a>':'<a class="cb" href="https://www.google.com/search?q='+sq+'" target="_blank">Find on web</a>';
   var src=g.source?'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+sourceBadge(g.source)+'">'+esc(g.source)+'</span>':'';
   var scorePill='';
-  if(successScore!==null){
-    var sc=parseInt(successScore)||0;
-    var scColor=sc>=70?'#166534':sc>=45?'#92400e':'#b91c1c';
-    var scBg=sc>=70?'#dcfce7':sc>=45?'#fef3c7':'#fef2f2';
-    scorePill='<span class="score-pill" style="color:'+scColor+';background:'+scBg+';border-color:'+scBg+'">'+sc+'% match</span>';
-  }
+  if(successScore!==null){var sc=parseInt(successScore)||0;var scColor=sc>=70?'#166534':sc>=45?'#92400e':'#b91c1c';var scBg=sc>=70?'#dcfce7':sc>=45?'#fef3c7':'#fef2f2';scorePill='<span class="score-pill" style="color:'+scColor+';background:'+scBg+';border-color:'+scBg+'">'+sc+'%</span>';}
+  var similarBtn='<button class="cb" onclick="findSimilar(\''+uid+'\')">Find similar</button>';
   return '<div class="card">'
-    +'<div class="card-top"><div class="card-name">'+esc(name)+'</div>'
-    +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+src+'<span class="badge '+(isStrong?'strong':'good')+'">'+(g.match||'Good match')+'</span>'+scorePill+'</div></div>'
+    +'<div class="card-top"><div class="card-name">'+esc(name)+'</div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+src+'<span class="badge '+(isStrong?'strong':'good')+'">'+(g.match||'Good match')+'</span>'+scorePill+'</div></div>'
     +'<div class="meta">'+esc(funder)+' &middot; '+esc(String(amount))+' &middot; <span style="color:#b91c1c;font-weight:600">Due: '+esc(String(deadline))+'</span></div>'
     +(desc?'<div class="desc">'+esc(desc.slice(0,220))+(desc.length>220?'...':'')+'</div>':'')
     +(why?'<div class="why">Why this matches: '+esc(why)+'</div>':'')
-    +'<div class="card-btns"><button class="cb" id="sv-'+uid+'" onclick="handleSave(\''+uid+'\')">Save to pipeline</button>'+link+'</div>'
+    +'<div class="card-btns"><button class="cb" id="sv-'+uid+'" onclick="handleSave(\''+uid+'\')">Save to pipeline</button>'+link+similarBtn+'</div>'
     +'</div>';
 }
 
 function handleSave(uid){var g=store[uid];var btn=document.getElementById('sv-'+uid);if(!g||!btn)return;var ok=saveGrant(g);btn.textContent=ok?'Saved!':'Already saved';btn.className='cb saved-ok';}
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function sourceBadge(source) {
-  if(source==='Grants.gov') return 'background:#dbeafe;color:#1d4ed8';
-  if(source==='GrantWatch') return 'background:#eaf3de;color:#3b6d11';
-  return 'background:#ede9fe;color:#6d28d9';
+function findSimilar(uid) {
+  var g = store[uid]; if (!g) return;
+  var name = g.grant_name||g.name||g.title||'';
+  var funder = g.funder||g.agencyName||'';
+  var focus = g.description||'';
+  showTab('discover');
+  var mission = document.getElementById('f-mission');
+  mission.value = 'Looking for grants similar to: '+name+(funder?' from '+funder:'')+'. '+focus.slice(0,200);
+  document.getElementById('f-wc').textContent = '('+mission.value.length+'/400)';
+  document.getElementById('res-find').innerHTML = '<div class="suc">&#128269; Form filled with context from "'+esc(name)+'". Click <strong>Search grants</strong> to find similar opportunities.</div>';
 }
 
-function callClaude(prompt) {
+// ── Helpers ────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function sourceBadge(src){if(src==='Grants.gov')return 'background:#dbeafe;color:#1d4ed8';if(src==='GrantWatch')return 'background:#eaf3de;color:#3b6d11';return 'background:#ede9fe;color:#6d28d9';}
+
+function callClaude(prompt,maxTokens) {
   return fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens||2000,messages:[{role:'user',content:prompt}]})
   }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Claude error '+r.status);});return r.json();})
   .then(function(d){return d.content.map(function(b){return b.text||'';}).join('');});
 }
 
-function pj(text) {
-  var clean=text.replace(/```json|```/gi,'').trim();
-  var fb=clean.indexOf('{'),fbk=clean.indexOf('[');
-  var start=fb===-1?fbk:fbk===-1?fb:Math.min(fb,fbk);
-  if(start===-1)throw new Error('No JSON found');
-  var isArr=fbk!==-1&&(fb===-1||fbk<fb);
-  var end=isArr?clean.lastIndexOf(']'):clean.lastIndexOf('}');
-  if(end===-1)throw new Error('Incomplete JSON');
-  return JSON.parse(clean.slice(start,end+1));
-}
+function pj(text){var clean=text.replace(/```json|```/gi,'').trim();var fb=clean.indexOf('{'),fbk=clean.indexOf('[');var start=fb===-1?fbk:fbk===-1?fb:Math.min(fb,fbk);if(start===-1)throw new Error('No JSON found');var isArr=fbk!==-1&&(fb===-1||fbk<fb);var end=isArr?clean.lastIndexOf(']'):clean.lastIndexOf('}');if(end===-1)throw new Error('Incomplete JSON');return JSON.parse(clean.slice(start,end+1));}
 
-function startRun(endpoint,body) {
-  return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-  .then(function(r){return r.json();})
-  .then(function(d){if(!d.runId)throw new Error('Start failed: '+(d.error||JSON.stringify(d).slice(0,100)));return d.runId;});
-}
+function startRun(endpoint,body){return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){if(!d.runId)throw new Error('Start failed: '+(d.error||JSON.stringify(d).slice(0,100)));return d.runId;});}
 
-function poll(runId,max) {
-  var n=0;
-  function step(){
-    if(n++>=max)return Promise.resolve(null);
-    return new Promise(function(res){setTimeout(res,5000);})
-    .then(function(){return fetch('/api/scan-status?runId='+encodeURIComponent(runId)).then(function(r){return r.json();});})
-    .then(function(d){if(d.status==='complete')return d.result;if(d.status==='failed')throw new Error('Run failed.');return step();});
-  }
-  return step();
-}
+function poll(runId,max){var n=0;function step(){if(n++>=max)return Promise.resolve(null);return new Promise(function(res){setTimeout(res,5000);}).then(function(){return fetch('/api/scan-status?runId='+encodeURIComponent(runId)).then(function(r){return r.json();});}).then(function(d){if(d.status==='complete')return d.result;if(d.status==='failed')throw new Error('Run failed.');return step();});}return step();}
 
-function keyword(text) {
-  var t=(text||'').toLowerCase();
-  var map=[['disability','disability'],['intellectual','disability'],['developmental','disability'],
-    ['food','food'],['hunger','food'],['nutrition','food'],['housing','housing'],['homeless','housing'],
-    ['youth','youth'],['children','youth'],['education','education'],['health','health'],
-    ['mental health','mental health'],['environment','environment'],['veteran','veterans'],
-    ['refugee','refugee'],['immigrant','immigrant'],['arts','arts'],['workforce','workforce'],
-    ['animal','animal welfare'],['lgbtq','lgbtq'],['racial equity','racial equity']];
-  for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])!==-1)return map[i][1];
-  return 'nonprofit';
-}
+function keyword(text){var t=(text||'').toLowerCase();var map=[['disability','disability'],['intellectual','disability'],['developmental','disability'],['food','food'],['hunger','food'],['housing','housing'],['homeless','housing'],['youth','youth'],['children','youth'],['education','education'],['health','health'],['mental health','mental health'],['environment','environment'],['veteran','veterans'],['refugee','refugee'],['immigrant','immigrant'],['arts','arts'],['workforce','workforce'],['animal','animal welfare'],['lgbtq','lgbtq'],['racial equity','racial equity']];for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])!==-1)return map[i][1];return 'nonprofit';}
 
-function stateSubdomain(text) {
-  var t=(text||'').toLowerCase();
-  var map={'arizona':'arizona','california':'california','texas':'texas','florida':'florida',
-    'new york':'new-york','colorado':'colorado','washington':'washington','oregon':'oregon',
-    'illinois':'illinois','georgia':'georgia','ohio':'ohio','pennsylvania':'pennsylvania','michigan':'michigan'};
-  for(var k in map)if(t.indexOf(k)!==-1)return map[k];
-  return 'grants';
-}
+function stateSubdomain(text){var t=(text||'').toLowerCase();var map={'arizona':'arizona','california':'california','texas':'texas','florida':'florida','new york':'new-york','colorado':'colorado','washington':'washington','oregon':'oregon','illinois':'illinois','georgia':'georgia','ohio':'ohio','pennsylvania':'pennsylvania','michigan':'michigan'};for(var k in map)if(t.indexOf(k)!==-1)return map[k];return 'grants';}
 
 function stepSet(n,state){var el=document.getElementById('si'+n);if(!el)return;if(state==='active'){el.className='si active';el.textContent='~';}else if(state==='done'){el.className='si done';el.textContent='+';}else{el.className='si';el.textContent=String(n);}}
 
-function exportText(content, filename) {
-  var a=document.createElement('a');
-  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(content);
-  a.download=filename; a.click();
-}
+function exportTxt(content,filename){var a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(content);a.download=filename;a.click();}
 
-function printSection(id) {
-  var el=document.getElementById(id);
-  if(!el)return;
+function printSection(id){
+  var el=document.getElementById(id);if(!el)return;
+  var styleClose='<\\/style>';
   var css='body{font-family:system-ui,sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1a18}'
     +'.card{border:1px solid #e0ddd8;border-radius:8px;padding:14px;margin-bottom:10px}'
     +'.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}'
@@ -908,7 +913,6 @@ function printSection(id) {
     +'.ba-box{border-radius:8px;padding:10px;font-size:13px}'
     +'.ba-before{background:#fef2f2;color:#7f1d1d}.ba-after{background:#f0fdf4;color:#14532d}'
     +'.export-bar,.card-btns,.move-btns,button{display:none!important}';
-  var styleClose='<\/style>';
   var content='<!DOCTYPE html><html><head><meta charset=UTF-8><title>GrantCompass Export</title>'
     +'<style>'+css+styleClose+'</head><body>'+el.innerHTML+'</body></html>';
   var blob=new Blob([content],{type:'text/html'});
@@ -931,16 +935,15 @@ function submitScreener(){
   var status=document.getElementById('eq-status').value,years=document.getElementById('eq-years').value,
     budget=document.getElementById('eq-budget').value,geo=document.getElementById('eq-geo').value;
   if(!status||!years||!budget||!geo){alert('Please answer all four questions.');return;}
-  var budgetLabels={under50k:'Under $50K','50to250k':'$50K-$250K','250to1m':'$250K-$1M','1to5m':'$1M-$5M',over5m:'Over $5M'};
-  var geoLabels={local:'Local',regional:'Regional',statewide:'Statewide',national:'National'};
-  var yearLabels={under1:'<1yr','1to2':'1-2yrs','3to5':'3-5yrs',over5:'5+yrs'};
+  var bL={under50k:'Under $50K','50to250k':'$50K-$250K','250to1m':'$250K-$1M','1to5m':'$1M-$5M',over5m:'Over $5M'};
+  var gL={local:'Local',regional:'Regional',statewide:'Statewide',national:'National'};
+  var yL={under1:'<1yr','1to2':'1-2yrs','3to5':'3-5yrs',over5:'5+yrs'};
   eligibilityProfile={status:status,years:years,budget:budget,geo:geo,
-    summary:'501c3:'+status+', Years:'+(yearLabels[years]||years)+', Budget:'+(budgetLabels[budget]||budget)+', Reach:'+(geoLabels[geo]||geo)};
+    summary:'501c3:'+status+', Years:'+(yL[years]||years)+', Budget:'+(bL[budget]||budget)+', Reach:'+(gL[geo]||geo)};
   document.getElementById('screener-modal').style.display='none';
   doFind();
 }
 
-// Close modals on backdrop click
 document.addEventListener('click',function(e){
   var sm=document.getElementById('screener-modal');if(sm&&e.target===sm)sm.style.display='none';
   var gm=document.getElementById('grant-modal');if(gm&&e.target===gm)closeModal();
@@ -958,55 +961,32 @@ function doFind() {
   var btn=document.getElementById('btn-find');btn.disabled=true;
   var srcList=[useGW?'GrantWatch':'',useFed?'Grants.gov':'',useSt?'State portal':''].filter(Boolean).join(', ');
   document.getElementById('res-find').innerHTML='<div class="loading">Searching '+esc(srcList)+'...</div>';
-  var orgProfile=[org?'Organization: '+org:'',focus?'Focus: '+focus:'',budget?'Budget: '+budget:'',state?'State: '+state:'',mission?'Mission: '+mission:'',eligibilityProfile?'Eligibility: '+eligibilityProfile.summary:''].filter(Boolean).join('\n');
+  var profile=[org?'Organization: '+org:'',focus?'Focus: '+focus:'',budget?'Budget: '+budget:'',state?'State: '+state:'',mission?'Mission: '+mission:'',eligibilityProfile?'Eligibility: '+eligibilityProfile.summary:''].filter(Boolean).join('\n');
   var kw=keyword(focus||mission),sub=stateSubdomain(state);
-  var allGrants=[],promises=[];
-  var sources=[];if(useFed)sources.push('federal');if(useSt)sources.push('state');
-
-  if(useGW){
-    promises.push(startRun('/api/search-grants',{keyword:kw,subdomain:sub})
-    .then(function(runId){return poll(runId,96);})
-    .then(function(result){if(!result)return;try{var r=typeof result==='string'?result:JSON.stringify(result);var g=pj(r);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source='GrantWatch';allGrants.push(x);});}catch(e){}}).catch(function(){}));
-  }
-  if(useFed||useSt){
-    promises.push(fetch('/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:state,sources:sources})})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});
-      if(d.stateRunId)return poll(d.stateRunId,60).then(function(r){if(!r)return;try{var sr=typeof r==='string'?r:JSON.stringify(r);var g=pj(sr);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source=d.statePortalName||'State';allGrants.push(x);});}catch(e){}}).catch(function(){});
-    }).catch(function(){}));
-  }
-
+  var allGrants=[],promises=[],sources=[];
+  if(useFed)sources.push('federal');if(useSt)sources.push('state');
+  if(useGW){promises.push(startRun('/api/search-grants',{keyword:kw,subdomain:sub}).then(function(runId){return poll(runId,96);}).then(function(result){if(!result)return;try{var r=typeof result==='string'?result:JSON.stringify(result);var g=pj(r);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source='GrantWatch';allGrants.push(x);});}catch(e){}}).catch(function(){}));}
+  if(useFed||useSt){promises.push(fetch('/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:state,sources:sources})}).then(function(r){return r.json();}).then(function(d){if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});if(d.stateRunId)return poll(d.stateRunId,60).then(function(r){if(!r)return;try{var sr=typeof r==='string'?r:JSON.stringify(r);var g=pj(sr);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source=d.statePortalName||'State';allGrants.push(x);});}catch(e){}}).catch(function(){});}).catch(function(){}));}
   Promise.all(promises).then(function(){
     if(!allGrants.length)throw new Error('No grants found. Try different keywords or sources.');
-    var eligNote=eligibilityProfile?'\n\nELIGIBILITY FILTER: Only include grants this org can qualify for given: '+eligibilityProfile.summary+'. Remove grants requiring confirmed 501c3 if status is pending/no, more operating years than they have, or larger geographic scope than their reach. If unsure, keep the grant.':'';
+    var eligNote=eligibilityProfile?'\n\nELIGIBILITY FILTER: Only include grants this org can qualify for given: '+eligibilityProfile.summary+'. Remove grants requiring confirmed 501c3 if status is pending/no, more operating years than they have, or larger geographic scope. If unsure, keep the grant.':'';
     var today=new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+orgProfile+'\n\nGrants from multiple sources:\n'+JSON.stringify(allGrants,null,2).slice(0,4000)+eligNote+'\n\nFor each grant: add "match" ("Strong match" or "Good match"), "why" (1 sentence), and "successScore" (0-100 integer estimating probability this org would be competitive for this grant based on eligibility, focus alignment, and budget fit). Preserve ALL original fields. Rank strongest first. Return ONLY JSON array starting with [.')
+    return callClaude('Today is '+today+'. Nonprofit:\n'+profile+'\n\nGrants:\n'+JSON.stringify(allGrants,null,2).slice(0,4000)+eligNote+'\n\nFor each grant: add "match" ("Strong match" or "Good match"), "why" (1 sentence), "successScore" (0-100 integer). Preserve ALL original fields. Rank strongest first. Return ONLY JSON array starting with [.')
     .then(function(text){
-      var ranked=pj(text);
-      var bySource={};
+      var ranked=pj(text),bySource={};
       ranked.forEach(function(g){var s=g.source||'Other';if(!bySource[s])bySource[s]=[];bySource[s].push(g);});
-      var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
-        +'<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span>'
-        +'<div style="display:flex;gap:8px"><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span>'
-        +'<button class="cb" onclick="printSection(\'res-find\')">Export PDF</button></div></div>';
-      if(eligibilityProfile)h+='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin-bottom:14px">&#10003; Filtered for eligibility &mdash; '+esc(eligibilityProfile.summary)+'</div>';
-      Object.keys(bySource).forEach(function(src){
-        h+='<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+sourceBadge(src)+'">'+esc(src)+'</span><span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';
-        bySource[src].forEach(function(g){h+=grantCard(g);});
-        h+='<div style="margin-bottom:16px"></div>';
-      });
+      var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span><div style="display:flex;gap:8px"><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span><button class="cb" onclick="printSection(\'res-find\')">Export PDF</button></div></div>';
+      if(eligibilityProfile)h+='<div class="suc" style="margin-bottom:14px">&#10003; Filtered for eligibility &mdash; '+esc(eligibilityProfile.summary)+'</div>';
+      Object.keys(bySource).forEach(function(src){h+='<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+sourceBadge(src)+'">'+esc(src)+'</span><span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';bySource[src].forEach(function(g){h+=grantCard(g);});h+='<div style="margin-bottom:16px"></div>';});
       document.getElementById('res-find').innerHTML=h;
     });
-  })
-  .catch(function(e){document.getElementById('res-find').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  }).catch(function(e){document.getElementById('res-find').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
 
 // ── Scan Website ───────────────────────────────────────────────────────────
 var scanTimer=null,scanSecs=0;
-
-function doScan() {
+function doScan(){
   var url=document.getElementById('f-url').value.trim();
   if(!url){document.getElementById('res-scan').innerHTML='<div class="err">Please enter your organization website URL.</div>';return;}
   var btn=document.getElementById('btn-scan');btn.disabled=true;
@@ -1018,7 +998,6 @@ function doScan() {
   scanTimer=setInterval(function(){scanSecs++;document.getElementById('scan-secs').textContent=scanSecs+'s';},1000);
   var scanResult=null,searchResult=null,detectedState='';
   stepSet(1,'active');
-
   fetch('/api/scan-and-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phase:'start',url:url})})
   .then(function(r){return r.json();})
   .then(function(d){
@@ -1026,8 +1005,7 @@ function doScan() {
     var scanId=d.scanRunId,searchId=d.searchRunId;
     stepSet(1,'done');stepSet(2,'active');
     var scanDone=false,searchDone=false;
-    function pollBoth(){
-      var ps=[];
+    function pollBoth(){var ps=[];
       if(!scanDone)ps.push(fetch('/api/scan-status?runId='+encodeURIComponent(scanId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){scanResult=d.result;scanDone=true;stepSet(2,'done');stepSet(3,'active');}else if(d.status==='failed')scanDone=true;}).catch(function(){scanDone=true;}));
       if(!searchDone)ps.push(fetch('/api/scan-status?runId='+encodeURIComponent(searchId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){searchResult=d.result;searchDone=true;}else if(d.status==='failed')searchDone=true;}).catch(function(){searchDone=true;}));
       return Promise.all(ps).then(function(){if(scanDone&&searchDone)return;return new Promise(function(res){setTimeout(res,5000);}).then(pollBoth);});
@@ -1036,13 +1014,12 @@ function doScan() {
     return Promise.race([pollBoth().then(function(){clearTimeout(tid);}),new Promise(function(_,rej){tid=setTimeout(function(){rej(new Error('Scan timed out. Please try again.'));},480000);})]);
   })
   .then(function(){
-    var orgProfile='';
-    if(scanResult){var d=scanResult;try{if(typeof scanResult==='string')d=pj(scanResult);}catch(e){}orgProfile=typeof d==='string'?d:JSON.stringify(d,null,2);
-      document.getElementById('res-scan').innerHTML='<div class="card" style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:#666;white-space:pre-wrap;line-height:1.5">'+esc(orgProfile.slice(0,500))+'</pre></div><div class="loading">Searching all sources...</div>';
-    }
-    var orgText=(orgProfile||'').toLowerCase();
-    var stateMatch=orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
-    detectedState=stateMatch?stateMatch[1]:'';
+    var orgProf='';
+    if(scanResult){var d2=scanResult;try{if(typeof scanResult==='string')d2=pj(scanResult);}catch(e){}orgProf=typeof d2==='string'?d2:JSON.stringify(d2,null,2);
+      document.getElementById('res-scan').innerHTML='<div class="card" style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:#666;white-space:pre-wrap;line-height:1.5">'+esc(orgProf.slice(0,500))+'</pre></div><div class="loading">Searching all sources...</div>';}
+    var orgText=(orgProf||'').toLowerCase();
+    var sm=orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
+    detectedState=sm?sm[1]:'';
     var kw=keyword(orgText),sub=stateSubdomain(orgText);
     var allGrants=[];
     if(searchResult){try{var r=typeof searchResult==='string'?searchResult:JSON.stringify(searchResult);var g=pj(r);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source='GrantWatch';allGrants.push(x);});}catch(e){}}
@@ -1052,24 +1029,18 @@ function doScan() {
     .then(function(d){
       if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});
       if(d.stateRunId)return poll(d.stateRunId,40).then(function(r){if(!r)return;try{var sr=typeof r==='string'?r:JSON.stringify(r);var g=pj(sr);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source=d.statePortalName||'State';allGrants.push(x);});}catch(e){}}).catch(function(){});
-    }).catch(function(){}).then(function(){return{allGrants:allGrants,orgProfile:orgProfile};});
+    }).catch(function(){}).then(function(){return{allGrants:allGrants,orgProfile:orgProf};});
   })
   .then(function(obj){
     if(!obj||!obj.allGrants||!obj.allGrants.length)throw new Error('No grants found. Please try again.');
     stepSet(3,'done');stepSet(4,'active');
     var today=new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants from multiple sources:\n'+JSON.stringify(obj.allGrants,null,2).slice(0,4000)+'\n\nFor each grant: add "match" ("Strong match" or "Good match"), "why" (1 sentence), and "successScore" (0-100 integer). Preserve ALL original fields. Rank strongest first. Return ONLY JSON array starting with [.')
+    return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants:\n'+JSON.stringify(obj.allGrants,null,2).slice(0,4000)+'\n\nFor each grant: add "match" ("Strong match" or "Good match"), "why" (1 sentence), "successScore" (0-100). Preserve ALL original fields. Rank strongest first. Return ONLY JSON array starting with [.')
     .then(function(text){
       var ranked=pj(text);stepSet(4,'done');clearInterval(scanTimer);
       var bySource={};ranked.forEach(function(g){var s=g.source||'Other';if(!bySource[s])bySource[s]=[];bySource[s].push(g);});
-      var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
-        +'<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span>'
-        +'<div style="display:flex;gap:8px"><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span>'
-        +'<button class="cb" onclick="printSection(\'res-scan\')">Export PDF</button></div></div>';
-      Object.keys(bySource).forEach(function(src){
-        h+='<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+sourceBadge(src)+'">'+esc(src)+'</span><span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';
-        bySource[src].forEach(function(g){h+=grantCard(g);});h+='<div style="margin-bottom:16px"></div>';
-      });
+      var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span><div style="display:flex;gap:8px"><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span><button class="cb" onclick="printSection(\'res-scan\')">Export PDF</button></div></div>';
+      Object.keys(bySource).forEach(function(src){h+='<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;'+sourceBadge(src)+'">'+esc(src)+'</span><span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';bySource[src].forEach(function(g){h+=grantCard(g);});h+='<div style="margin-bottom:16px"></div>';});
       document.getElementById('res-scan').innerHTML=h;
     });
   })
@@ -1079,109 +1050,71 @@ function doScan() {
 
 // ── Review Writing ─────────────────────────────────────────────────────────
 function updateWC(){var w=document.getElementById('f-proposal').value.trim().split(/\s+/).filter(Boolean).length;document.getElementById('wc').textContent='('+w+' words)';}
-
 function clearReview(){['f-proposal','f-grantname'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('wc').textContent='(0 words)';document.getElementById('res-review').innerHTML='';document.getElementById('drop-label').textContent='Upload PDF or TXT \u2014 or drag and drop';document.getElementById('drop-zone').className='drop';}
+function clearRewrite(){['f-funder-name','f-funder-priorities','f-rewrite-proposal'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-rewrite').innerHTML='';}
 
-function doReview() {
+function doReview(){
   var text=document.getElementById('f-proposal').value.trim(),target=document.getElementById('f-grantname').value.trim();
   if(text.split(/\s+/).filter(Boolean).length<15){document.getElementById('res-review').innerHTML='<div class="err">Please paste your proposal (at least 15 words).</div>';return;}
   var btn=document.getElementById('btn-review');btn.disabled=true;
   document.getElementById('res-review').innerHTML='<div class="loading">Analyzing your proposal...</div>';
   callClaude('Expert nonprofit grant writer. Review this proposal'+(target?' for '+target:'')+'. Return JSON:\n{"overallScore":0-100,"clarity":0-100,"impact":0-100,"specificity":0-100,"feedback":[{"type":"strength"|"improvement"|"missing","title":"5-7 words","detail":"2-3 sentences"}],"suggestedRevision":"one improved opening sentence","beforeAfter":{"before":"quote the weakest sentence verbatim","after":"rewrite that same sentence significantly improved"}}\n6 feedback items. Return ONLY raw JSON starting with {.\n\nPROPOSAL:\n'+text)
   .then(function(txt){
-    var r=pj(txt),sc=r.overallScore||0;
-    var color=sc>=75?'#3b6d11':sc>=50?'#92400e':'#b91c1c';
-    var h='<div class="card" style="margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888">Overall score</span><span style="font-size:28px;font-weight:700;color:'+color+'">'+sc+'<span style="font-size:13px;color:#888;font-weight:400">/100</span></span></div>'
+    var r=pj(txt),sc=r.overallScore||0,color=sc>=75?'#3b6d11':sc>=50?'#92400e':'#b91c1c';
+    var h='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888">Overall score</span><span style="font-size:28px;font-weight:700;color:'+color+'">'+sc+'<span style="font-size:13px;color:#888;font-weight:400">/100</span></span></div>'
       +'<div class="score-row"><span>Clarity</span><span>'+r.clarity+'%</span></div><div class="bar"><div class="bar-fill" style="width:'+r.clarity+'%"></div></div>'
       +'<div class="score-row"><span>Impact</span><span>'+r.impact+'%</span></div><div class="bar"><div class="bar-fill" style="width:'+r.impact+'%;background:#1d4ed8"></div></div>'
       +'<div class="score-row"><span>Specificity</span><span>'+r.specificity+'%</span></div><div class="bar"><div class="bar-fill" style="width:'+r.specificity+'%;background:#92400e"></div></div>'
       +'</div>';
-    if(r.beforeAfter&&r.beforeAfter.before){
-      h+='<div class="rev-card" style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Before &amp; after</div>'
-        +'<div class="before-after"><div class="ba-box ba-before"><div class="ba-label">Before</div>'+esc(r.beforeAfter.before)+'</div><div class="ba-box ba-after"><div class="ba-label">After</div>'+esc(r.beforeAfter.after)+'</div></div></div>';
-    }
-    if(r.suggestedRevision)h+='<div class="rev-card" style="border-left:3px solid #3b6d11;border-radius:0 10px 10px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Suggested opening</div><div class="rev-body">'+esc(r.suggestedRevision)+'</div></div>';
-    var tc={strength:'rt-s',improvement:'rt-i',missing:'rt-m'};
-    var tl={strength:'Strength',improvement:'Needs improvement',missing:'Missing element'};
-    (r.feedback||[]).forEach(function(f){h+='<div class="rev-card"><span class="rev-tag '+(tc[f.type]||'rt-i')+'">'+(tl[f.type]||f.type)+'</span><div class="rev-title">'+esc(f.title)+'</div><div class="rev-body">'+esc(f.detail)+'</div></div>';});
-    var exportText=('GRANT PROPOSAL REVIEW\n'+(target?'Funder: '+target+'\n':'')+'Date: '+new Date().toLocaleDateString()+'\n\nOverall Score: '+sc+'/100\nClarity: '+r.clarity+'%\nImpact: '+r.impact+'%\nSpecificity: '+r.specificity+'%\n\n'+(r.feedback||[]).map(function(f){return '['+f.type.toUpperCase()+']\n'+f.title+'\n'+f.detail;}).join('\n\n')+'\n\nSUGGESTED REVISION:\n'+(r.suggestedRevision||''));
-    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-review\')">Export PDF</button><button class="cb" onclick="exportText('+JSON.stringify(exportText)+',\'grant-review.txt\')">Download .txt</button></div>';
+    if(r.beforeAfter&&r.beforeAfter.before){h+='<div class="rev-card" style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Before &amp; after</div><div class="before-after"><div class="ba-box ba-before"><div class="ba-label">Before</div>'+esc(r.beforeAfter.before)+'</div><div class="ba-box ba-after"><div class="ba-label">After</div>'+esc(r.beforeAfter.after)+'</div></div></div>';}
+    if(r.suggestedRevision)h+='<div class="rev-card" style="border-left:3px solid #3b6d11;border-radius:0 10px 10px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Suggested opening</div><div style="font-size:13px;color:#555;line-height:1.65">'+esc(r.suggestedRevision)+'</div></div>';
+    var tc={strength:'rt-s',improvement:'rt-i',missing:'rt-m'},tl={strength:'Strength',improvement:'Needs improvement',missing:'Missing element'};
+    (r.feedback||[]).forEach(function(f){h+='<div class="rev-card"><span class="rev-tag '+(tc[f.type]||'rt-i')+'">'+(tl[f.type]||f.type)+'</span><div class="rev-title">'+esc(f.title)+'</div><div style="font-size:13px;color:#666;line-height:1.6">'+esc(f.detail)+'</div></div>';});
+    var etxt='GRANT PROPOSAL REVIEW\n'+(target?'Funder: '+target+'\n':'')+'Date: '+new Date().toLocaleDateString()+'\nScore: '+sc+'/100\n\n'+(r.feedback||[]).map(function(f){return '['+f.type.toUpperCase()+']\n'+f.title+'\n'+f.detail;}).join('\n\n');
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-review\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(etxt)+',\'grant-review.txt\')">Download .txt</button></div>';
     document.getElementById('res-review').innerHTML=h;
-  })
-  .catch(function(e){document.getElementById('res-review').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  }).catch(function(e){document.getElementById('res-review').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
 
-// ── Section-by-section feedback ────────────────────────────────────────────
-function doSectionFeedback() {
-  var sectionType=document.getElementById('f-section-type').value;
-  var text=document.getElementById('f-section-text').value.trim();
-  if(text.split(/\s+/).filter(Boolean).length<10){document.getElementById('res-sections').innerHTML='<div class="err">Please paste at least 10 words of section text.</div>';return;}
+function doSectionFeedback(){
+  var sectionType=document.getElementById('f-section-type').value,text=document.getElementById('f-section-text').value.trim();
+  if(text.split(/\s+/).filter(Boolean).length<10){document.getElementById('res-sections').innerHTML='<div class="err">Please paste at least 10 words.</div>';return;}
   var btn=document.getElementById('btn-section');btn.disabled=true;
   document.getElementById('res-sections').innerHTML='<div class="loading">Reviewing this section...</div>';
   var typeLabels={need:'Statement of Need',goals:'Goals & Objectives',methods:'Methods & Activities',evaluation:'Evaluation Plan',budget:'Budget Narrative',org:'Organizational Capacity',exec:'Executive Summary'};
   var sectionLabel=typeLabels[sectionType]||sectionType;
-  callClaude('Expert nonprofit grant writer. Review this "'+sectionLabel+'" section of a grant proposal.\n\nSECTION TEXT:\n'+text+'\n\nReturn JSON:\n{"sectionScore":0-100,"strengths":["2-3 specific strengths"],"improvements":["3-5 specific actionable improvements"],"missingElements":["elements typically required in this section that are absent"],"rewrittenOpening":"rewrite the first 1-2 sentences significantly stronger","keyPhraseSuggestions":["3-5 powerful phrases funders want to see in this section type"]}\n\nReturn ONLY raw JSON starting with {.')
+  callClaude('Expert nonprofit grant writer. Review this "'+sectionLabel+'" section.\n\nSECTION:\n'+text+'\n\nReturn JSON:\n{"sectionScore":0-100,"strengths":["2-3 specific strengths"],"improvements":["3-5 actionable improvements"],"missingElements":["elements typically required that are absent"],"rewrittenOpening":"rewrite the first 1-2 sentences stronger","keyPhraseSuggestions":["3-5 powerful phrases funders want to see"]}\nReturn ONLY raw JSON starting with {.')
   .then(function(txt){
-    var r=pj(txt);
-    var sc=r.sectionScore||0;
-    var color=sc>=75?'#3b6d11':sc>=50?'#92400e':'#b91c1c';
-    var h='<div class="card" style="margin-bottom:8px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-      +'<span style="font-weight:600">'+esc(sectionLabel)+' Review</span>'
-      +'<span style="font-size:24px;font-weight:700;color:'+color+'">'+sc+'<span style="font-size:13px;color:#888;font-weight:400">/100</span></span></div>';
+    var r=pj(txt),sc=r.sectionScore||0,color=sc>=75?'#3b6d11':sc>=50?'#92400e':'#b91c1c';
+    var h='<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-weight:600">'+esc(sectionLabel)+' Review</span><span style="font-size:24px;font-weight:700;color:'+color+'">'+sc+'<span style="font-size:13px;color:#888;font-weight:400">/100</span></span></div>';
     if(r.strengths&&r.strengths.length){h+='<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#3b6d11;margin-bottom:6px">Strengths</div>';r.strengths.forEach(function(s){h+='<div style="font-size:13px;color:#166534;margin-bottom:4px;padding-left:12px;border-left:2px solid #86efac">'+esc(s)+'</div>';});}
     if(r.improvements&&r.improvements.length){h+='<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#92400e;margin:12px 0 6px">Improvements needed</div>';r.improvements.forEach(function(s){h+='<div style="font-size:13px;color:#78350f;margin-bottom:4px;padding-left:12px;border-left:2px solid #fcd34d">'+esc(s)+'</div>';});}
-    if(r.missingElements&&r.missingElements.length){h+='<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#b91c1c;margin:12px 0 6px">Missing elements</div>';r.missingElements.forEach(function(s){h+='<div style="font-size:13px;color:#991b1b;margin-bottom:4px;padding-left:12px;border-left:2px solid #fca5a5">'+esc(s)+'</div>';}); }
+    if(r.missingElements&&r.missingElements.length){h+='<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#b91c1c;margin:12px 0 6px">Missing elements</div>';r.missingElements.forEach(function(s){h+='<div style="font-size:13px;color:#991b1b;margin-bottom:4px;padding-left:12px;border-left:2px solid #fca5a5">'+esc(s)+'</div>';});}
     h+='</div>';
-    if(r.rewrittenOpening){h+='<div class="rev-card" style="border-left:3px solid #3b6d11;border-radius:0 10px 10px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Stronger opening</div><div class="rev-body">'+esc(r.rewrittenOpening)+'</div></div>';}
-    if(r.keyPhraseSuggestions&&r.keyPhraseSuggestions.length){
-      h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Key phrases funders want to see</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
-      r.keyPhraseSuggestions.forEach(function(p){h+='<span style="font-size:12px;padding:3px 10px;border-radius:20px;background:#eff6ff;color:#1d4ed8">'+esc(p)+'</span>';});
-      h+='</div></div>';
-    }
+    if(r.rewrittenOpening)h+='<div class="rev-card" style="border-left:3px solid #3b6d11;border-radius:0 10px 10px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Stronger opening</div><div style="font-size:13px;color:#555;line-height:1.65">'+esc(r.rewrittenOpening)+'</div></div>';
+    if(r.keyPhraseSuggestions&&r.keyPhraseSuggestions.length){h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Key phrases funders want to see</div><div style="display:flex;flex-wrap:wrap;gap:6px">';r.keyPhraseSuggestions.forEach(function(p){h+='<span style="font-size:12px;padding:3px 10px;border-radius:20px;background:#eff6ff;color:#1d4ed8">'+esc(p)+'</span>';});h+='</div></div>';}
     document.getElementById('res-sections').innerHTML=h;
-  })
-  .catch(function(e){document.getElementById('res-sections').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  }).catch(function(e){document.getElementById('res-sections').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
 
-// ── Funder-specific rewrite ────────────────────────────────────────────────
-function clearRewrite(){['f-funder-name','f-funder-priorities','f-rewrite-proposal'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-rewrite').innerHTML='';}
-
-function doFunderRewrite() {
-  var funder=document.getElementById('f-funder-name').value.trim();
-  var priorities=document.getElementById('f-funder-priorities').value.trim();
-  var proposal=document.getElementById('f-rewrite-proposal').value.trim();
+function doFunderRewrite(){
+  var funder=document.getElementById('f-funder-name').value.trim(),priorities=document.getElementById('f-funder-priorities').value.trim(),proposal=document.getElementById('f-rewrite-proposal').value.trim();
   if(!proposal||proposal.split(/\s+/).length<15){document.getElementById('res-rewrite').innerHTML='<div class="err">Please paste your proposal text (at least 15 words).</div>';return;}
   if(!funder){document.getElementById('res-rewrite').innerHTML='<div class="err">Please enter the funder name.</div>';return;}
   var btn=document.getElementById('btn-rewrite');btn.disabled=true;
   document.getElementById('res-rewrite').innerHTML='<div class="loading">Rewriting for '+esc(funder)+'...</div>';
-  callClaude('Expert nonprofit grant writer. Rewrite the proposal below specifically for '+funder+'.\n\nFunder priorities and language: '+priorities+'\n\nOriginal proposal:\n'+proposal+'\n\nReturn JSON:\n{"rewrittenText":"the fully rewritten proposal text tailored to this funder","changesExplained":["3-5 specific changes you made and why"],"funderLanguageUsed":["key phrases from their priorities you wove in"],"alignmentScore":0-100}\n\nReturn ONLY raw JSON starting with {.')
+  callClaude('Expert nonprofit grant writer. Rewrite the proposal for '+funder+'.\n\nFunder priorities: '+priorities+'\n\nOriginal:\n'+proposal+'\n\nReturn JSON:\n{"rewrittenText":"fully rewritten text","changesExplained":["3-5 specific changes and why"],"funderLanguageUsed":["key phrases woven in"],"alignmentScore":0-100}\nReturn ONLY raw JSON starting with {.')
   .then(function(txt){
     var r=pj(txt);
-    var h='<div class="rev-card" style="margin-bottom:10px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888">Rewritten for '+esc(funder)+'</div>'
-      +'<span style="font-size:13px;font-weight:700;color:#3b6d11">'+(r.alignmentScore||0)+'% aligned</span></div>'
-      +'<div class="before-after"><div class="ba-box ba-before"><div class="ba-label">Original</div>'+esc(proposal.slice(0,400))+(proposal.length>400?'...':'')+'</div>'
-      +'<div class="ba-box ba-after"><div class="ba-label">Rewritten</div>'+esc(r.rewrittenText||'')+'</div></div></div>';
-    if(r.changesExplained&&r.changesExplained.length){
-      h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Changes made</div>';
-      r.changesExplained.forEach(function(c){h+='<div style="font-size:13px;color:#555;margin-bottom:6px;padding-left:12px;border-left:2px solid #d0cdc8">'+esc(c)+'</div>';});
-      h+='</div>';
-    }
-    if(r.funderLanguageUsed&&r.funderLanguageUsed.length){
-      h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Funder language woven in</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
-      r.funderLanguageUsed.forEach(function(p){h+='<span style="font-size:12px;padding:3px 10px;border-radius:20px;background:#eaf3de;color:#3b6d11">'+esc(p)+'</span>';});
-      h+='</div></div>';
-    }
-    var exportText='FUNDER-SPECIFIC REWRITE\nFunder: '+funder+'\nDate: '+new Date().toLocaleDateString()+'\nAlignment Score: '+(r.alignmentScore||0)+'%\n\nREWRITTEN TEXT:\n'+(r.rewrittenText||'')+'\n\nCHANGES MADE:\n'+(r.changesExplained||[]).join('\n');
-    h+='<div class="export-bar"><button class="cb" onclick="exportText('+JSON.stringify(exportText)+',\'funder-rewrite.txt\')">Download rewrite</button></div>';
+    var h='<div class="rev-card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888">Rewritten for '+esc(funder)+'</div><span style="font-size:13px;font-weight:700;color:#3b6d11">'+(r.alignmentScore||0)+'% aligned</span></div><div class="before-after"><div class="ba-box ba-before"><div class="ba-label">Original</div>'+esc(proposal.slice(0,400))+(proposal.length>400?'...':'')+'</div><div class="ba-box ba-after"><div class="ba-label">Rewritten</div>'+esc(r.rewrittenText||'')+'</div></div></div>';
+    if(r.changesExplained&&r.changesExplained.length){h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Changes made</div>';r.changesExplained.forEach(function(c){h+='<div style="font-size:13px;color:#555;margin-bottom:6px;padding-left:12px;border-left:2px solid #d0cdc8">'+esc(c)+'</div>';});h+='</div>';}
+    if(r.funderLanguageUsed&&r.funderLanguageUsed.length){h+='<div class="rev-card"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:8px">Funder language woven in</div><div style="display:flex;flex-wrap:wrap;gap:6px">';r.funderLanguageUsed.forEach(function(p){h+='<span style="font-size:12px;padding:3px 10px;border-radius:20px;background:#eaf3de;color:#3b6d11">'+esc(p)+'</span>';});h+='</div></div>';}
+    var etxt='FUNDER REWRITE\nFunder: '+funder+'\nAlignment: '+(r.alignmentScore||0)+'%\n\nREWRITTEN:\n'+(r.rewrittenText||'');
+    h+='<div class="export-bar"><button class="cb" onclick="exportTxt('+JSON.stringify(etxt)+',\'funder-rewrite.txt\')">Download rewrite</button></div>';
     document.getElementById('res-rewrite').innerHTML=h;
-  })
-  .catch(function(e){document.getElementById('res-rewrite').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  }).catch(function(e){document.getElementById('res-rewrite').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
 
@@ -1199,64 +1132,296 @@ function handleFile(input){
 }
 function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('over');var file=e.dataTransfer.files[0];if(file){var dt=new DataTransfer();dt.items.add(file);document.getElementById('f-file').files=dt.files;handleFile(document.getElementById('f-file'));}}
 
-// ── Budget narrative ───────────────────────────────────────────────────────
-function clearBudget(){['b-project','b-funder','b-items','b-desc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-budget').innerHTML='';}
+// ── Generate: LOI ──────────────────────────────────────────────────────────
+function clearLOI(){['loi-funder','loi-program','loi-amount','loi-project','loi-desc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-loi').innerHTML='';}
 
-function doBudgetNarrative() {
-  var project=document.getElementById('b-project').value.trim();
-  var funder=document.getElementById('b-funder').value.trim();
-  var items=document.getElementById('b-items').value.trim();
-  var desc=document.getElementById('b-desc').value.trim();
-  if(!project||!items){document.getElementById('res-budget').innerHTML='<div class="err">Please enter a project name and budget items.</div>';return;}
-  var btn=document.getElementById('btn-budget');btn.disabled=true;
-  document.getElementById('res-budget').innerHTML='<div class="loading">Generating budget narrative...</div>';
-  callClaude('Expert nonprofit grant writer. Write a professional budget narrative for a grant application.\n\nProject: '+project+'\nFunder: '+(funder||'General foundation')+'\nProject description: '+(desc||'Not provided')+'\nBudget line items:\n'+items+'\n\nReturn JSON:\n{"totalBudget":"formatted total","narrativeParagraphs":["one detailed paragraph per major budget category explaining and justifying the cost"],"budgetJustification":"2-3 sentence overall justification tying budget to project goals","personnelNote":"if salary items exist, explain FTE allocation and market-rate justification","indirectNote":"if indirect/overhead costs exist, explain the rate"}\n\nReturn ONLY raw JSON starting with {.')
-  .then(function(txt){
-    var r=pj(txt);
-    var h='<div class="card" style="margin-bottom:10px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
-      +'<span style="font-weight:600">Budget Narrative &mdash; '+esc(project)+'</span>'
-      +'<span style="font-size:13px;font-weight:700;color:#3b6d11">Total: '+esc(r.totalBudget||'')+'</span></div>';
-    if(r.budgetJustification)h+='<div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:12px;padding:10px 14px;background:#f5f5f3;border-radius:7px">'+esc(r.budgetJustification)+'</div>';
-    (r.narrativeParagraphs||[]).forEach(function(p){h+='<div style="font-size:13px;color:#333;line-height:1.75;margin-bottom:10px">'+esc(p)+'</div>';});
-    if(r.personnelNote)h+='<div style="font-size:12px;color:#555;font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid #f0ede8">Personnel: '+esc(r.personnelNote)+'</div>';
-    if(r.indirectNote)h+='<div style="font-size:12px;color:#555;font-style:italic;margin-top:4px">Indirect costs: '+esc(r.indirectNote)+'</div>';
-    h+='</div>';
-    var fullText='BUDGET NARRATIVE\nProject: '+project+'\nFunder: '+(funder||'General foundation')+'\nTotal Budget: '+(r.totalBudget||'')+'\nDate: '+new Date().toLocaleDateString()+'\n\n'+(r.budgetJustification||'')+'\n\n'+(r.narrativeParagraphs||[]).join('\n\n')+(r.personnelNote?'\n\nPersonnel: '+r.personnelNote:'')+(r.indirectNote?'\n\nIndirect: '+r.indirectNote:'');
-    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-budget\')">Export PDF</button><button class="cb" onclick="exportText('+JSON.stringify(fullText)+',\'budget-narrative.txt\')">Download .txt</button></div>';
-    document.getElementById('res-budget').innerHTML=h;
-  })
-  .catch(function(e){document.getElementById('res-budget').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+function doLOI(){
+  var funder=document.getElementById('loi-funder').value.trim(),
+    program=document.getElementById('loi-program').value.trim(),
+    amount=document.getElementById('loi-amount').value.trim(),
+    project=document.getElementById('loi-project').value.trim(),
+    desc=document.getElementById('loi-desc').value.trim();
+  if(!funder||!project){document.getElementById('res-loi').innerHTML='<div class="err">Please enter at least a funder name and project name.</div>';return;}
+  var btn=document.getElementById('btn-loi');btn.disabled=true;
+  document.getElementById('res-loi').innerHTML='<div class="loading">Writing your LOI...</div>';
+  var ctx=getOrgContext();
+  callClaude('Expert nonprofit grant writer. Write a professional Letter of Inquiry (LOI) for a grant application.\n\nOrganization context:\n'+ctx+'\n\nFunder: '+funder+'\nProgram: '+(program||'General grant program')+'\nProject: '+project+'\nAmount requested: '+(amount||'To be determined')+'\nProject description: '+desc+'\n\nWrite a polished 1-page LOI (3-4 paragraphs). Include: compelling opening, clear need statement, project overview and goals, organizational credibility, specific ask. Use professional tone. Return ONLY the LOI text, no preamble.',3000)
+  .then(function(text){
+    var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-weight:600">Letter of Inquiry &mdash; '+esc(funder)+'</span></div>'
+      +'<div style="font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap">'+esc(text)+'</div></div>';
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-loi\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(text)+',\'letter-of-inquiry.txt\')">Download .txt</button></div>';
+    document.getElementById('res-loi').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-loi').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
 
-// ── Checklist ──────────────────────────────────────────────────────────────
+// ── Generate: Cover letter ─────────────────────────────────────────────────
+function clearCover(){['cov-funder','cov-contact','cov-amount','cov-project'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-cover').innerHTML='';}
+
+function doCoverLetter(){
+  var funder=document.getElementById('cov-funder').value.trim(),
+    contact=document.getElementById('cov-contact').value.trim(),
+    amount=document.getElementById('cov-amount').value.trim(),
+    project=document.getElementById('cov-project').value.trim();
+  if(!funder){document.getElementById('res-cover').innerHTML='<div class="err">Please enter a funder or grant name.</div>';return;}
+  var btn=document.getElementById('btn-cover');btn.disabled=true;
+  document.getElementById('res-cover').innerHTML='<div class="loading">Writing your cover letter...</div>';
+  var ctx=getOrgContext();
+  callClaude('Expert nonprofit grant writer. Write a professional grant transmittal cover letter.\n\nOrganization context:\n'+ctx+'\n\nGrant/funder: '+funder+'\nContact: '+(contact||'Program Officer')+'\nAmount: '+(amount||'requested amount')+'\nProject: '+(project||'described in the attached proposal')+'\n\nWrite a concise, professional cover letter (2-3 short paragraphs). Include today\'s date, proper salutation, clear statement of what is enclosed and why, brief compelling reason to fund this work, and a professional close. Return ONLY the letter text.',2000)
+  .then(function(text){
+    var h='<div class="card"><div style="font-weight:600;margin-bottom:14px">Cover Letter &mdash; '+esc(funder)+'</div>'
+      +'<div style="font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap">'+esc(text)+'</div></div>';
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-cover\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(text)+',\'cover-letter.txt\')">Download .txt</button></div>';
+    document.getElementById('res-cover').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-cover').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  .finally(function(){btn.disabled=false;});
+}
+
+// ── Generate: Timeline ─────────────────────────────────────────────────────
+function clearTimeline(){['tl-grant','tl-deadline','tl-special'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('tl-type').value='full';document.getElementById('res-timeline').innerHTML='';}
+
+function doTimeline(){
+  var grant=document.getElementById('tl-grant').value.trim(),
+    deadline=document.getElementById('tl-deadline').value,
+    type=document.getElementById('tl-type').value,
+    special=document.getElementById('tl-special').value.trim();
+  if(!deadline){document.getElementById('res-timeline').innerHTML='<div class="err">Please enter the submission deadline.</div>';return;}
+  var btn=document.getElementById('btn-timeline');btn.disabled=true;
+  document.getElementById('res-timeline').innerHTML='<div class="loading">Building your timeline...</div>';
+  var deadlineDate=new Date(deadline);
+  var today=new Date();
+  var daysLeft=Math.ceil((deadlineDate-today)/86400000);
+  var typeLabels={full:'Full proposal',loi:'LOI then full proposal',simple:'Simple application',federal:'Federal grant (complex)'};
+  callClaude('Nonprofit grants manager. Create an application timeline working backward from the deadline.\n\nGrant: '+(grant||'Grant application')+'\nApplication type: '+typeLabels[type]+'\nDeadline: '+deadline+' ('+daysLeft+' days from today)\nSpecial requirements: '+(special||'None specified')+'\n\nReturn JSON:\n{"totalDays":'+daysLeft+',"milestones":[{"task":"task name","date":"YYYY-MM-DD","daysBeforeDeadline":N,"detail":"what to do","priority":"high"|"medium"|"low","color":"#hex color for dot"}]}\n\nCreate 8-12 milestones working backward from deadline. Include: research/eligibility check, outline, first draft, internal review, final review, board/ED approval (if needed), gather attachments, final proofread, submission. Return ONLY raw JSON starting with {.')
+  .then(function(txt){
+    var r=pj(txt);
+    var color=daysLeft<14?'#b91c1c':daysLeft<30?'#92400e':'#3b6d11';
+    var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+      +'<div style="font-weight:600">'+(grant||'Application Timeline')+'</div>'
+      +'<span style="font-size:13px;font-weight:700;color:'+color+'">'+daysLeft+' days left</span></div>';
+    h+='<div style="position:relative;padding-left:20px">';
+    (r.milestones||[]).forEach(function(m){
+      var dotColor=m.color||'#3b6d11';
+      var pc=m.priority==='high'?'ph':m.priority==='medium'?'pm':'pl';
+      var mDate=new Date(m.date);
+      var isPast=mDate<today;
+      h+='<div class="tl-item" style="opacity:'+(isPast?'.5':'1')+'">'
+        +'<div class="tl-dot" style="background:'+dotColor+'"></div>'
+        +'<div class="tl-content">'
+        +'<div class="tl-date">'+mDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+(isPast?' (past)':' ('+m.daysBeforeDeadline+' days before)')+'</div>'
+        +'<div class="tl-task">'+esc(m.task)+'</div>'
+        +'<div class="tl-detail">'+esc(m.detail)+'</div>'
+        +'</div>'
+        +'<span class="pri '+pc+'">'+m.priority+'</span></div>';
+    });
+    h+='</div>';
+    var etxt='APPLICATION TIMELINE\n'+(grant||'Grant Application')+'\nDeadline: '+deadline+'\n\n'+(r.milestones||[]).map(function(m){return m.date+' | '+m.task+'\n'+m.detail;}).join('\n\n');
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-timeline\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(etxt)+',\'application-timeline.txt\')">Download .txt</button></div>';
+    document.getElementById('res-timeline').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-timeline').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  .finally(function(){btn.disabled=false;});
+}
+
+// ── Generate: Email digest ─────────────────────────────────────────────────
+function doDigest(){
+  if(!saved.length){document.getElementById('res-digest').innerHTML='<div class="err">Your pipeline is empty. Add grants to the Pipeline tab first.</div>';return;}
+  var to=document.getElementById('dig-to').value.trim()||'Team';
+  var from=document.getElementById('dig-from').value.trim()||'Development Team';
+  var notes=document.getElementById('dig-notes').value.trim();
+  var btn=document.getElementById('btn-digest');btn.disabled=true;
+  document.getElementById('res-digest').innerHTML='<div class="loading">Generating digest...</div>';
+  var pipelineData=STAGES.map(function(stage){var grants=saved.filter(function(g){return(g.stage||'researching')===stage.id;});return stage.label+' ('+grants.length+'): '+grants.map(function(g){return g.name+(g.deadline?' [due '+g.deadline+']':'');}).join(', ');}).join('\n');
+  var today=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  callClaude('Write a professional weekly grant pipeline update email.\n\nTo: '+to+'\nFrom: '+from+'\nDate: '+today+'\n\nPipeline summary:\n'+pipelineData+'\n\nAdditional notes: '+(notes||'None')+'\n\nUpcoming deadlines (next 30 days): '+saved.filter(function(g){if(!g.deadline)return false;var d=new Date(g.deadline),days=Math.ceil((d-Date.now())/86400000);return days>=0&&days<=30;}).map(function(g){return g.name+' ('+g.deadline+')';}).join(', ')+'\n\nWrite a concise, professional email update. Include: brief intro, pipeline status by stage, upcoming deadlines flagged as urgent, any wins or submitted applications, a brief next steps note. Professional but warm tone. Return ONLY the email text.',2000)
+  .then(function(text){
+    var mailtoLink='mailto:?subject='+encodeURIComponent('Grant Pipeline Update - '+today)+'&body='+encodeURIComponent(text);
+    var h='<div class="card"><div style="font-weight:600;margin-bottom:14px">Weekly Pipeline Digest</div>'
+      +'<div style="font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;background:#fafaf8;padding:14px;border-radius:8px;border:1px solid #e0ddd8">'+esc(text)+'</div></div>';
+    h+='<div class="export-bar"><a class="cb" href="'+mailtoLink+'" style="text-decoration:none">Open in email</a><button class="cb" onclick="navigator.clipboard.writeText('+JSON.stringify(text)+').then(function(){this.textContent=\'Copied!\';},function(){}).bind(this)">Copy to clipboard</button></div>';
+    document.getElementById('res-digest').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-digest').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  .finally(function(){btn.disabled=false;});
+}
+
+// ── Tools: Budget narrative ────────────────────────────────────────────────
+function clearBudget(){['b-project','b-funder','b-items','b-desc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('res-budget').innerHTML='';}
+
+function doBudgetNarrative(){
+  var project=document.getElementById('b-project').value.trim(),funder=document.getElementById('b-funder').value.trim(),items=document.getElementById('b-items').value.trim(),desc=document.getElementById('b-desc').value.trim();
+  if(!project||!items){document.getElementById('res-budget').innerHTML='<div class="err">Please enter a project name and budget items.</div>';return;}
+  var btn=document.getElementById('btn-budget');btn.disabled=true;
+  document.getElementById('res-budget').innerHTML='<div class="loading">Generating budget narrative...</div>';
+  callClaude('Expert nonprofit grant writer. Write a professional budget narrative.\n\nProject: '+project+'\nFunder: '+(funder||'General foundation')+'\nDescription: '+(desc||'Not provided')+'\nBudget line items:\n'+items+'\n\nReturn JSON:\n{"totalBudget":"formatted total","narrativeParagraphs":["one detailed paragraph per major category justifying the cost"],"budgetJustification":"2-3 sentence overall justification","personnelNote":"if salary items exist, explain FTE and market rate","indirectNote":"if indirect costs exist, explain the rate"}\nReturn ONLY raw JSON starting with {.')
+  .then(function(txt){
+    var r=pj(txt);
+    var h='<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-weight:600">Budget Narrative &mdash; '+esc(project)+'</span><span style="font-size:13px;font-weight:700;color:#3b6d11">Total: '+esc(r.totalBudget||'')+'</span></div>';
+    if(r.budgetJustification)h+='<div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:12px;padding:10px 14px;background:#f5f5f3;border-radius:7px">'+esc(r.budgetJustification)+'</div>';
+    (r.narrativeParagraphs||[]).forEach(function(p){h+='<div style="font-size:13px;color:#333;line-height:1.75;margin-bottom:10px">'+esc(p)+'</div>';});
+    if(r.personnelNote)h+='<div style="font-size:12px;color:#555;font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid #f0ede8">Personnel: '+esc(r.personnelNote)+'</div>';
+    if(r.indirectNote)h+='<div style="font-size:12px;color:#555;font-style:italic;margin-top:4px">Indirect: '+esc(r.indirectNote)+'</div>';
+    h+='</div>';
+    var fullText='BUDGET NARRATIVE\nProject: '+project+'\nFunder: '+(funder||'General')+'\nTotal: '+(r.totalBudget||'')+'\n\n'+(r.budgetJustification||'')+'\n\n'+(r.narrativeParagraphs||[]).join('\n\n');
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-budget\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(fullText)+',\'budget-narrative.txt\')">Download .txt</button></div>';
+    document.getElementById('res-budget').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-budget').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  .finally(function(){btn.disabled=false;});
+}
+
+// ── Tools: Checklist ──────────────────────────────────────────────────────
 function clearChecklist(){document.getElementById('f-clgrant').value='';document.getElementById('f-cldesc').value='';document.getElementById('res-cl').innerHTML='';}
 
-function doChecklist() {
+function doChecklist(){
   var grant=document.getElementById('f-clgrant').value.trim(),desc=document.getElementById('f-cldesc').value.trim();
   if(!grant&&!desc){document.getElementById('res-cl').innerHTML='<div class="err">Please enter a grant name or description.</div>';return;}
   var btn=document.getElementById('btn-cl');btn.disabled=true;
   document.getElementById('res-cl').innerHTML='<div class="loading">Building checklist...</div>';
-  callClaude('Nonprofit grants manager. Build a pre-submission checklist.\nGrant: '+(grant||'General grant')+'\nProject: '+(desc||'Not specified')+'\n\nReturn JSON: {"categories":[{"category":"name","items":[{"task":"short task","detail":"15-20 words","priority":"high"|"medium"|"low"}]}]}\n4-5 categories, 3-5 items each. Return ONLY raw JSON starting with {.')
+  callClaude('Nonprofit grants manager. Build a pre-submission checklist.\nGrant: '+(grant||'General')+'\nProject: '+(desc||'Not specified')+'\n\nReturn JSON: {"categories":[{"category":"name","items":[{"task":"short task","detail":"15-20 words","priority":"high"|"medium"|"low"}]}]}\n4-5 categories, 3-5 items each. Return ONLY raw JSON starting with {.')
   .then(function(txt){
     var result=pj(txt),h='';
     (result.categories||[]).forEach(function(cat){
       h+='<div class="card" style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:10px">'+esc(cat.category)+'</div>';
-      (cat.items||[]).forEach(function(item){
-        var id='ck'+Math.random().toString(36).slice(2,8),pc=item.priority==='high'?'ph':item.priority==='medium'?'pm':'pl';
-        h+='<div class="cl-item"><input type="checkbox" id="'+id+'" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;margin-top:3px" onchange="document.getElementById(\'lbl-'+id+'\').style.textDecoration=this.checked?\'line-through\':\'none\'"/><div class="cl-text"><div class="cl-title" id="lbl-'+id+'">'+esc(item.task)+'</div><div class="cl-detail">'+esc(item.detail)+'</div></div><span class="pri '+pc+'">'+esc(item.priority)+'</span></div>';
-      });
+      (cat.items||[]).forEach(function(item){var id='ck'+Math.random().toString(36).slice(2,8),pc=item.priority==='high'?'ph':item.priority==='medium'?'pm':'pl';h+='<div class="cl-item"><input type="checkbox" id="'+id+'" style="width:15px;height:15px;cursor:pointer;flex-shrink:0;margin-top:3px" onchange="document.getElementById(\'lbl-'+id+'\').style.textDecoration=this.checked?\'line-through\':\'none\'"/><div class="cl-text"><div class="cl-title" id="lbl-'+id+'">'+esc(item.task)+'</div><div class="cl-detail">'+esc(item.detail)+'</div></div><span class="pri '+pc+'">'+esc(item.priority)+'</span></div>';});
       h+='</div>';
     });
-    var exportText='GRANT SUBMISSION CHECKLIST\nGrant: '+(grant||'General')+'\nDate: '+new Date().toLocaleDateString()+'\n\n';
-    (result.categories||[]).forEach(function(cat){exportText+=cat.category.toUpperCase()+'\n';(cat.items||[]).forEach(function(item){exportText+='[ ] '+item.task+'\n    '+item.detail+'\n';});exportText+='\n';});
-    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-cl\')">Export PDF</button><button class="cb" onclick="exportText('+JSON.stringify(exportText)+',\'grant-checklist.txt\')">Download .txt</button></div>';
+    var etxt='GRANT CHECKLIST\n'+(grant||'Grant')+'\n'+new Date().toLocaleDateString()+'\n\n';
+    (result.categories||[]).forEach(function(cat){etxt+=cat.category.toUpperCase()+'\n';(cat.items||[]).forEach(function(i){etxt+='[ ] '+i.task+'\n    '+i.detail+'\n';});etxt+='\n';});
+    h+='<div class="export-bar"><button class="cb" onclick="printSection(\'res-cl\')">Export PDF</button><button class="cb" onclick="exportTxt('+JSON.stringify(etxt)+',\'checklist.txt\')">Download .txt</button></div>';
     document.getElementById('res-cl').innerHTML=h;
-  })
-  .catch(function(e){document.getElementById('res-cl').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
+  }).catch(function(e){document.getElementById('res-cl').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){btn.disabled=false;});
 }
+
+// ── Tools: Funder 990 ─────────────────────────────────────────────────────
+function do990(){
+  var query=document.getElementById('f-990').value.trim();
+  if(!query){document.getElementById('res-990').innerHTML='<div class="err">Please enter a funder name.</div>';return;}
+  var btn=document.getElementById('btn-990');btn.disabled=true;
+  document.getElementById('res-990').innerHTML='<div class="loading">Looking up 990 data...</div>';
+  // ProPublica Nonprofit Explorer API - free, no key required
+  fetch('https://projects.propublica.org/nonprofits/api/v2/search.json?q='+encodeURIComponent(query))
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var orgs=data.organizations||[];
+    if(!orgs.length){document.getElementById('res-990').innerHTML='<div class="empty">No results found for "'+esc(query)+'". Try a different spelling or more general name.</div>';return;}
+    var h='<div style="font-size:12px;color:#888;margin-bottom:12px">Showing top results from ProPublica Nonprofit Explorer</div>';
+    var top=orgs.slice(0,5);
+    top.forEach(function(org){
+      var revenue=org.income_amount?'$'+Number(org.income_amount).toLocaleString():'N/A';
+      var assets=org.asset_amount?'$'+Number(org.asset_amount).toLocaleString():'N/A';
+      var profileUrl='https://projects.propublica.org/nonprofits/organizations/'+org.ein;
+      h+='<div class="org990">'
+        +'<div class="org990-name">'+esc(org.name)+'</div>'
+        +'<div class="org990-meta">EIN: '+esc(org.ein)+' &middot; '+esc(org.city||'')+', '+esc(org.state||'')+' &middot; NTEE: '+esc(org.ntee_code||'N/A')+'</div>'
+        +'<div class="org990-grants">'
+        +'<span style="font-weight:600">Annual revenue:</span> '+revenue+' &nbsp;&middot;&nbsp; '
+        +'<span style="font-weight:600">Total assets:</span> '+assets+' &nbsp;&middot;&nbsp; '
+        +'<span style="font-weight:600">Last filed:</span> '+esc(String(org.tax_prd_yr||'N/A'))
+        +'</div>'
+        +'<div style="margin-top:10px;display:flex;gap:8px">'
+        +'<a class="cb" href="'+profileUrl+'" target="_blank">Full 990 profile</a>'
+        +'<button class="cb" onclick="lookup990Detail(\''+org.ein+'\','+JSON.stringify(org.name)+')">View giving history</button>'
+        +'</div></div>';
+    });
+    document.getElementById('res-990').innerHTML=h;
+  }).catch(function(e){document.getElementById('res-990').innerHTML='<div class="err">Could not load 990 data. Check your connection. Error: '+esc(e.message)+'</div>';})
+  .finally(function(){btn.disabled=false;});
+}
+
+function lookup990Detail(ein,name){
+  var container=document.getElementById('res-990');
+  container.insertAdjacentHTML('beforeend','<div class="loading" id="detail-loading">Loading filing history for '+esc(name)+'...</div>');
+  fetch('https://projects.propublica.org/nonprofits/api/v2/organizations/'+ein+'.json')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var el=document.getElementById('detail-loading');if(el)el.remove();
+    var filings=(data.filings_with_data||[]).slice(0,5);
+    var h='<div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:12px">Filing history: '+esc(name)+'</div>';
+    if(!filings.length){h+='<div style="font-size:13px;color:#888">No detailed filing data available.</div></div>';container.insertAdjacentHTML('beforeend',h);return;}
+    h+='<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">'
+      +'<tr style="background:#f5f5f3"><th style="padding:6px 10px;text-align:left;font-weight:600">Year</th><th style="padding:6px 10px;text-align:right;font-weight:600">Revenue</th><th style="padding:6px 10px;text-align:right;font-weight:600">Expenses</th><th style="padding:6px 10px;text-align:right;font-weight:600">Assets</th><th style="padding:6px 10px;text-align:right;font-weight:600">Employees</th></tr>';
+    filings.forEach(function(f,i){
+      h+='<tr style="background:'+(i%2===0?'#fff':'#fafaf8')+'">'
+        +'<td style="padding:6px 10px">'+esc(String(f.tax_prd_yr||''))+'</td>'
+        +'<td style="padding:6px 10px;text-align:right">$'+Number(f.totrevenue||0).toLocaleString()+'</td>'
+        +'<td style="padding:6px 10px;text-align:right">$'+Number(f.totfuncexpns||0).toLocaleString()+'</td>'
+        +'<td style="padding:6px 10px;text-align:right">$'+Number(f.totassetsend||0).toLocaleString()+'</td>'
+        +'<td style="padding:6px 10px;text-align:right">'+esc(String(f.noemployees||'N/A'))+'</td>'
+        +'</tr>';
+    });
+    h+='</table></div></div>';
+    container.insertAdjacentHTML('beforeend',h);
+  }).catch(function(){var el=document.getElementById('detail-loading');if(el)el.remove();});
+}
+
+// ── Co-pilot ───────────────────────────────────────────────────────────────
+var chatHistory = [];
+
+function clearChat(){chatHistory=[];var msgs=document.getElementById('chat-msgs');msgs.innerHTML='<div class="msg ai">Hi! I\'m your grant writing co-pilot. I can help you with strategy, language, specific sections, funder research questions, or anything else about your application. What are you working on?</div>';}
+
+function sendChat(){
+  var input=document.getElementById('chat-input');
+  var text=input.value.trim();if(!text)return;
+  input.value='';
+  var msgs=document.getElementById('chat-msgs');
+  msgs.insertAdjacentHTML('beforeend','<div class="msg user">'+esc(text)+'</div>');
+  var loadId='load'+Date.now();
+  msgs.insertAdjacentHTML('beforeend','<div class="msg ai loading" id="'+loadId+'">Thinking...</div>');
+  msgs.scrollTop=msgs.scrollHeight;
+  chatHistory.push({role:'user',content:text});
+  var ctx=document.getElementById('copilot-context').value.trim();
+  var orgCtx=getOrgContext();
+  var systemMsg='You are an expert nonprofit grant writing co-pilot. Be concise, practical, and specific. '
+    +(orgCtx?'Organization context:\n'+orgCtx+'\n\n':'')
+    +(ctx?'Grant context the user is working on:\n'+ctx+'\n\n':'')
+    +'Help with grant writing strategy, narrative language, specific sections, funder research, or any aspect of the grant application process. When giving feedback, be direct and actionable.';
+  fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+      system:systemMsg,
+      messages:chatHistory.slice(-10)})
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    var reply=d.content?d.content.map(function(b){return b.text||'';}).join(''):'Sorry, I had trouble responding.';
+    chatHistory.push({role:'assistant',content:reply});
+    var el=document.getElementById(loadId);
+    if(el){el.className='msg ai';el.textContent=reply;}
+    msgs.scrollTop=msgs.scrollHeight;
+  }).catch(function(){var el=document.getElementById(loadId);if(el){el.className='msg ai';el.textContent='Sorry, I had an error. Please try again.';}});
+}
+
+// ── Accordion (help) ───────────────────────────────────────────────────────
+function toggleAcc(hdr){
+  var body=hdr.nextElementSibling,isOpen=hdr.classList.contains('open');
+  document.querySelectorAll('.acc-hdr.open').forEach(function(h){h.classList.remove('open');h.nextElementSibling.classList.remove('open');});
+  if(!isOpen){hdr.classList.add('open');body.classList.add('open');}
+}
+
+var HELP_SECTIONS = [
+  {icon:'&#128100;',bg:'#dcfce7',color:'#166534',title:'My Org Profile',desc:'Save your organization details once — name, focus area, state, budget, mission, EIN, and programs. Your profile auto-fills all search forms and feeds the co-pilot, LOI, and cover letter generators. Click the My Org button (top right) to edit.',tips:['Fill in your mission statement completely for better search results','Your EIN is useful when looking up similar orgs in the Funder 990 tool','Update your profile when your budget or programs change']},
+  {icon:'&#128269;',bg:'#eaf3de',color:'#3b6d11',title:'Find Grants',desc:'Select your focus area and state, then click Search grants. The eligibility screener filters out grants you won\'t qualify for. Check all three sources for the widest coverage. Results show match strength, a success score, and a Find Similar button.',tips:['Be specific in your mission statement for better results','Grants.gov returns federal opportunities that rarely appear on GrantWatch','Click Save to pipeline on any grant to track it in the Pipeline tab']},
+  {icon:'&#127760;',bg:'#eff6ff',color:'#1d4ed8',title:'Scan Website',desc:'Enter your website URL. We scan your site to learn your mission and geography, then search GrantWatch, Grants.gov, and your state portal simultaneously. Best used for a cold start when you haven\'t filled in the form yet.',tips:['Works best when your website clearly describes your mission','The scan takes 3-5 minutes','State portal results depend on your geography being detectable from your site']},
+  {icon:'&#9997;',bg:'#fef3c7',color:'#92400e',title:'Review Writing',desc:'Three sub-tabs: Overall Review scores your full proposal and shows a before/after panel. Section Feedback reviews individual sections with targeted guidance. Funder Rewrite rewrites your narrative in a specific funder\'s language.',tips:['Aim for a score above 75 before submitting','Use Section Feedback iteratively on each section before the full review','Paste priorities directly from the funder\'s RFP for best rewrite results']},
+  {icon:'&#128196;',bg:'#fef3c7',color:'#92400e',title:'Generate Tab',desc:'Four generators: Letter of Inquiry creates a polished 1-page LOI. Cover Letter generates a professional transmittal letter. Timeline Builder works backward from your deadline to create a writing schedule. Email Digest creates a formatted pipeline update for your team.',tips:['LOI and cover letter use your saved org profile automatically','Timeline Builder creates 8-12 milestones with high/medium/low priority','Email Digest includes upcoming deadlines and pipeline status by stage']},
+  {icon:'&#128202;',bg:'#ede9fe',color:'#6d28d9',title:'Tools Tab',desc:'Budget Narrative generates paragraph-by-paragraph justification for your budget line items. Checklist Builder creates a customized pre-submission checklist. Funder 990 looks up real financial data and filing history from ProPublica. Deadline Calendar shows your pipeline deadlines by month.',tips:['Format budget items as "Program Coordinator (0.75 FTE), $38,250" for best results','Funder 990 uses the free ProPublica API — no key required','Always set deadline dates when saving grants so they appear on the calendar']},
+  {icon:'&#129302;',bg:'#eff6ff',color:'#1d4ed8',title:'Grant Writing Co-pilot',desc:'A persistent chat interface for anything grant-related. Ask about strategy, language, specific sections, funder research, or how to strengthen a weak paragraph. Paste grant context or your draft into the context box so the co-pilot knows what you\'re working on.',tips:['Paste the funder\'s guidelines into the context box for targeted advice','Ask it to "rewrite this paragraph stronger" with your text pasted in','The co-pilot remembers your org profile automatically']},
+  {icon:'&#128202;',bg:'#dcfce7',color:'#166534',title:'Pipeline',desc:'Four Kanban stages: Researching, Writing, Submitted, Awarded. Save grants from search results or add manually with + Add grant. Click any card to edit details or add notes. Export CSV sends all pipeline data to a spreadsheet.',tips:['Add internal notes to each grant (contacts, requirements, assigned writer)','Export CSV to share pipeline status with your ED or board','Use Deadline Calendar in Tools to see all grants with dates at a glance']}
+];
+
+function renderHelp(){
+  var el=document.getElementById('help-accordion');if(!el||el.innerHTML)return;
+  var h='';
+  HELP_SECTIONS.forEach(function(s,i){
+    var tips=s.tips.map(function(t){return '<div class="acc-tip">&#128161; '+t+'</div>';}).join('');
+    h+='<div class="acc-item"><div class="acc-hdr'+(i===0?' open':'')+'" onclick="toggleAcc(this)">'
+      +'<div class="acc-icon-wrap" style="background:'+s.bg+';color:'+s.color+'">'+s.icon+'</div>'
+      +'<div class="acc-title">'+s.title+'</div>'
+      +'<span class="acc-arrow">&#9660;</span></div>'
+      +'<div class="acc-body'+(i===0?' open':'')+'"><div class="acc-desc">'+s.desc+'</div><div class="acc-tips">'+tips+'</div></div></div>';
+  });
+  el.innerHTML=h;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+applyProfileBanners();
 
 </script>
 </body>
