@@ -562,6 +562,8 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+// API base — points to Vercel backend regardless of which domain serves the HTML
+var API = 'https://grantcompass.vercel.app';
 
 // ── Org Profile ────────────────────────────────────────────────────────────
 var orgProfile = {};
@@ -879,7 +881,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function sourceBadge(src){if(src==='Grants.gov')return 'background:#dbeafe;color:#1d4ed8';if(src==='GrantWatch')return 'background:#eaf3de;color:#3b6d11';return 'background:#ede9fe;color:#6d28d9';}
 
 function callClaude(prompt,maxTokens) {
-  return fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+  return fetch(API+'/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens||2000,messages:[{role:'user',content:prompt}]})
   }).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Claude error '+r.status);});return r.json();})
   .then(function(d){return d.content.map(function(b){return b.text||'';}).join('');});
@@ -889,7 +891,7 @@ function pj(text){var clean=text.replace(/```json|```/gi,'').trim();var fb=clean
 
 function startRun(endpoint,body){return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){if(!d.runId)throw new Error('Start failed: '+(d.error||JSON.stringify(d).slice(0,100)));return d.runId;});}
 
-function poll(runId,max){var n=0;function step(){if(n++>=max)return Promise.resolve(null);return new Promise(function(res){setTimeout(res,5000);}).then(function(){return fetch('/api/scan-status?runId='+encodeURIComponent(runId)).then(function(r){return r.json();});}).then(function(d){if(d.status==='complete')return d.result;if(d.status==='failed')throw new Error('Run failed.');return step();});}return step();}
+function poll(runId,max){var n=0;function step(){if(n++>=max)return Promise.resolve(null);return new Promise(function(res){setTimeout(res,5000);}).then(function(){return fetch(API+'/api/scan-status?runId='+encodeURIComponent(runId)).then(function(r){return r.json();});}).then(function(d){if(d.status==='complete')return d.result;if(d.status==='failed')throw new Error('Run failed.');return step();});}return step();}
 
 function keyword(text){var t=(text||'').toLowerCase();var map=[['disability','disability'],['intellectual','disability'],['developmental','disability'],['food','food'],['hunger','food'],['housing','housing'],['homeless','housing'],['youth','youth'],['children','youth'],['education','education'],['health','health'],['mental health','mental health'],['environment','environment'],['veteran','veterans'],['refugee','refugee'],['immigrant','immigrant'],['arts','arts'],['workforce','workforce'],['animal','animal welfare'],['lgbtq','lgbtq'],['racial equity','racial equity']];for(var i=0;i<map.length;i++)if(t.indexOf(map[i][0])!==-1)return map[i][1];return 'nonprofit';}
 
@@ -966,7 +968,7 @@ function doFind() {
   var allGrants=[],promises=[],sources=[];
   if(useFed)sources.push('federal');if(useSt)sources.push('state');
   if(useGW){promises.push(startRun('/api/search-grants',{keyword:kw,subdomain:sub}).then(function(runId){return poll(runId,96);}).then(function(result){if(!result)return;try{var r=typeof result==='string'?result:JSON.stringify(result);var g=pj(r);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source='GrantWatch';allGrants.push(x);});}catch(e){}}).catch(function(){}));}
-  if(useFed||useSt){promises.push(fetch('/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:state,sources:sources})}).then(function(r){return r.json();}).then(function(d){if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});if(d.stateRunId)return poll(d.stateRunId,60).then(function(r){if(!r)return;try{var sr=typeof r==='string'?r:JSON.stringify(r);var g=pj(sr);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source=d.statePortalName||'State';allGrants.push(x);});}catch(e){}}).catch(function(){});}).catch(function(){}));}
+  if(useFed||useSt){promises.push(fetch(API+'/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:state,sources:sources})}).then(function(r){return r.json();}).then(function(d){if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});if(d.stateRunId)return poll(d.stateRunId,60).then(function(r){if(!r)return;try{var sr=typeof r==='string'?r:JSON.stringify(r);var g=pj(sr);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source=d.statePortalName||'State';allGrants.push(x);});}catch(e){}}).catch(function(){});}).catch(function(){}));}
   Promise.all(promises).then(function(){
     if(!allGrants.length)throw new Error('No grants found. Try different keywords or sources.');
     var eligNote=eligibilityProfile?'\n\nELIGIBILITY FILTER: Only include grants this org can qualify for given: '+eligibilityProfile.summary+'. Remove grants requiring confirmed 501c3 if status is pending/no, more operating years than they have, or larger geographic scope. If unsure, keep the grant.':'';
@@ -998,7 +1000,7 @@ function doScan(){
   scanTimer=setInterval(function(){scanSecs++;document.getElementById('scan-secs').textContent=scanSecs+'s';},1000);
   var scanResult=null,searchResult=null,detectedState='';
   stepSet(1,'active');
-  fetch('/api/scan-and-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phase:'start',url:url})})
+  fetch(API+'/api/scan-and-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phase:'start',url:url})})
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.error)throw new Error(d.error);
@@ -1006,8 +1008,8 @@ function doScan(){
     stepSet(1,'done');stepSet(2,'active');
     var scanDone=false,searchDone=false;
     function pollBoth(){var ps=[];
-      if(!scanDone)ps.push(fetch('/api/scan-status?runId='+encodeURIComponent(scanId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){scanResult=d.result;scanDone=true;stepSet(2,'done');stepSet(3,'active');}else if(d.status==='failed')scanDone=true;}).catch(function(){scanDone=true;}));
-      if(!searchDone)ps.push(fetch('/api/scan-status?runId='+encodeURIComponent(searchId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){searchResult=d.result;searchDone=true;}else if(d.status==='failed')searchDone=true;}).catch(function(){searchDone=true;}));
+      if(!scanDone)ps.push(fetch(API+'/api/scan-status?runId='+encodeURIComponent(scanId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){scanResult=d.result;scanDone=true;stepSet(2,'done');stepSet(3,'active');}else if(d.status==='failed')scanDone=true;}).catch(function(){scanDone=true;}));
+      if(!searchDone)ps.push(fetch(API+'/api/scan-status?runId='+encodeURIComponent(searchId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){searchResult=d.result;searchDone=true;}else if(d.status==='failed')searchDone=true;}).catch(function(){searchDone=true;}));
       return Promise.all(ps).then(function(){if(scanDone&&searchDone)return;return new Promise(function(res){setTimeout(res,5000);}).then(pollBoth);});
     }
     var tid;
@@ -1024,7 +1026,7 @@ function doScan(){
     var allGrants=[];
     if(searchResult){try{var r=typeof searchResult==='string'?searchResult:JSON.stringify(searchResult);var g=pj(r);if(!Array.isArray(g))g=g.grants||g.data||Object.values(g);g.forEach(function(x){x.source='GrantWatch';allGrants.push(x);});}catch(e){}}
     stepSet(3,'active');
-    return fetch('/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:detectedState,sources:['federal','state']})})
+    return fetch(API+'/api/search-federal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,state:detectedState,sources:['federal','state']})})
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.federal&&Array.isArray(d.federal))d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});
@@ -1374,7 +1376,7 @@ function sendChat(){
     +(orgCtx?'Organization context:\n'+orgCtx+'\n\n':'')
     +(ctx?'Grant context the user is working on:\n'+ctx+'\n\n':'')
     +'Help with grant writing strategy, narrative language, specific sections, funder research, or any aspect of the grant application process. When giving feedback, be direct and actionable.';
-  fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+  fetch(API+'/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
       system:systemMsg,
       messages:chatHistory.slice(-10)})
