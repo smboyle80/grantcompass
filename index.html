@@ -127,6 +127,22 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 .help-tips{display:flex;flex-direction:column;gap:5px}
 .tip{font-size:12px;color:#666;background:#fafaf8;border-radius:6px;padding:5px 10px;border-left:2px solid #d0cdc8}
 
+
+/* ── Accordion ───────────────────────────────────────────── */
+.acc-item{border:1px solid #e5e2dc;border-radius:10px;margin-bottom:8px;overflow:hidden}
+.acc-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:#fff;user-select:none;transition:background .15s}
+.acc-hdr:hover{background:#fafaf8}
+.acc-hdr.open{background:#fafaf8;border-bottom:1px solid #e5e2dc}
+.acc-icon-wrap{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.acc-title{font-size:14px;font-weight:600;flex:1;color:#1a1a18}
+.acc-arrow{font-size:12px;color:#aaa;transition:transform .2s;flex-shrink:0}
+.acc-hdr.open .acc-arrow{transform:rotate(180deg)}
+.acc-body{display:none;padding:16px}
+.acc-body.open{display:block}
+.acc-desc{font-size:13px;color:#555;line-height:1.65;margin-bottom:12px}
+.acc-tips{display:flex;flex-direction:column;gap:6px}
+.acc-tip{font-size:12px;color:#555;background:#fafaf8;border-radius:6px;padding:6px 10px;border-left:2px solid #d0cdc8;line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -469,128 +485,11 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 
   <!-- HELP PANEL -->
   <div id="pn-helpMain" class="panel">
-<div style="max-width:600px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:4px">How to use GrantCompass</div>
-        <div style="font-size:13px;color:#888;margin-bottom:20px">Tips for getting the most out of each feature</div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#eaf3de;color:#3b6d11">&#128269;</div>
-          <div>
-            <div class="help-title">Find Grants</div>
-            <div class="help-body">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div>
-              <div class="tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div>
-              <div class="tip">&#128161; Click <strong>Save to pipeline</strong> on any grant to track it in the Pipeline tab</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#eff6ff;color:#1d4ed8">&#127760;</div>
-          <div>
-            <div class="help-title">Scan Website</div>
-            <div class="help-body">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Works best when your website clearly describes your mission and service area</div>
-              <div class="tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div>
-              <div class="tip">&#128161; State portal results depend on your geography being detectable from the site</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#9997;&#65039;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Overall Review</div>
-            <div class="help-body">Paste your full proposal (or upload a PDF/TXT) and click <strong>Review my writing</strong>. You get an overall score, sub-scores for clarity, impact, and specificity, a before/after panel showing your weakest sentence rewritten, and six detailed feedback items. Enter the funder name for targeted advice.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Aim for a score above 75 before submitting</div>
-              <div class="tip">&#128161; The before/after panel shows the single highest-impact change you can make</div>
-              <div class="tip">&#128161; Use <strong>Export PDF</strong> to share the review with your ED or board</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128203;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Section Feedback</div>
-            <div class="help-body">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div>
-              <div class="tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div>
-              <div class="tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128196;</div>
-          <div>
-            <div class="help-title">Review Writing &mdash; Funder Rewrite</div>
-            <div class="help-body">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div>
-              <div class="tip">&#128161; Aim for 80%+ alignment score before submitting</div>
-              <div class="tip">&#128161; Download the rewrite as .txt to edit further in Word</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128176;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Budget Narrative</div>
-            <div class="help-body">Enter your project name, list budget line items (one per line in &ldquo;Item, $Amount&rdquo; format), and a short project description. The tool writes a complete paragraph-by-paragraph budget narrative justifying each cost. Add the funder name for a more targeted narrative.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Include indirect/overhead costs in your line items &mdash; they need the most justification</div>
-              <div class="tip">&#128161; Format items as &ldquo;Program Coordinator (0.75 FTE), $38,250&rdquo; for best results</div>
-              <div class="tip">&#128161; Download as .txt and paste directly into your application</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#9989;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Checklist Builder</div>
-            <div class="help-body">Enter a grant name and brief project description to generate a customized pre-submission checklist. Items are prioritized high/medium/low and organized by category (narrative, attachments, approvals, etc.). Check off items as you complete them &mdash; checkmarks persist in your session.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Build the checklist at the start of writing, not the end</div>
-              <div class="tip">&#128161; Export as PDF and share with everyone working on the application</div>
-              <div class="tip">&#128161; High-priority items are typically required &mdash; missing any is a disqualifier</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128197;</div>
-          <div>
-            <div class="help-title">Tools &mdash; Deadline Calendar</div>
-            <div class="help-body">Shows all grants in your Pipeline that have deadlines set. Navigate forward and backward through months using the arrows. Color coding: <span style="background:#fef2f2;color:#b91c1c;padding:1px 6px;border-radius:4px;font-size:12px">red</span> = due within 2 weeks or overdue, <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:12px">yellow</span> = due within 30 days, <span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:4px;font-size:12px">green</span> = plenty of time.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Always set deadline dates when saving grants to the pipeline</div>
-              <div class="tip">&#128161; Use the Pipeline tab to update deadlines after saving</div>
-              <div class="tip">&#128161; Check the calendar weekly to stay ahead of upcoming submissions</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="help-section">
-          <div class="help-icon" style="background:#dcfce7;color:#166534">&#128202;</div>
-          <div>
-            <div class="help-title">Pipeline</div>
-            <div class="help-body">Your grant pipeline has four stages: Researching, Writing, Submitted, and Awarded. Save grants from search results using <strong>Save to pipeline</strong>, or add them manually with <strong>+ Add grant</strong>. Click any card to edit details or add notes. Move grants between stages using the arrow buttons.</div>
-            <div class="help-tips">
-              <div class="tip">&#128161; Add internal notes to each grant (contacts, requirements, assigned writer)</div>
-              <div class="tip">&#128161; Pipeline data is saved in your browser &mdash; it persists across sessions on this device</div>
-              <div class="tip">&#128161; Use the Deadline Calendar to see all pipeline grants with dates at a glance</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+    <div style="max-width:640px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">How to use GrantCompass</div>
+      <div style="font-size:13px;color:#888;margin-bottom:20px">Click any section to expand tips and guidance</div>
+      <div class="acc-item"><div class="acc-hdr open" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#eaf3de;color:#3b6d11">&#128269;</div><div class="acc-title">Find Grants</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body open"><div class="acc-desc">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div><div class="acc-tips"><div class="acc-tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div><div class="acc-tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div><div class="acc-tip">&#128161; Click <strong>Save to pipeline</strong> on any grant to track it in the Pipeline tab</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#eff6ff;color:#1d4ed8">&#127760;</div><div class="acc-title">Scan Website</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div><div class="acc-tips"><div class="acc-tip">&#128161; Works best when your website clearly describes your mission and service area</div><div class="acc-tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div><div class="acc-tip">&#128161; State portal results depend on your geography being detectable from the site</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#9997;&#65039;</div><div class="acc-title">Review Writing &mdash; Overall Review</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Paste your full proposal (or upload a PDF/TXT) and click <strong>Review my writing</strong>. You get an overall score, sub-scores for clarity, impact, and specificity, a before/after panel showing your weakest sentence rewritten, and six detailed feedback items. Enter the funder name for targeted advice.</div><div class="acc-tips"><div class="acc-tip">&#128161; Aim for a score above 75 before submitting</div><div class="acc-tip">&#128161; The before/after panel shows the single highest-impact change you can make</div><div class="acc-tip">&#128161; Use <strong>Export PDF</strong> to share the review with your ED or board</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#128203;</div><div class="acc-title">Review Writing &mdash; Section Feedback</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div><div class="acc-tips"><div class="acc-tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div><div class="acc-tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div><div class="acc-tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#fef3c7;color:#92400e">&#128196;</div><div class="acc-title">Review Writing &mdash; Funder Rewrite</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div><div class="acc-tips"><div class="acc-tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div><div class="acc-tip">&#128161; Aim for 80%+ alignment score before submitting</div><div class="acc-tip">&#128161; Download the rewrite as .txt to edit further in Word</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#128176;</div><div class="acc-title">Tools &mdash; Budget Narrative</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter your project name, list budget line items (one per line in "Item, $Amount" format), and a short project description. The tool writes a complete paragraph-by-paragraph budget narrative justifying each cost. Add the funder name for a more targeted narrative.</div><div class="acc-tips"><div class="acc-tip">&#128161; Include indirect/overhead costs in your line items &mdash; they need the most justification</div><div class="acc-tip">&#128161; Format items as "Program Coordinator (0.75 FTE), $38,250" for best results</div><div class="acc-tip">&#128161; Download as .txt and paste directly into your application</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#9989;</div><div class="acc-title">Tools &mdash; Checklist Builder</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Enter a grant name and brief project description to generate a customized pre-submission checklist. Items are prioritized high/medium/low and organized by category. Check off items as you complete them &mdash; checkmarks persist in your session.</div><div class="acc-tips"><div class="acc-tip">&#128161; Build the checklist at the start of writing, not the end</div><div class="acc-tip">&#128161; Export as PDF and share with everyone working on the application</div><div class="acc-tip">&#128161; High-priority items are typically required &mdash; missing any is a disqualifier</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#ede9fe;color:#6d28d9">&#128197;</div><div class="acc-title">Tools &mdash; Deadline Calendar</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Shows all grants in your Pipeline that have deadlines set. Navigate forward and backward through months using the arrows. Color coding: <span style="background:#fef2f2;color:#b91c1c;padding:1px 6px;border-radius:4px;font-size:11px">red</span> = due within 2 weeks or overdue, <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:11px">yellow</span> = due within 30 days, <span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:4px;font-size:11px">green</span> = plenty of time.</div><div class="acc-tips"><div class="acc-tip">&#128161; Always set deadline dates when saving grants to the pipeline</div><div class="acc-tip">&#128161; Use the Pipeline tab to edit grants and update deadlines</div><div class="acc-tip">&#128161; Check the calendar weekly to stay ahead of upcoming submissions</div></div></div></div><div class="acc-item"><div class="acc-hdr" onclick="toggleAcc(this)"><div class="acc-icon-wrap" style="background:#dcfce7;color:#166534">&#128202;</div><div class="acc-title">Pipeline</div><span class="acc-arrow">&#9660;</span></div><div class="acc-body"><div class="acc-desc">Your grant pipeline has four stages: Researching, Writing, Submitted, and Awarded. Save grants from search results using <strong>Save to pipeline</strong>, or add them manually with <strong>+ Add grant</strong>. Click any card to edit details or add notes. Move grants between stages using the arrow buttons.</div><div class="acc-tips"><div class="acc-tip">&#128161; Add internal notes to each grant (contacts, requirements, assigned writer)</div><div class="acc-tip">&#128161; Pipeline data is saved in your browser &mdash; it persists across sessions on this device</div><div class="acc-tip">&#128161; Use the Deadline Calendar to see all pipeline grants with dates at a glance</div></div></div></div>
+    </div>
   </div>
 
   <!-- ELIGIBILITY SCREENER MODAL -->
@@ -660,6 +559,23 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+
+
+// ── Accordion ─────────────────────────────────────────────────────────────
+function toggleAcc(hdr) {
+  var body = hdr.nextElementSibling;
+  var isOpen = hdr.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.acc-hdr.open').forEach(function(h) {
+    h.classList.remove('open');
+    h.nextElementSibling.classList.remove('open');
+  });
+  // Open clicked if it was closed
+  if (!isOpen) {
+    hdr.classList.add('open');
+    body.classList.add('open');
+  }
+}
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 function showTab(id) {
@@ -992,8 +908,9 @@ function printSection(id) {
     +'.ba-box{border-radius:8px;padding:10px;font-size:13px}'
     +'.ba-before{background:#fef2f2;color:#7f1d1d}.ba-after{background:#f0fdf4;color:#14532d}'
     +'.export-bar,.card-btns,.move-btns,button{display:none!important}';
+  var styleClose='<\/style>';
   var content='<!DOCTYPE html><html><head><meta charset=UTF-8><title>GrantCompass Export</title>'
-    +'<style>'+css+'</style></head><body>'+el.innerHTML+'</body></html>';
+    +'<style>'+css+styleClose+'</head><body>'+el.innerHTML+'</body></html>';
   var blob=new Blob([content],{type:'text/html'});
   var blobUrl=URL.createObjectURL(blob);
   var w=window.open(blobUrl,'_blank');
