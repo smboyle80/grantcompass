@@ -3,5 +3,10 @@
     "api/*.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "routes": [
+    { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
