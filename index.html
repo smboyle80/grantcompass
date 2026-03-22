@@ -1,146 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GrantCompass — AI Grant Assistant for Nonprofits</title>
-  <!-- v20260321-230238 -->
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #ffffff; --bg2: #f5f5f4; --bg3: #eeece8;
-      --bg-success: #eaf3de; --bg-warn: #faeeda; --bg-danger: #fcebeb; --bg-info: #e6f1fb;
-      --text: #1a1a18; --text2: #5f5e5a; --text3: #888780;
-      --success: #3b6d11; --warn: #854f0b; --danger: #a32d2d; --info: #185fa5;
-      --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22); --border-success: #639922;
-      --r: 8px; --rl: 12px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1e1e1c; --bg2: #2a2a27; --bg3: #333330;
-        --bg-success: #173404; --bg-warn: #412402; --bg-danger: #501313; --bg-info: #042c53;
-        --text: #f0ede8; --text2: #b4b2a9; --text3: #888780;
-        --success: #97c459; --warn: #ef9f27; --danger: #f09595; --info: #85b7eb;
-        --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18); --border-success: #3b6d11;
-      }
-    }
-    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
-    #app { max-width: 760px; margin: 0 auto; background: var(--bg); border-radius: var(--rl); border: 0.5px solid var(--border); padding: 2rem; }
-    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem; }
-    .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--bg-success); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    h1 { font-size: 20px; font-weight: 500; }
-    .subtitle { font-size: 13px; color: var(--text2); margin-top: 2px; }
-    .tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
-    .tab { padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -0.5px; white-space: nowrap; font-family: inherit; transition: color 0.15s; }
-    .tab.active { color: var(--success); border-bottom-color: var(--success); }
-    .tab:hover:not(.active) { color: var(--text); }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .fg { margin-bottom: 1rem; }
-    label { display: block; font-size: 11px; font-weight: 500; color: var(--text2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    input[type=text], input[type=url], select, textarea { width: 100%; font-family: inherit; font-size: 14px; padding: 8px 12px; border: 0.5px solid var(--border2); border-radius: var(--r); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-    input:focus, select:focus, textarea:focus { border-color: var(--border-success); }
-    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
-    select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
-    .g2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
-    @media (max-width: 520px) { .g2 { grid-template-columns: 1fr; } }
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--r); cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; }
-    .btn:active { transform: scale(0.98); }
-    .btn-p { background: var(--success); color: #fff; }
-    .btn-p:hover { opacity: 0.88; }
-    .btn-p:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-    .btn-g { background: var(--bg2); color: var(--text2); border: 0.5px solid var(--border); }
-    .btn-g:hover { color: var(--text); }
-    .btn-d { background: var(--bg-danger); color: var(--danger); border: none; }
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); padding: 1rem 1.25rem; margin-bottom: 10px; }
-    .rh { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
-    .gname { font-size: 14px; font-weight: 500; flex: 1; }
-    .badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
-    .b-high { background: var(--bg-success); color: var(--success); }
-    .b-med { background: var(--bg-warn); color: var(--warn); }
-    .b-info { background: var(--bg-info); color: var(--info); }
-    .gmeta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
-    .gdesc { font-size: 13px; line-height: 1.65; color: var(--text2); margin-bottom: 10px; }
-    .saved-ok { font-size: 12px; color: var(--success); font-weight: 500; }
-    .rs { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); padding: 1rem 1.25rem; margin-bottom: 10px; }
-    .rtag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
-    .t-s { background: var(--bg-success); color: var(--success); }
-    .t-i { background: var(--bg-warn); color: var(--warn); }
-    .t-m { background: var(--bg-danger); color: var(--danger); }
-    .rtitle { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-    .rbody { font-size: 13px; color: var(--text2); line-height: 1.65; }
-    .sbar { margin: 0.75rem 0; }
-    .sbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
-    .sbt { height: 5px; background: var(--bg2); border-radius: 99px; overflow: hidden; }
-    .sbf { height: 100%; border-radius: 99px; background: var(--success); }
-    .loading { text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; }
-    .dot::after { content: ''; animation: dots 1.4s infinite; }
-    @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
-    .empty { text-align: center; padding: 2.5rem 1rem; color: var(--text2); font-size: 13px; }
-    .sh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .st { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
-    .cc { font-size: 11px; color: var(--text3); }
-    .url-row { display: flex; gap: 8px; align-items: flex-end; }
-    .url-row .fg { flex: 1; margin-bottom: 0; }
-    .info-box { display: flex; gap: 10px; align-items: flex-start; background: var(--bg-info); border-radius: var(--r); padding: 10px 14px; margin-bottom: 1rem; font-size: 13px; color: var(--info); }
-    .file-drop { border: 1px dashed var(--border2); border-radius: var(--r); padding: 1.25rem; text-align: center; cursor: pointer; font-size: 13px; color: var(--text2); transition: background 0.15s; margin-bottom: 1rem; }
-    .file-drop:hover { background: var(--bg2); }
-    .file-drop.loaded { border-style: solid; border-color: var(--border-success); background: var(--bg-success); color: var(--success); }
-
-    /* Tinyfish scan progress */
-    .scan-progress { display: none; border: 0.5px solid var(--border); border-radius: var(--rl); padding: 1.25rem; margin-bottom: 1rem; }
-    .scan-progress.visible { display: block; }
-    .scan-steps { list-style: none; margin-top: 12px; }
-    .scan-step { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; color: var(--text2); }
-    .step-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
-    .step-pending { background: var(--bg2); color: var(--text3); }
-    .step-active { background: var(--bg-info); color: var(--info); animation: pulse 1.2s ease-in-out infinite; }
-    .step-done { background: var(--bg-success); color: var(--success); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-    .scan-timer { font-size: 12px; color: var(--text3); margin-top: 8px; }
-
-    .cl-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
-    .cl-item:last-child { border-bottom: none; }
-    .cl-text { flex: 1; }
-    .cl-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-    .cl-sub { font-size: 12px; color: var(--text2); }
-    .pbadge { font-size: 10px; padding: 2px 6px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
-    .p-h { background: var(--bg-danger); color: var(--danger); }
-    .p-m { background: var(--bg-warn); color: var(--warn); }
-    .p-l { background: var(--bg-info); color: var(--info); }
-    .sv-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
-    .sv-row:last-child { border-bottom: none; }
-    .sv-info { flex: 1; }
-    .sv-name { font-size: 13px; font-weight: 500; }
-    .sv-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
-    footer { text-align: center; font-size: 12px; color: var(--text3); margin-top: 2rem; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GrantCompass</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f4;--bg3:#eeece8;
+  --bgs:#eaf3de;--bgw:#faeeda;--bgd:#fcebeb;--bgi:#e6f1fb;
+  --tx:#1a1a18;--tx2:#5f5e5a;--tx3:#888780;
+  --s:#3b6d11;--w:#854f0b;--d:#a32d2d;--inf:#185fa5;
+  --b:rgba(0,0,0,0.12);--b2:rgba(0,0,0,0.22);--bs:#639922;
+  --r:8px;--rl:12px
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#2a2a27;--bg3:#333330;
+  --bgs:#173404;--bgw:#412402;--bgd:#501313;--bgi:#042c53;
+  --tx:#f0ede8;--tx2:#b4b2a9;--tx3:#888780;
+  --s:#97c459;--w:#ef9f27;--d:#f09595;--inf:#85b7eb;
+  --b:rgba(255,255,255,0.1);--b2:rgba(255,255,255,0.18);--bs:#3b6d11
+}}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh;padding:2rem 1rem}
+#app{max-width:760px;margin:0 auto;background:var(--bg);border-radius:var(--rl);border:.5px solid var(--b);padding:2rem}
+.hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.75rem}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--bgs);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+h1{font-size:20px;font-weight:500}
+.sub{font-size:13px;color:var(--tx2);margin-top:2px}
+.tabs{display:flex;border-bottom:.5px solid var(--b);margin-bottom:1.5rem;overflow-x:auto}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-.5px;white-space:nowrap;font-family:inherit}
+.tab.on{color:var(--s);border-bottom-color:var(--s)}
+.tab:hover:not(.on){color:var(--tx)}
+.panel{display:none}.panel.on{display:block}
+.fg{margin-bottom:1rem}
+label{display:block;font-size:11px;font-weight:500;color:var(--tx2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{width:100%;font-family:inherit;font-size:14px;padding:8px 12px;border:.5px solid var(--b2);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--bs)}
+textarea{resize:vertical;min-height:90px;line-height:1.6}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media(max-width:520px){.g2{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:500;border-radius:var(--r);cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.bp{background:var(--s);color:#fff}.bp:hover{opacity:.88}.bp:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.bg{background:var(--bg2);color:var(--tx2);border:.5px solid var(--b)}.bg:hover{color:var(--tx)}
+.bd{background:var(--bgd);color:var(--d);border:none}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}
+.card{background:var(--bg);border:.5px solid var(--b);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:10px}
+.rh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+.gn{font-size:14px;font-weight:500;flex:1}
+.badge{font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.bhi{background:var(--bgs);color:var(--s)}.bme{background:var(--bgw);color:var(--w)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--tx2);margin-bottom:6px}
+.desc{font-size:13px;line-height:1.65;color:var(--tx2);margin-bottom:10px}
+.saved-ok{font-size:12px;color:var(--s);font-weight:500}
+.rs{background:var(--bg);border:.5px solid var(--b);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:10px}
+.rtag{display:inline-flex;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;margin-bottom:8px}
+.ts{background:var(--bgs);color:var(--s)}.ti{background:var(--bgw);color:var(--w)}.tm{background:var(--bgd);color:var(--d)}
+.rtitle{font-size:14px;font-weight:500;margin-bottom:4px}
+.rbody{font-size:13px;color:var(--tx2);line-height:1.65}
+.sb{margin:.75rem 0}
+.sbl{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:4px}
+.sbt{height:5px;background:var(--bg2);border-radius:99px;overflow:hidden}
+.sbf{height:100%;border-radius:99px;background:var(--s)}
+.loading{text-align:center;padding:2rem;color:var(--tx2);font-size:14px}
+.dot::after{content:'';animation:dots 1.4s infinite}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--tx2);font-size:13px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.st{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
+.cc{font-size:11px;color:var(--tx3)}
+.urow{display:flex;gap:8px;align-items:flex-end}
+.urow .fg{flex:1;margin-bottom:0}
+.ibox{display:flex;gap:10px;align-items:flex-start;background:var(--bgi);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--inf)}
+.prog{display:none;border:.5px solid var(--b);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.prog.on{display:block}
+.steps{list-style:none;margin-top:12px}
+.step{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--tx2)}
+.si{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
+.sp{background:var(--bg2);color:var(--tx3)}
+.sa{background:var(--bgi);color:var(--inf);animation:pulse 1.2s ease-in-out infinite}
+.sd{background:var(--bgs);color:var(--s)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.timer{font-size:12px;color:var(--tx3);margin-top:8px}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid var(--b)}
+.cl-item:last-child{border-bottom:none}
+.cl-tx{flex:1}
+.cl-t{font-size:13px;font-weight:500;margin-bottom:2px}
+.cl-s{font-size:12px;color:var(--tx2)}
+.pb{font-size:10px;padding:2px 6px;border-radius:20px;font-weight:500;white-space:nowrap}
+.ph{background:var(--bgd);color:var(--d)}.pm{background:var(--bgw);color:var(--w)}.pl{background:var(--bgi);color:var(--inf)}
+.svr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--b)}
+.svr:last-child{border-bottom:none}
+.svi{flex:1}
+.svn{font-size:13px;font-weight:500}
+.svm{font-size:12px;color:var(--tx2);margin-top:2px}
+.fdrop{border:1px dashed var(--b2);border-radius:var(--r);padding:1.25rem;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2);margin-bottom:1rem}
+.fdrop:hover{background:var(--bg2)}
+.fdrop.loaded{border-style:solid;border-color:var(--bs);background:var(--bgs);color:var(--s)}
+footer{text-align:center;font-size:12px;color:var(--tx3);margin-top:2rem}
+</style>
 </head>
 <body>
 <div id="app">
-  <div class="header">
+  <div class="hdr">
     <div class="logo">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="var(--success)"/>
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="var(--s)"/>
       </svg>
     </div>
     <div>
       <h1>GrantCompass</h1>
-      <div class="subtitle">AI grant discovery, checklist builder &amp; writing assistant for nonprofits</div>
+      <div class="sub">AI grant discovery &amp; writing assistant for nonprofits</div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('discover')">Find grants</button>
+    <button class="tab on" onclick="switchTab('discover')">Find grants</button>
     <button class="tab" onclick="switchTab('webscan')">Scan website</button>
     <button class="tab" onclick="switchTab('review')">Review writing</button>
     <button class="tab" onclick="switchTab('checklist')">Checklist builder</button>
-    <button class="tab" onclick="switchTab('saved')">Saved grants <span id="saved-badge" style="display:none;background:var(--bg-success);color:var(--success);font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;">0</span></button>
+    <button class="tab" onclick="switchTab('saved')">Saved grants <span id="sbadge" style="display:none;background:var(--bgs);color:var(--s);font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px">0</span></button>
   </div>
 
   <!-- FIND GRANTS -->
-  <div id="panel-discover" class="panel active">
+  <div id="panel-discover" class="panel on">
     <div class="g2">
       <div class="fg"><label>Organization name</label><input type="text" id="org-name" placeholder="e.g. Green Valley Food Bank"/></div>
       <div class="fg"><label>Focus area</label>
@@ -168,353 +152,133 @@
         <select id="budget">
           <option value="">Select range</option>
           <option>Under $100K</option>
-          <option>$100K – $500K</option>
-          <option>$500K – $1M</option>
-          <option>$1M – $5M</option>
+          <option>$100K - $500K</option>
+          <option>$500K - $1M</option>
+          <option>$1M - $5M</option>
           <option>Over $5M</option>
         </select>
       </div>
-      <div class="fg"><label>Geography served</label><input type="text" id="geo" placeholder="e.g. Chicago, IL or National"/></div>
+      <div class="fg"><label>State</label><input type="text" id="geo" placeholder="e.g. Arizona"/></div>
     </div>
     <div class="fg">
       <label>Mission statement <span class="cc" id="mc">(0/400)</span></label>
-      <textarea id="mission" maxlength="400" placeholder="Describe your organization's mission and communities you serve..." oninput="document.getElementById('mc').textContent='('+this.value.length+'/400)'"></textarea>
+      <textarea id="mission" maxlength="400" placeholder="Describe your mission and communities served..." oninput="document.getElementById('mc').textContent='('+this.value.length+'/400)'"></textarea>
     </div>
-    <div class="btn-row">
-      <button class="btn btn-p" id="discover-btn" onclick="findGrants()">Find matching grants</button>
-      <button class="btn btn-g" onclick="clearEl(['org-name','geo','mission'],'focus-area','budget','mc','(0/400)','discover-results')">Clear</button>
+    <div class="brow">
+      <button class="btn bp" id="disc-btn" onclick="findGrants()">Search GrantWatch</button>
+      <button class="btn bg" onclick="clearDiscover()">Clear</button>
     </div>
-    <div id="discover-results"></div>
+    <div id="disc-res"></div>
   </div>
 
-  <!-- SCAN WEBSITE (Tinyfish powered) -->
+  <!-- SCAN WEBSITE -->
   <div id="panel-webscan" class="panel">
-    <div class="info-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="var(--info)" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="var(--info)" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Enter your website URL and our agent will read your site, learn about your mission and programs, then search GrantWatch for currently open matching grants.
+    <div class="ibox">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10" stroke="var(--inf)" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="var(--inf)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Enter your website URL. Our agent reads your site, learns about your mission and programs, then searches GrantWatch for currently open matching grants.
     </div>
-    <div class="url-row">
+    <div class="urow">
       <div class="fg"><label>Organization website URL</label><input type="url" id="scan-url" placeholder="https://yourorganization.org"/></div>
-      <button class="btn btn-p" id="scan-btn" onclick="scanWebsite()" style="flex-shrink:0;margin-bottom:0;">Scan &amp; find grants</button>
+      <button class="btn bp" id="scan-btn" onclick="scanWebsite()" style="flex-shrink:0;margin-bottom:0">Scan &amp; find grants</button>
     </div>
-
-    <div class="scan-progress" id="scan-progress">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="prog" id="scan-prog">
+      <div style="display:flex;align-items:center;justify-content:space-between">
         <span class="st">Scan in progress</span>
-        <span class="scan-timer" id="scan-timer">0s</span>
+        <span class="timer" id="scan-timer">0s</span>
       </div>
-      <ul class="scan-steps">
-        <li class="scan-step" id="step-1">
-          <div class="step-icon step-pending" id="step-1-icon">1</div>
-          <span>Reading your website</span>
-        </li>
-        <li class="scan-step" id="step-2">
-          <div class="step-icon step-pending" id="step-2-icon">2</div>
-          <span>Identifying mission &amp; programs</span>
-        </li>
-        <li class="scan-step" id="step-3">
-          <div class="step-icon step-pending" id="step-3-icon">3</div>
-          <span>Searching GrantWatch for matches</span>
-        </li>
-        <li class="scan-step" id="step-4">
-          <div class="step-icon step-pending" id="step-4-icon">4</div>
-          <span>Ranking by relevance</span>
-        </li>
+      <ul class="steps">
+        <li class="step"><div class="si sp" id="si1">1</div><span>Reading your website</span></li>
+        <li class="step"><div class="si sp" id="si2">2</div><span>Identifying mission &amp; programs</span></li>
+        <li class="step"><div class="si sp" id="si3">3</div><span>Searching GrantWatch</span></li>
+        <li class="step"><div class="si sp" id="si4">4</div><span>Ranking by relevance</span></li>
       </ul>
     </div>
-
-    <div id="webscan-results"></div>
+    <div id="scan-res"></div>
   </div>
 
   <!-- REVIEW WRITING -->
   <div id="panel-review" class="panel">
-    <div id="pdf-drop" class="file-drop" onclick="document.getElementById('pdf-input').click()" ondragover="event.preventDefault();this.style.background='var(--bg2)'" ondragleave="this.style.background=''" ondrop="handleDrop(event)">
-      <input type="file" id="pdf-input" accept=".pdf,.txt" style="display:none" onchange="handlePdfFile(this)"/>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="display:inline-block;margin-right:6px;vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--text2)" stroke-width="1.5"/><polyline points="14 2 14 8 20 8" stroke="var(--text2)" stroke-width="1.5"/></svg>
-      <span id="drop-label">Upload PDF or TXT grant proposal — or drag &amp; drop</span>
+    <div id="fdrop" class="fdrop" onclick="document.getElementById('finput').click()" ondragover="event.preventDefault();this.style.background='var(--bg2)'" ondragleave="this.style.background=''" ondrop="handleDrop(event)">
+      <input type="file" id="finput" accept=".pdf,.txt" style="display:none" onchange="handlePdfFile(this)"/>
+      <span id="dlabel">Upload PDF or TXT proposal -- or drag and drop</span>
     </div>
-    <div class="fg"><label>Grant name / funder (optional)</label><input type="text" id="grant-target" placeholder="e.g. Robert Wood Johnson Foundation Health Equity Grant"/></div>
+    <div class="fg"><label>Grant name / funder (optional)</label><input type="text" id="grant-target" placeholder="e.g. Robert Wood Johnson Foundation"/></div>
     <div class="fg">
-      <label>Grant proposal text <span class="cc" id="wc">(0 words)</span></label>
-      <textarea id="proposal-text" style="min-height:150px;" placeholder="Paste your grant narrative here, or upload a file above..." oninput="updateWC(this)"></textarea>
+      <label>Proposal text <span class="cc" id="wc">(0 words)</span></label>
+      <textarea id="proposal" style="min-height:150px" placeholder="Paste your grant narrative here, or upload above..." oninput="updateWC(this)"></textarea>
     </div>
-    <div class="btn-row">
-      <button class="btn btn-p" id="review-btn" onclick="reviewWriting()">Review my writing</button>
-      <button class="btn btn-g" onclick="clearReview()">Clear</button>
+    <div class="brow">
+      <button class="btn bp" id="rev-btn" onclick="reviewWriting()">Review my writing</button>
+      <button class="btn bg" onclick="clearReview()">Clear</button>
     </div>
-    <div id="review-results"></div>
+    <div id="rev-res"></div>
   </div>
 
   <!-- CHECKLIST -->
   <div id="panel-checklist" class="panel">
     <div class="fg"><label>Grant or funder name</label><input type="text" id="cl-grant" placeholder="e.g. USDA Community Facilities Grant"/></div>
-    <div class="fg"><label>Describe your project or program</label><textarea id="cl-desc" style="min-height:90px;" placeholder="What project are you applying for? Who does it serve? What outcomes do you expect?"></textarea></div>
-    <div class="btn-row">
-      <button class="btn btn-p" id="cl-btn" onclick="buildChecklist()">Build checklist</button>
-      <button class="btn btn-g" onclick="document.getElementById('cl-grant').value='';document.getElementById('cl-desc').value='';document.getElementById('cl-results').innerHTML=''">Clear</button>
+    <div class="fg"><label>Describe your project</label><textarea id="cl-desc" style="min-height:90px" placeholder="What project are you applying for? Who does it serve?"></textarea></div>
+    <div class="brow">
+      <button class="btn bp" id="cl-btn" onclick="buildChecklist()">Build checklist</button>
+      <button class="btn bg" onclick="clearChecklist()">Clear</button>
     </div>
-    <div id="cl-results"></div>
+    <div id="cl-res"></div>
   </div>
 
   <!-- SAVED -->
   <div id="panel-saved" class="panel">
     <div class="sh">
       <span class="st">Saved grants</span>
-      <button class="btn btn-g" style="font-size:12px;padding:5px 10px;" onclick="clearAllSaved()">Clear all</button>
+      <button class="btn bg" style="font-size:12px;padding:5px 10px" onclick="clearAllSaved()">Clear all</button>
     </div>
     <div id="saved-list"></div>
   </div>
 </div>
-<footer>GrantCompass — free for nonprofits</footer>
+<footer>GrantCompass -- free for nonprofits</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-let saved = [];
+var saved = [];
 try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
 
-async function callClaude(prompt) {
-  const r = await fetch('/api/claude', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
-  });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error || 'Claude request failed'); }
-  const d = await r.json();
-  return d.content.map(b => b.text || '').join('');
-}
-
-function pj(text) {
-  // Strip markdown code fences and find the first valid JSON object/array
-  let clean = text.replace(/```json|```/gi, '').trim();
-  // Find the first { or [ and last } or ]
-  const firstBrace = clean.indexOf('{');
-  const firstBracket = clean.indexOf('[');
-  let start = -1;
-  if (firstBrace === -1) start = firstBracket;
-  else if (firstBracket === -1) start = firstBrace;
-  else start = Math.min(firstBrace, firstBracket);
-  if (start === -1) throw new Error('No JSON found in response: ' + clean.slice(0, 100));
-  const isArray = start === firstBracket && (firstBrace === -1 || firstBracket < firstBrace);
-  const end = isArray ? clean.lastIndexOf(']') : clean.lastIndexOf('}');
-  if (end === -1) throw new Error('Incomplete JSON in response');
-  clean = clean.slice(start, end + 1);
-  return JSON.parse(clean);
-}
+var grantStore = {};
+var scanSecs = 0;
+var scanTimer = null;
 
 function switchTab(tab) {
-  const ids = ['discover','webscan','review','checklist','saved'];
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i] === tab));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+tab).classList.add('active');
+  var ids = ['discover','webscan','review','checklist','saved'];
+  document.querySelectorAll('.tab').forEach(function(t,i) {
+    t.classList.toggle('on', ids[i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+  document.getElementById('panel-'+tab).classList.add('on');
   if (tab === 'saved') renderSaved();
 }
 
-function updateWC(el) {
-  const w = el.value.trim().split(/\s+/).filter(Boolean).length;
-  document.getElementById('wc').textContent = '('+w+' words)';
+function callClaude(prompt) {
+  return fetch('/api/claude', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'Claude error'); });
+    return r.json();
+  }).then(function(d) {
+    return d.content.map(function(b) { return b.text || ''; }).join('');
+  });
 }
 
-function clearEl(inputs, sel, bud, countId, countVal, resultsId) {
-  inputs.forEach(id => document.getElementById(id).value = '');
-  document.getElementById(sel).value = '';
-  document.getElementById(bud).value = '';
-  document.getElementById(countId).textContent = countVal;
-  document.getElementById(resultsId).innerHTML = '';
+function pj(text) {
+  var clean = text.replace(/```json|```/gi,'').trim();
+  var fb = clean.indexOf('{'), fbk = clean.indexOf('[');
+  var start = fb === -1 ? fbk : fbk === -1 ? fb : Math.min(fb,fbk);
+  if (start === -1) throw new Error('No JSON in response');
+  var isArr = fbk !== -1 && (fb === -1 || fbk < fb);
+  var end = isArr ? clean.lastIndexOf(']') : clean.lastIndexOf('}');
+  if (end === -1) throw new Error('Incomplete JSON');
+  return JSON.parse(clean.slice(start, end+1));
 }
 
-function clearReview() {
-  ['grant-target','proposal-text'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('wc').textContent = '(0 words)';
-  document.getElementById('review-results').innerHTML = '';
-  document.getElementById('drop-label').textContent = 'Upload PDF or TXT grant proposal — or drag & drop';
-  document.getElementById('pdf-drop').className = 'file-drop';
-}
-
-function savegrant(g) {
-  if (typeof g === 'string') { try { g = JSON.parse(g); } catch(e) { return false; } }
-  if (saved.find(s => s.name === g.name)) return false;
-  saved.push({...g, savedAt: new Date().toLocaleDateString()});
-  try { localStorage.setItem('gc_saved', JSON.stringify(saved)); } catch(e) {}
-  updateBadge(); return true;
-}
-
-function updateBadge() {
-  const b = document.getElementById('saved-badge');
-  b.style.display = saved.length ? 'inline' : 'none';
-  b.textContent = saved.length;
-}
-
-function renderSaved() {
-  const el = document.getElementById('saved-list');
-  if (!saved.length) { el.innerHTML = '<div class="empty">No saved grants yet. Find grants and click Save to add them here.</div>'; return; }
-  el.innerHTML = '<div class="card">' + saved.map(function(g,i) {
-    const searchQ = encodeURIComponent((g.funder||'') + ' ' + (g.name||'') + ' grant apply');
-    const linkHtml = g.url
-      ? '<a href="' + g.url + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">View &rarr;</a>'
-      : '<a href="https://www.google.com/search?q=' + searchQ + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 10px;text-decoration:none;">Search &rarr;</a>';
-    return '<div class="sv-row">' +
-      '<div class="sv-info"><div class="sv-name">' + (g.name||'') + '</div>' +
-      '<div class="sv-meta">' + (g.funder||'') + ' &nbsp;&middot;&nbsp; ' + (g.amount||'') + ' &nbsp;&middot;&nbsp; Deadline: ' + (g.deadline||'Check funder') + ' &nbsp;&middot;&nbsp; Saved ' + (g.savedAt||'') + '</div></div>' +
-      '<div style="display:flex;gap:6px;flex-shrink:0;">' + linkHtml +
-      '<button class="btn btn-d" style="font-size:12px;padding:5px 10px;" onclick="removeSaved(' + i + ')">Remove</button></div>' +
-      '</div>';
-  }).join('') + '</div>';
-}
-
-function removeSaved(i) {
-  saved.splice(i,1);
-  try { localStorage.setItem('gc_saved', JSON.stringify(saved)); } catch(e) {}
-  updateBadge(); renderSaved();
-}
-
-function clearAllSaved() {
-  if (!saved.length) return;
-  if (!confirm('Remove all saved grants?')) return;
-  saved = [];
-  try { localStorage.removeItem('gc_saved'); } catch(e) {}
-  updateBadge(); renderSaved();
-}
-
-// Store grants by id so onclick doesn't need inline JSON
-const grantStore = {};
-
-function grantCard(g) { return grantCardWithUid(g, 'g'+Math.random().toString(36).slice(2,8)); }
-
-function grantWatchCard(g) {
-  const uid = 'g'+Math.random().toString(36).slice(2,8);
-  grantStore[uid] = g;
-  const hi = (g.match||'').toLowerCase().includes('strong');
-  const name = g.grant_name || g.name || 'Unnamed grant';
-  const funder = g.funder || g.funder_organization || '';
-  const amount = g.amount || g.award_amount || 'See listing';
-  const deadline = g.deadline || g.deadline_date || 'See listing';
-  const desc = g.description || '';
-  const why = g.why || '';
-  const url = g.url || '';
-  const whyHtml = why
-    ? '<div style="font-size:12px;color:var(--success);margin-bottom:10px;padding:6px 10px;background:var(--bg-success);border-radius:var(--r);">Why this matches: ' + why + '</div>'
-    : '';
-  const linkHtml = url
-    ? '<a href="' + url + '" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;color:var(--info);">View on GrantWatch →</a>'
-    : '';
-  return '<div class="card">' +
-    '<div class="rh"><div class="gname">' + name + '</div><span class="badge ' + (hi?'b-high':'b-med') + '">' + (g.match||'Good match') + '</span></div>' +
-    '<div class="gmeta"><span>' + funder + '</span><span>·</span><span>' + amount + '</span><span>·</span><span style="color:var(--danger);font-weight:500;">Due: ' + deadline + '</span></div>' +
-    '<div class="gdesc">' + desc + '</div>' +
-    whyHtml +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-    '<button class="btn btn-g" id="sb-' + uid + '" style="font-size:12px;padding:5px 12px;" onclick="handleSave('' + uid + '')">Save grant</button>' +
-    linkHtml +
-    '</div></div>';
-}
-function grantCardWithUid(g, uid) {
-  grantStore[uid] = grantStore[uid] || g;
-  const hi = (g.match||'').toLowerCase().includes('strong');
-  // Build a safe search URL using funder + grant name
-  const searchQ = encodeURIComponent('"' + (g.funder||'') + '" "' + (g.name||'') + '" grant application');
-  const linkHtml = `<a id="link-${uid}" href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener" class="btn btn-g" style="font-size:12px;padding:5px 12px;text-decoration:none;">Find application →</a>`;
-  return `<div class="card">
-    <div class="rh"><div class="gname">${g.name}</div><span class="badge ${hi?'b-high':'b-med'}">${g.match||'Good match'}</span></div>
-    <div class="gmeta"><span>${g.funder}</span><span>·</span><span>${g.amount}</span><span>·</span><span style="color:var(--text2);">Deadline: ${g.deadline}</span></div>
-    <div class="gdesc">${g.description}</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-g" id="sb-${uid}" style="font-size:12px;padding:5px 12px;" onclick="handleSave('${uid}')">Save grant</button>
-      ${linkHtml}
-    </div>
-  </div>`;
-}
-
-function handleSave(uid) {
-  const g = grantStore[uid];
-  const btn = document.getElementById('sb-'+uid);
-  if (!g || !btn) return;
-  const ok = savegrant(g);
-  btn.outerHTML = ok ? '<span class="saved-ok">Saved</span>' : '<span class="saved-ok">Already saved</span>';
-}
-
-async function findGrants() {
-  const org = document.getElementById('org-name').value.trim();
-  const focus = document.getElementById('focus-area').value;
-  const budget = document.getElementById('budget').value;
-  const geo = document.getElementById('geo').value.trim();
-  const mission = document.getElementById('mission').value.trim();
-  if (!focus && !mission) { document.getElementById('discover-results').innerHTML = '<div class="empty">Please select a focus area or enter your mission statement.</div>'; return; }
-
-  const btn = document.getElementById('discover-btn'); btn.disabled = true;
-  document.getElementById('discover-results').innerHTML = '<div class="loading"><span class="dot">Searching GrantWatch for current opportunities</span></div>';
-
-  try {
-    // Step 1: Start Tinyfish GrantWatch search
-    const keywords = [focus, mission, org].filter(Boolean).join(' ');
-    const startResp = await fetch('/api/search-grants', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category: focus || mission, keywords, state: geo, budget })
-    });
-    const startData = await startResp.json();
-    if (!startData.runId) throw new Error(startData.error || 'Failed to start grant search');
-    const runId = startData.runId;
-
-    // Step 2: Poll for results (up to 6 min)
-    let grants = null;
-    let attempts = 0;
-    while (attempts < 90) {
-      await new Promise(r => setTimeout(r, 4000));
-      attempts++;
-      const pollResp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
-      const pollData = await pollResp.json();
-      if (pollData.status === 'complete' && pollData.result) {
-        try {
-          const raw = typeof pollData.result === 'string' ? pollData.result : JSON.stringify(pollData.result);
-          grants = pj(raw);
-        } catch(e) {
-          throw new Error('Could not parse grant results: ' + e.message);
-        }
-        break;
-      } else if (pollData.status === 'failed') {
-        throw new Error('Grant search failed. Please try again.');
-      }
-    }
-
-    if (!grants) throw new Error('Search timed out. Please try again.');
-    if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
-
-    // Step 3: Ask Claude to rank/explain relevance based on org profile
-    const today = new Date().toISOString().split('T')[0];
-    const orgContext = `Organization: ${org||'A nonprofit'}, Focus: ${focus||mission}, Geography: ${geo||'Arizona'}, Budget: ${budget||'not specified'}`;
-    const rankText = await callClaude(`Today is ${today}. A nonprofit is looking for grants. Here is their profile:
-${orgContext}
-
-Here are real grants found on GrantWatch right now:
-${JSON.stringify(grants, null, 2)}
-
-For each grant, add a "match" field ("Strong match" or "Good match") and a "why" field (1 sentence explaining why this org would qualify). Return the same JSON array with these two fields added to each object. Keep all original fields exactly as-is. Return ONLY raw JSON array starting with [.`);
-
-    const rankedGrants = pj(rankText);
-
-    let html = `<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">${rankedGrants.length} found</span></div>`;
-    html += `<p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Live results scraped from GrantWatch — deadlines and amounts verified as of today.</p>`;
-    rankedGrants.forEach(g => { html += grantWatchCard(g); });
-    document.getElementById('discover-results').innerHTML = html;
-
-  } catch(e) {
-    document.getElementById('discover-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`;
-  }
-  btn.disabled = false;
-}
-
-// --- Tinyfish-powered website scanner ---
-let scanTimerInterval = null;
-let scanSeconds = 0;
-
-function setStep(n, state) {
-  const icon = document.getElementById('step-'+n+'-icon');
-  if (!icon) return;
-  icon.className = 'step-icon step-'+state;
-  if (state === 'done') icon.innerHTML = '✓';
-  else if (state === 'active') icon.innerHTML = '●';
-  else icon.innerHTML = n;
-}
-
-// Shared helpers for scan workflow
 function errMsg(d) {
   if (!d) return 'Unknown error';
   if (typeof d.error === 'string') return d.error;
@@ -522,275 +286,321 @@ function errMsg(d) {
   return JSON.stringify(d);
 }
 
-async function startRun(endpoint, body) {
-  const resp = await fetch(endpoint, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+function startRun(endpoint, body) {
+  return fetch(endpoint, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
     body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (!d.runId) throw new Error('Failed to start: ' + errMsg(d));
+    return d.runId;
   });
-  const data = await resp.json();
-  if (!data.runId) throw new Error('Failed to start: ' + errMsg(data));
-  return data.runId;
 }
 
-async function pollUntilDone(runId, maxAttempts) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, 4000));
-    const resp = await fetch('/api/scan-status?runId=' + encodeURIComponent(runId));
-    const data = await resp.json();
-    if (data.error) throw new Error(errMsg(data));
-    if (data.status === 'complete') return data.result;
-    if (data.status === 'failed') throw new Error('Run failed. Please try again.');
-  }
-  return null;
-}
-
-async function scanWebsite() {
-  const url = document.getElementById('scan-url').value.trim();
-  if (!url) { document.getElementById('webscan-results').innerHTML = '<div class="empty">Please enter your organization&#39;s website URL.</div>'; return; }
-
-  const btn = document.getElementById('scan-btn');
-  btn.disabled = true;
-  document.getElementById('webscan-results').innerHTML = '';
-  [1,2,3,4].forEach(n => setStep(n, 'pending'));
-  document.getElementById('scan-progress').className = 'scan-progress visible';
-  scanSeconds = 0;
-  document.getElementById('scan-timer').textContent = '0s';
-  clearInterval(scanTimerInterval);
-  scanTimerInterval = setInterval(() => { scanSeconds++; document.getElementById('scan-timer').textContent = scanSeconds + 's'; }, 1000);
-
-  try {
-    // Step 1: Start BOTH Tinyfish runs in parallel immediately
-    setStep(1, 'active');
-
-    // Run 1: Scan the nonprofit website
-    const scanRunId = await startRun('/api/scan-and-search', { phase: 'scan', url });
-
-    // Run 2: Start a broad GrantWatch search in parallel using the URL domain as a hint
-    const domain = new URL(url).hostname.replace('www.', '');
-    const grantRunId = await startRun('/api/search-grants', {
-      category: 'nonprofit programs community services',
-      state: '',
-      orgProfile: 'Organization website: ' + url
+function pollUntilDone(runId, max) {
+  var attempts = 0;
+  function poll() {
+    if (attempts >= max) return Promise.resolve(null);
+    attempts++;
+    return new Promise(function(res) { setTimeout(res, 4000); }).then(function() {
+      return fetch('/api/scan-status?runId=' + encodeURIComponent(runId)).then(function(r) { return r.json(); });
+    }).then(function(d) {
+      if (d.error) throw new Error(errMsg(d));
+      if (d.status === 'complete') return d.result;
+      if (d.status === 'failed') throw new Error('Run failed');
+      return poll();
     });
+  }
+  return poll();
+}
 
-    setStep(1, 'done'); setStep(2, 'active');
+function updateBadge() {
+  var b = document.getElementById('sbadge');
+  b.style.display = saved.length ? 'inline' : 'none';
+  b.textContent = saved.length;
+}
 
-    // Poll both runs simultaneously
-    let orgResult = null;
-    let grantResult = null;
-    let orgDone = false;
-    let grantDone = false;
+function savegrant(g) {
+  if (saved.find(function(s) { return s.name === (g.grant_name || g.name); })) return false;
+  var item = {
+    name: g.grant_name || g.name || '',
+    funder: g.funder || '',
+    amount: g.amount || '',
+    deadline: g.deadline || g.deadline_date || '',
+    url: g.url || '',
+    savedAt: new Date().toLocaleDateString()
+  };
+  saved.push(item);
+  try { localStorage.setItem('gc_saved', JSON.stringify(saved)); } catch(e) {}
+  updateBadge();
+  return true;
+}
 
-    for (let i = 0; i < 90; i++) {
-      await new Promise(r => setTimeout(r, 4000));
+function handleSave(uid) {
+  var g = grantStore[uid];
+  var btn = document.getElementById('sb-'+uid);
+  if (!g || !btn) return;
+  var ok = savegrant(g);
+  btn.outerHTML = ok ? '<span class="saved-ok">Saved</span>' : '<span class="saved-ok">Already saved</span>';
+}
 
-      // Poll site scan
-      if (!orgDone) {
-        const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(scanRunId));
-        const d = await r.json();
-        if (d.status === 'complete') { orgResult = d.result; orgDone = true; setStep(2, 'done'); setStep(3, 'active'); }
-        else if (d.status === 'failed') { orgDone = true; } // continue without org data
-      }
+function renderSaved() {
+  var el = document.getElementById('saved-list');
+  if (!saved.length) {
+    el.innerHTML = '<div class="empty">No saved grants yet.</div>';
+    return;
+  }
+  var html = '<div class="card">';
+  saved.forEach(function(g, i) {
+    var sq = encodeURIComponent('"' + (g.funder||'') + '" "' + (g.name||'') + '" grant');
+    var link = g.url
+      ? '<a href="' + g.url + '" target="_blank" class="btn bg" style="font-size:12px;padding:5px 10px;text-decoration:none">View</a>'
+      : '<a href="https://www.google.com/search?q=' + sq + '" target="_blank" class="btn bg" style="font-size:12px;padding:5px 10px;text-decoration:none">Search</a>';
+    html += '<div class="svr"><div class="svi"><div class="svn">' + (g.name||'') + '</div><div class="svm">' + (g.funder||'') + ' &middot; ' + (g.amount||'') + ' &middot; Due: ' + (g.deadline||'Check funder') + ' &middot; Saved ' + (g.savedAt||'') + '</div></div><div style="display:flex;gap:6px;flex-shrink:0">' + link + '<button class="btn bd" style="font-size:12px;padding:5px 10px" onclick="removeSaved(' + i + ')">Remove</button></div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
 
-      // Poll GrantWatch search
-      if (!grantDone) {
-        const r = await fetch('/api/scan-status?runId=' + encodeURIComponent(grantRunId));
-        const d = await r.json();
-        if (d.status === 'complete') { grantResult = d.result; grantDone = true; }
-        else if (d.status === 'failed') { grantDone = true; }
-      }
+function removeSaved(i) {
+  saved.splice(i,1);
+  try { localStorage.setItem('gc_saved', JSON.stringify(saved)); } catch(e) {}
+  updateBadge();
+  renderSaved();
+}
 
-      if (orgDone && grantDone) break;
-    }
+function clearAllSaved() {
+  if (!saved.length) return;
+  if (!confirm('Remove all saved grants?')) return;
+  saved = [];
+  try { localStorage.removeItem('gc_saved'); } catch(e) {}
+  updateBadge();
+  renderSaved();
+}
 
-    // If we got org profile, rerun GrantWatch search with better context
-    if (orgResult) {
-      let orgData;
-      try { orgData = (typeof orgResult === 'string') ? pj(orgResult) : orgResult; } catch(e) { orgData = orgResult; }
-      const orgProfile = (typeof orgData === 'string') ? orgData : JSON.stringify(orgData, null, 2);
+function gwCard(g) {
+  var uid = 'g' + Math.random().toString(36).slice(2,8);
+  grantStore[uid] = g;
+  var hi = (g.match||'').toLowerCase().indexOf('strong') !== -1;
+  var name = g.grant_name || g.name || 'Unnamed';
+  var funder = g.funder || g.funder_organization || '';
+  var amount = g.amount || g.award_amount || 'See listing';
+  var deadline = g.deadline || g.deadline_date || 'See listing';
+  var desc = g.description || '';
+  var why = g.why || '';
+  var url = g.url || '';
+  var sq = encodeURIComponent('"' + funder + '" "' + name + '" grant application');
+  var link = url
+    ? '<a href="' + url + '" target="_blank" class="btn bg" style="font-size:12px;padding:5px 12px;text-decoration:none;color:var(--inf)">View on GrantWatch</a>'
+    : '<a href="https://www.google.com/search?q=' + sq + '" target="_blank" class="btn bg" style="font-size:12px;padding:5px 12px;text-decoration:none">Find application</a>';
+  var whyHtml = why ? '<div style="font-size:12px;color:var(--s);margin-bottom:10px;padding:6px 10px;background:var(--bgs);border-radius:var(--r)">Why this matches: ' + why + '</div>' : '';
+  return '<div class="card"><div class="rh"><div class="gn">' + name + '</div><span class="badge ' + (hi ? 'bhi' : 'bme') + '">' + (g.match||'Good match') + '</span></div><div class="meta"><span>' + funder + '</span><span>&middot;</span><span>' + amount + '</span><span>&middot;</span><span style="color:var(--d);font-weight:500">Due: ' + deadline + '</span></div><div class="desc">' + desc + '</div>' + whyHtml + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn bg" id="sb-' + uid + '" style="font-size:12px;padding:5px 12px" onclick="handleSave(\'' + uid + '\')">Save grant</button>' + link + '</div></div>';
+}
 
-      // Detect state
-      const orgText = orgProfile.toLowerCase();
-      const stateMatch = orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
-      const detectedState = stateMatch ? stateMatch[1] : '';
+function setStep(n, state) {
+  var el = document.getElementById('si'+n);
+  if (!el) return;
+  el.className = 'si s' + state.charAt(0);
+  el.textContent = state === 'done' ? '✓' : state === 'active' ? '●' : String(n);
+}
 
-      // Show org profile immediately
-      document.getElementById('webscan-results').innerHTML =
-        '<div class="card" style="margin-bottom:12px;">' +
-        '<div class="st" style="margin-bottom:6px;">Your organization — identified from website</div>' +
-        '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.6;">' +
-        orgProfile.slice(0, 800) + (orgProfile.length > 800 ? '...' : '') +
-        '</pre></div>' +
-        '<div class="loading"><span class="dot">Searching GrantWatch with your org profile</span></div>';
+function clearDiscover() {
+  ['org-name','geo','mission'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('focus-area').value = '';
+  document.getElementById('budget').value = '';
+  document.getElementById('mc').textContent = '(0/400)';
+  document.getElementById('disc-res').innerHTML = '';
+}
 
-      setStep(3, 'active');
+function clearReview() {
+  ['grant-target','proposal'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('wc').textContent = '(0 words)';
+  document.getElementById('rev-res').innerHTML = '';
+  document.getElementById('dlabel').textContent = 'Upload PDF or TXT proposal -- or drag and drop';
+  document.getElementById('fdrop').className = 'fdrop';
+}
 
-      // Now do a targeted GrantWatch search using the real org profile
-      const targetedRunId = await startRun('/api/search-grants', {
-        category: orgProfile,
-        state: detectedState,
-        orgProfile
+function clearChecklist() {
+  document.getElementById('cl-grant').value = '';
+  document.getElementById('cl-desc').value = '';
+  document.getElementById('cl-res').innerHTML = '';
+}
+
+function updateWC(el) {
+  var w = el.value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('wc').textContent = '(' + w + ' words)';
+}
+
+function findGrants() {
+  var org = document.getElementById('org-name').value.trim();
+  var focus = document.getElementById('focus-area').value;
+  var budget = document.getElementById('budget').value;
+  var geo = document.getElementById('geo').value.trim();
+  var mission = document.getElementById('mission').value.trim();
+  if (!focus && !mission) { document.getElementById('disc-res').innerHTML = '<div class="empty">Please select a focus area or enter your mission.</div>'; return; }
+  var btn = document.getElementById('disc-btn'); btn.disabled = true;
+  document.getElementById('disc-res').innerHTML = '<div class="loading"><span class="dot">Searching GrantWatch for current opportunities</span></div>';
+  var orgProfile = (org ? 'Organization: ' + org + '\n' : '') + (focus ? 'Focus: ' + focus + '\n' : '') + (budget ? 'Budget: ' + budget + '\n' : '') + (geo ? 'State: ' + geo + '\n' : '') + (mission ? 'Mission: ' + mission : '');
+  startRun('/api/search-grants', {category: focus || mission, state: geo, orgProfile: orgProfile}).then(function(runId) {
+    return pollUntilDone(runId, 90);
+  }).then(function(result) {
+    if (!result) throw new Error('Search timed out. Please try again.');
+    var raw = typeof result === 'string' ? result : JSON.stringify(result);
+    var grants = pj(raw);
+    if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
+    var today = new Date().toISOString().split('T')[0];
+    return callClaude('Today is ' + today + '. Nonprofit: ' + orgProfile + '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants,null,2).slice(0,3000) + '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence why this org qualifies) to each grant object. Return same JSON array with these two fields added. Keep all original fields. Return ONLY raw JSON array starting with [.').then(function(text) {
+      var ranked = pj(text);
+      var html = '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + ranked.length + ' found</span></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px">Live results with verified deadlines.</p>';
+      ranked.forEach(function(g) { html += gwCard(g); });
+      document.getElementById('disc-res').innerHTML = html;
+    });
+  }).catch(function(e) {
+    document.getElementById('disc-res').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+  }).finally(function() { btn.disabled = false; });
+}
+
+function scanWebsite() {
+  var url = document.getElementById('scan-url').value.trim();
+  if (!url) { document.getElementById('scan-res').innerHTML = '<div class="empty">Please enter your organization website URL.</div>'; return; }
+  var btn = document.getElementById('scan-btn'); btn.disabled = true;
+  document.getElementById('scan-res').innerHTML = '';
+  [1,2,3,4].forEach(function(n) { setStep(n,'pending'); });
+  document.getElementById('scan-prog').className = 'prog on';
+  scanSecs = 0; document.getElementById('scan-timer').textContent = '0s';
+  clearInterval(scanTimer);
+  scanTimer = setInterval(function() { scanSecs++; document.getElementById('scan-timer').textContent = scanSecs + 's'; }, 1000);
+
+  setStep(1,'active');
+  startRun('/api/scan-and-search', {phase:'scan', url:url}).then(function(runId) {
+    return pollUntilDone(runId, 60);
+  }).then(function(scanResult) {
+    setStep(1,'done'); setStep(2,'active');
+    var orgData = scanResult;
+    try { if (typeof scanResult === 'string') orgData = pj(scanResult); } catch(e) {}
+    var orgProfile = typeof orgData === 'string' ? orgData : JSON.stringify(orgData,null,2);
+    var orgText = orgProfile.toLowerCase();
+    var stateMatch = orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
+    var detectedState = stateMatch ? stateMatch[1] : '';
+    document.getElementById('scan-res').innerHTML = '<div class="card" style="margin-bottom:12px"><div class="st" style="margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:var(--tx2);white-space:pre-wrap;line-height:1.5">' + orgProfile.slice(0,600) + (orgProfile.length > 600 ? '...' : '') + '</pre></div><div class="loading"><span class="dot">Searching GrantWatch</span></div>';
+    setStep(2,'done'); setStep(3,'active');
+    return startRun('/api/search-grants', {category: orgProfile, state: detectedState, orgProfile: orgProfile}).then(function(runId) {
+      return pollUntilDone(runId, 60).then(function(result) {
+        return {result: result, orgProfile: orgProfile};
       });
-
-      grantResult = await pollUntilDone(targetedRunId, 60);
-      if (!grantResult) throw new Error('GrantWatch search timed out. Please try again.');
-    }
-
-    if (!grantResult) throw new Error('Could not retrieve grant results. Please try again.');
-    setStep(3, 'done'); setStep(4, 'active');
-
-    // Parse grants
-    let grants;
-    try {
-      const raw = (typeof grantResult === 'string') ? grantResult : JSON.stringify(grantResult);
-      grants = pj(raw);
-      if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
-    } catch(e) { throw new Error('Could not parse grant results: ' + e.message); }
-
-    // Claude ranks by relevance
-    const orgContext = orgResult ? (typeof orgResult === 'string' ? orgResult : JSON.stringify(orgResult)).slice(0, 800) : 'Organization from: ' + url;
-    const today = new Date().toISOString().split('T')[0];
-    const rankText = await callClaude('Today is ' + today + '. Nonprofit: ' + orgContext +
-      '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants, null, 2).slice(0, 3000) +
-      '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence why this org qualifies based on what you know about them). Return same JSON array with these two fields added. Keep all original fields. Return ONLY raw JSON array starting with [.');
-    const rankedGrants = pj(rankText);
-    setStep(4, 'done');
-    clearInterval(scanTimerInterval);
-
-    const orgBlock = orgResult
-      ? '<div class="card" style="margin-bottom:12px;"><div class="st" style="margin-bottom:6px;">Organization identified from website</div>' +
-        '<pre style="font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.6;">' +
-        orgContext.slice(0, 500) + (orgContext.length > 500 ? '...' : '') + '</pre></div>'
-      : '';
-
-    let html = orgBlock +
-      '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + rankedGrants.length + ' found</span></div>' +
-      '<p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Live results — deadlines and amounts verified directly from GrantWatch.</p>';
-    rankedGrants.forEach(function(g) { html += grantWatchCard(g); });
-    document.getElementById('webscan-results').innerHTML = html;
-
-  } catch(e) {
-    clearInterval(scanTimerInterval);
-    [1,2,3,4].forEach(n => setStep(n,'pending'));
-    document.getElementById('webscan-results').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
-  }
-
-  document.getElementById('scan-progress').className = 'scan-progress';
-  btn.disabled = false;
+    });
+  }).then(function(obj) {
+    if (!obj.result) throw new Error('GrantWatch search timed out. Please try again.');
+    setStep(3,'done'); setStep(4,'active');
+    var raw = typeof obj.result === 'string' ? obj.result : JSON.stringify(obj.result);
+    var grants = pj(raw);
+    if (!Array.isArray(grants)) grants = grants.grants || grants.data || Object.values(grants);
+    var today = new Date().toISOString().split('T')[0];
+    return callClaude('Today is ' + today + '. Nonprofit profile:\n' + obj.orgProfile.slice(0,1000) + '\n\nReal grants from GrantWatch:\n' + JSON.stringify(grants,null,2).slice(0,3000) + '\n\nAdd "match" ("Strong match" or "Good match") and "why" (1 sentence) to each grant. Return same JSON array with these two fields added. Return ONLY raw JSON array starting with [.').then(function(text) {
+      var ranked = pj(text);
+      setStep(4,'done'); clearInterval(scanTimer);
+      var html = '<div class="sh"><span class="st">Current grants from GrantWatch</span><span class="cc">' + ranked.length + ' found</span></div><p style="font-size:12px;color:var(--tx2);margin-bottom:12px">Live results matched to your organization.</p>';
+      ranked.forEach(function(g) { html += gwCard(g); });
+      document.getElementById('scan-res').innerHTML = html;
+    });
+  }).catch(function(e) {
+    clearInterval(scanTimer);
+    [1,2,3,4].forEach(function(n) { setStep(n,'pending'); });
+    document.getElementById('scan-res').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+  }).finally(function() {
+    document.getElementById('scan-prog').className = 'prog';
+    btn.disabled = false;
+  });
 }
 
-// --- PDF upload ---
-async function handlePdfFile(input) {
-  const file = input.files[0]; if (!file) return;
-  const drop = document.getElementById('pdf-drop');
-  const label = document.getElementById('drop-label');
-  label.textContent = 'Reading ' + file.name + '...';
-  if (file.name.endsWith('.txt')) {
-    const text = await file.text();
-    document.getElementById('proposal-text').value = text.slice(0,8000);
-    updateWC(document.getElementById('proposal-text'));
-    label.textContent = file.name + ' loaded'; drop.className = 'file-drop loaded'; return;
-  }
-  try {
-    if (typeof pdfjsLib === 'undefined') throw new Error('PDF library not loaded');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-    let txt = '';
-    for (let i = 1; i <= Math.min(pdf.numPages,10); i++) {
-      const page = await pdf.getPage(i);
-      const c = await page.getTextContent();
-      txt += c.items.map(x=>x.str).join(' ') + '\n';
-    }
-    document.getElementById('proposal-text').value = txt.slice(0,8000);
-    updateWC(document.getElementById('proposal-text'));
-    label.textContent = file.name + ' loaded (' + pdf.numPages + ' pages)';
-    drop.className = 'file-drop loaded';
-  } catch(e) { label.textContent = 'Could not read PDF — please paste text manually.'; drop.className = 'file-drop'; }
+function reviewWriting() {
+  var proposal = document.getElementById('proposal').value.trim();
+  var target = document.getElementById('grant-target').value.trim();
+  if (!proposal || proposal.split(/\s+/).length < 15) { document.getElementById('rev-res').innerHTML = '<div class="empty">Please paste your grant proposal (at least 15 words).</div>'; return; }
+  var btn = document.getElementById('rev-btn'); btn.disabled = true;
+  document.getElementById('rev-res').innerHTML = '<div class="loading"><span class="dot">Analyzing your proposal</span></div>';
+  callClaude('Expert nonprofit grant writer. Review this proposal' + (target ? ' for ' + target : '') + '.\n\nPROPOSAL:\n' + proposal + '\n\nReturn JSON: { overallScore (0-100), clarity (0-100), impact (0-100), specificity (0-100), feedback: array of 6 (type:"strength"|"improvement"|"missing", title:5-7 words, detail:2-3 sentences), suggestedRevision: one sentence rewritten }. Return ONLY raw JSON starting with {.').then(function(text) {
+    var r = pj(text);
+    var score = Math.round(r.overallScore)||0;
+    var cl = Math.round(r.clarity)||0, imp = Math.round(r.impact)||0, sp = Math.round(r.specificity)||0;
+    var sc = score>=75?'var(--s)':score>=50?'var(--w)':'var(--d)';
+    var html = '<div class="rs"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><span class="st">Overall score</span><span style="font-size:26px;font-weight:500;color:'+sc+'">'+score+'<span style="font-size:13px;color:var(--tx2)">/100</span></span></div>';
+    html += '<div class="sb"><div class="sbl"><span>Clarity</span><span>'+cl+'%</span></div><div class="sbt"><div class="sbf" style="width:'+cl+'%"></div></div></div>';
+    html += '<div class="sb"><div class="sbl"><span>Impact</span><span>'+imp+'%</span></div><div class="sbt"><div class="sbf" style="width:'+imp+'%;background:var(--inf)"></div></div></div>';
+    html += '<div class="sb"><div class="sbl"><span>Specificity</span><span>'+sp+'%</span></div><div class="sbt"><div class="sbf" style="width:'+sp+'%;background:var(--w)"></div></div></div></div>';
+    if (r.suggestedRevision) html += '<div class="rs" style="border-left:2px solid var(--bs);border-radius:0 var(--rl) var(--rl) 0"><div class="st" style="margin-bottom:6px">Suggested revision</div><p style="font-size:13px;line-height:1.65;color:var(--tx2)">'+r.suggestedRevision+'</p></div>';
+    var tc = {strength:'ts',improvement:'ti',missing:'tm'};
+    var tl = {strength:'Strength',improvement:'Needs improvement',missing:'Missing element'};
+    (r.feedback||[]).forEach(function(f) {
+      html += '<div class="rs"><span class="rtag '+(tc[f.type]||'ti')+'">'+(tl[f.type]||f.type)+'</span><div class="rtitle">'+f.title+'</div><div class="rbody">'+f.detail+'</div></div>';
+    });
+    document.getElementById('rev-res').innerHTML = html;
+  }).catch(function(e) {
+    document.getElementById('rev-res').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+  }).finally(function() { btn.disabled = false; });
 }
 
-function handleDrop(e) {
-  e.preventDefault(); document.getElementById('pdf-drop').style.background = '';
-  const file = e.dataTransfer.files[0];
-  if (file) { const dt = new DataTransfer(); dt.items.add(file); document.getElementById('pdf-input').files = dt.files; handlePdfFile(document.getElementById('pdf-input')); }
-}
-
-// --- Review writing ---
-async function reviewWriting() {
-  const proposal = document.getElementById('proposal-text').value.trim();
-  const target = document.getElementById('grant-target').value.trim();
-  if (!proposal || proposal.split(/\s+/).length < 15) { document.getElementById('review-results').innerHTML = '<div class="empty">Please paste your grant proposal text (at least 15 words).</div>'; return; }
-  const btn = document.getElementById('review-btn'); btn.disabled = true;
-  document.getElementById('review-results').innerHTML = '<div class="loading"><span class="dot">Analyzing your proposal</span></div>';
-  try {
-    const text = await callClaude(`Expert nonprofit grant writer. Review this proposal${target?' for the '+target:''}.
-
-PROPOSAL:
-${proposal}
-
-Return JSON: { overallScore (0-100), clarity (0-100), impact (0-100), specificity (0-100), feedback: array of 6 (type:"strength"|"improvement"|"missing", title:5-7 words, detail:2-3 sentences), suggestedRevision: one sentence rewritten }. Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
-    const r = pj(text);
-    const score = Math.round(r.overallScore)||0;
-    const c = Math.round(r.clarity)||0, imp = Math.round(r.impact)||0, sp = Math.round(r.specificity)||0;
-    const sc = score>=75?'var(--success)':score>=50?'var(--warn)':'var(--danger)';
-    let html = `<div class="rs">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <span class="st">Overall score</span>
-        <span style="font-size:26px;font-weight:500;color:${sc};">${score}<span style="font-size:13px;color:var(--text2);">/100</span></span>
-      </div>
-      <div class="sbar"><div class="sbl"><span>Clarity</span><span>${c}%</span></div><div class="sbt"><div class="sbf" style="width:${c}%"></div></div></div>
-      <div class="sbar"><div class="sbl"><span>Impact articulation</span><span>${imp}%</span></div><div class="sbt"><div class="sbf" style="width:${imp}%;background:var(--info);"></div></div></div>
-      <div class="sbar"><div class="sbl"><span>Specificity &amp; evidence</span><span>${sp}%</span></div><div class="sbt"><div class="sbf" style="width:${sp}%;background:var(--warn);"></div></div></div>
-    </div>`;
-    if (r.suggestedRevision) {
-      html += `<div class="rs" style="border-left:2px solid var(--border-success);border-radius:0 var(--rl) var(--rl) 0;">
-        <div class="st" style="margin-bottom:6px;">Suggested revision example</div>
-        <p style="font-size:13px;line-height:1.65;color:var(--text2);">${r.suggestedRevision}</p>
-      </div>`;
-    }
-    html += `<div class="st" style="margin-bottom:10px;">Detailed feedback</div>`;
-    const tc = {strength:'t-s',improvement:'t-i',missing:'t-m'};
-    const tl = {strength:'Strength',improvement:'Needs improvement',missing:'Missing element'};
-    (r.feedback||[]).forEach(f => { html += `<div class="rs"><span class="rtag ${tc[f.type]||'t-i'}">${tl[f.type]||f.type}</span><div class="rtitle">${f.title}</div><div class="rbody">${f.detail}</div></div>`; });
-    document.getElementById('review-results').innerHTML = html;
-  } catch(e) { document.getElementById('review-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`; }
-  btn.disabled = false;
-}
-
-// --- Checklist builder ---
-async function buildChecklist() {
-  const grant = document.getElementById('cl-grant').value.trim();
-  const desc = document.getElementById('cl-desc').value.trim();
-  if (!grant && !desc) { document.getElementById('cl-results').innerHTML = '<div class="empty">Please enter a grant name or project description.</div>'; return; }
-  const btn = document.getElementById('cl-btn'); btn.disabled = true;
-  document.getElementById('cl-results').innerHTML = '<div class="loading"><span class="dot">Building your checklist</span></div>';
-  try {
-    const text = await callClaude(`Nonprofit grants manager. Build a comprehensive pre-submission checklist.
-
-Grant: ${grant||'General foundation grant'}
-Project: ${desc||'Not specified'}
-
-Return JSON: { categories: [ { category, items: [ { task, detail (15-20 words), priority:"high"|"medium"|"low" } ] } ] }. 4-5 categories, 3-5 items each. Return ONLY raw JSON with no markdown, no code fences, no explanation. Start your response with { or [ directly.`);
-    const result = pj(text);
-    let html = '';
-    (result.categories||[]).forEach(cat => {
-      html += `<div class="card" style="margin-bottom:10px;"><div class="st" style="margin-bottom:8px;">${cat.category}</div>`;
-      (cat.items||[]).forEach(item => {
-        const pid = 'ck'+Math.random().toString(36).slice(2,8);
-        html += `<div class="cl-item">
-          <input type="checkbox" id="${pid}" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;margin-top:3px;" onchange="document.getElementById('lbl-${pid}').style.textDecoration=this.checked?'line-through':'none'"/>
-          <div class="cl-text"><div class="cl-title" id="lbl-${pid}">${item.task}</div><div class="cl-sub">${item.detail}</div></div>
-          <span class="pbadge ${item.priority==='high'?'p-h':item.priority==='medium'?'p-m':'p-l'}">${item.priority}</span>
-        </div>`;
+function buildChecklist() {
+  var grant = document.getElementById('cl-grant').value.trim();
+  var desc = document.getElementById('cl-desc').value.trim();
+  if (!grant && !desc) { document.getElementById('cl-res').innerHTML = '<div class="empty">Please enter a grant name or project description.</div>'; return; }
+  var btn = document.getElementById('cl-btn'); btn.disabled = true;
+  document.getElementById('cl-res').innerHTML = '<div class="loading"><span class="dot">Building your checklist</span></div>';
+  callClaude('Nonprofit grants manager. Build a pre-submission checklist.\n\nGrant: '+(grant||'General foundation grant')+'\nProject: '+(desc||'Not specified')+'\n\nReturn JSON: { categories: [ { category, items: [ { task, detail (15-20 words), priority:"high"|"medium"|"low" } ] } ] }. 4-5 categories, 3-5 items each. Return ONLY raw JSON starting with {.').then(function(text) {
+    var result = pj(text);
+    var html = '';
+    (result.categories||[]).forEach(function(cat) {
+      html += '<div class="card" style="margin-bottom:10px"><div class="st" style="margin-bottom:8px">'+cat.category+'</div>';
+      (cat.items||[]).forEach(function(item) {
+        var pid = 'ck'+Math.random().toString(36).slice(2,8);
+        html += '<div class="cl-item"><input type="checkbox" id="'+pid+'" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;margin-top:3px" onchange="document.getElementById(\'lbl-'+pid+'\').style.textDecoration=this.checked?\'line-through\':\'none\'"/><div class="cl-tx"><div class="cl-t" id="lbl-'+pid+'">'+item.task+'</div><div class="cl-s">'+item.detail+'</div></div><span class="pb '+(item.priority==='high'?'ph':item.priority==='medium'?'pm':'pl')+'">'+item.priority+'</span></div>';
       });
       html += '</div>';
     });
-    document.getElementById('cl-results').innerHTML = html;
-  } catch(e) { document.getElementById('cl-results').innerHTML = `<div class="empty">Error: ${e.message}</div>`; }
-  btn.disabled = false;
+    document.getElementById('cl-res').innerHTML = html;
+  }).catch(function(e) {
+    document.getElementById('cl-res').innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+  }).finally(function() { btn.disabled = false; });
 }
 
-try { if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; } catch(e) {}
+function handlePdfFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var drop = document.getElementById('fdrop');
+  var label = document.getElementById('dlabel');
+  label.textContent = 'Reading ' + file.name + '...';
+  if (file.name.endsWith('.txt')) {
+    file.text().then(function(text) {
+      document.getElementById('proposal').value = text.slice(0,8000);
+      updateWC(document.getElementById('proposal'));
+      label.textContent = file.name + ' loaded';
+      drop.className = 'fdrop loaded';
+    });
+    return;
+  }
+  if (typeof pdfjsLib === 'undefined') { label.textContent = 'PDF library not loaded -- paste text manually.'; return; }
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  file.arrayBuffer().then(function(ab) { return pdfjsLib.getDocument({data:ab}).promise; }).then(function(pdf) {
+    var pages = [];
+    for (var i = 1; i <= Math.min(pdf.numPages,10); i++) pages.push(i);
+    return Promise.all(pages.map(function(n) { return pdf.getPage(n).then(function(p) { return p.getTextContent(); }).then(function(c) { return c.items.map(function(x){return x.str;}).join(' '); }); })).then(function(texts) {
+      document.getElementById('proposal').value = texts.join('\n').slice(0,8000);
+      updateWC(document.getElementById('proposal'));
+      label.textContent = file.name + ' loaded (' + pdf.numPages + ' pages)';
+      drop.className = 'fdrop loaded';
+    });
+  }).catch(function() { label.textContent = 'Could not read PDF -- please paste text manually.'; });
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('fdrop').style.background = '';
+  var file = e.dataTransfer.files[0];
+  if (file) { var dt = new DataTransfer(); dt.items.add(file); document.getElementById('finput').files = dt.files; handlePdfFile(document.getElementById('finput')); }
+}
+
 updateBadge();
 </script>
 </body>
 </html>
+
