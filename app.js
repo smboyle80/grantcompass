@@ -6,14 +6,15 @@ var scanSecs = 0;
 var scanTimer = null;
 
 function switchTab(tab) {
-  var ids = ['discover','webscan','review','checklist','saved'];
-  document.querySelectorAll('.tab').forEach(function(t,i) {
-    t.classList.toggle('on', ids[i] === tab);
-  });
-  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
-  document.getElementById('panel-'+tab).classList.add('on');
+  var radio = document.getElementById('t-' + tab);
+  if (radio) radio.checked = true;
   if (tab === 'saved') renderSaved();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var savedRadio = document.getElementById('t-saved');
+  if (savedRadio) savedRadio.addEventListener('change', function() { if (this.checked) renderSaved(); });
+});
 
 function callClaude(prompt) {
   return fetch('/api/claude', {
