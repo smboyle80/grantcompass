@@ -1,3 +1,4 @@
+// v20260322-044517
 var saved = [];
 try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
 

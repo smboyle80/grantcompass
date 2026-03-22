@@ -1,3 +1,4 @@
+// v20260322-044517
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
   const key = process.env.TINYFISH_API_KEY;
