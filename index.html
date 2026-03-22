@@ -144,6 +144,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
     <button class="tab" id="tb-review" onclick="showTab('review')">Review writing</button>
     <button class="tab" id="tb-tools" onclick="showTab('tools')">Tools</button>
     <button class="tab" id="tb-saved" onclick="showTab('saved')">Pipeline <span id="sbadge" style="display:none;background:#eaf3de;color:#3b6d11;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:3px">0</span></button>
+    <button class="tab" id="tb-helpMain" onclick="showTab('helpMain')">Help &amp; tips</button>
   </div>
 
   <!-- FIND GRANTS -->
@@ -291,7 +292,6 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
       <button class="stab active" id="stb-budget" onclick="showSubTab('tools','budget')">Budget narrative</button>
       <button class="stab" id="stb-checklist" onclick="showSubTab('tools','checklist')">Checklist builder</button>
       <button class="stab" id="stb-calendar" onclick="showSubTab('tools','calendar')">Deadline calendar</button>
-      <button class="stab" id="stb-help" onclick="showSubTab('tools','help')">Help &amp; tips</button>
     </div>
 
     <!-- Budget narrative -->
@@ -467,6 +467,132 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
     <div id="pipeline-board" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:200px"></div>
   </div>
 
+  <!-- HELP PANEL -->
+  <div id="pn-helpMain" class="panel">
+<div style="max-width:600px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px">How to use GrantCompass</div>
+        <div style="font-size:13px;color:#888;margin-bottom:20px">Tips for getting the most out of each feature</div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#eaf3de;color:#3b6d11">&#128269;</div>
+          <div>
+            <div class="help-title">Find Grants</div>
+            <div class="help-body">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div>
+              <div class="tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div>
+              <div class="tip">&#128161; Click <strong>Save to pipeline</strong> on any grant to track it in the Pipeline tab</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#eff6ff;color:#1d4ed8">&#127760;</div>
+          <div>
+            <div class="help-title">Scan Website</div>
+            <div class="help-body">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Works best when your website clearly describes your mission and service area</div>
+              <div class="tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div>
+              <div class="tip">&#128161; State portal results depend on your geography being detectable from the site</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#9997;&#65039;</div>
+          <div>
+            <div class="help-title">Review Writing &mdash; Overall Review</div>
+            <div class="help-body">Paste your full proposal (or upload a PDF/TXT) and click <strong>Review my writing</strong>. You get an overall score, sub-scores for clarity, impact, and specificity, a before/after panel showing your weakest sentence rewritten, and six detailed feedback items. Enter the funder name for targeted advice.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Aim for a score above 75 before submitting</div>
+              <div class="tip">&#128161; The before/after panel shows the single highest-impact change you can make</div>
+              <div class="tip">&#128161; Use <strong>Export PDF</strong> to share the review with your ED or board</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128203;</div>
+          <div>
+            <div class="help-title">Review Writing &mdash; Section Feedback</div>
+            <div class="help-body">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div>
+              <div class="tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div>
+              <div class="tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128196;</div>
+          <div>
+            <div class="help-title">Review Writing &mdash; Funder Rewrite</div>
+            <div class="help-body">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div>
+              <div class="tip">&#128161; Aim for 80%+ alignment score before submitting</div>
+              <div class="tip">&#128161; Download the rewrite as .txt to edit further in Word</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128176;</div>
+          <div>
+            <div class="help-title">Tools &mdash; Budget Narrative</div>
+            <div class="help-body">Enter your project name, list budget line items (one per line in &ldquo;Item, $Amount&rdquo; format), and a short project description. The tool writes a complete paragraph-by-paragraph budget narrative justifying each cost. Add the funder name for a more targeted narrative.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Include indirect/overhead costs in your line items &mdash; they need the most justification</div>
+              <div class="tip">&#128161; Format items as &ldquo;Program Coordinator (0.75 FTE), $38,250&rdquo; for best results</div>
+              <div class="tip">&#128161; Download as .txt and paste directly into your application</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#9989;</div>
+          <div>
+            <div class="help-title">Tools &mdash; Checklist Builder</div>
+            <div class="help-body">Enter a grant name and brief project description to generate a customized pre-submission checklist. Items are prioritized high/medium/low and organized by category (narrative, attachments, approvals, etc.). Check off items as you complete them &mdash; checkmarks persist in your session.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Build the checklist at the start of writing, not the end</div>
+              <div class="tip">&#128161; Export as PDF and share with everyone working on the application</div>
+              <div class="tip">&#128161; High-priority items are typically required &mdash; missing any is a disqualifier</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#ede9fe;color:#6d28d9">&#128197;</div>
+          <div>
+            <div class="help-title">Tools &mdash; Deadline Calendar</div>
+            <div class="help-body">Shows all grants in your Pipeline that have deadlines set. Navigate forward and backward through months using the arrows. Color coding: <span style="background:#fef2f2;color:#b91c1c;padding:1px 6px;border-radius:4px;font-size:12px">red</span> = due within 2 weeks or overdue, <span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:12px">yellow</span> = due within 30 days, <span style="background:#f0fdf4;color:#166534;padding:1px 6px;border-radius:4px;font-size:12px">green</span> = plenty of time.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Always set deadline dates when saving grants to the pipeline</div>
+              <div class="tip">&#128161; Use the Pipeline tab to update deadlines after saving</div>
+              <div class="tip">&#128161; Check the calendar weekly to stay ahead of upcoming submissions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <div class="help-icon" style="background:#dcfce7;color:#166534">&#128202;</div>
+          <div>
+            <div class="help-title">Pipeline</div>
+            <div class="help-body">Your grant pipeline has four stages: Researching, Writing, Submitted, and Awarded. Save grants from search results using <strong>Save to pipeline</strong>, or add them manually with <strong>+ Add grant</strong>. Click any card to edit details or add notes. Move grants between stages using the arrow buttons.</div>
+            <div class="help-tips">
+              <div class="tip">&#128161; Add internal notes to each grant (contacts, requirements, assigned writer)</div>
+              <div class="tip">&#128161; Pipeline data is saved in your browser &mdash; it persists across sessions on this device</div>
+              <div class="tip">&#128161; Use the Deadline Calendar to see all pipeline grants with dates at a glance</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+  </div>
+
   <!-- ELIGIBILITY SCREENER MODAL -->
   <div id="screener-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center">
     <div style="background:#fff;border-radius:12px;padding:28px;width:92%;max-width:460px">
@@ -537,7 +663,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
 
 // ── Navigation ─────────────────────────────────────────────────────────────
 function showTab(id) {
-  ['discover','webscan','review','tools','saved'].forEach(function(t) {
+  ['discover','webscan','review','tools','saved','helpMain'].forEach(function(t) {
     document.getElementById('tb-'+t).classList.toggle('active', t===id);
     document.getElementById('pn-'+t).classList.toggle('active', t===id);
   });
@@ -546,7 +672,7 @@ function showTab(id) {
 }
 
 function showSubTab(tabId, subId) {
-  var prefix = tabId==='review' ? ['review','sections','rewrite'] : ['budget','checklist','calendar','help'];
+  var prefix = tabId==='review' ? ['review','sections','rewrite'] : ['budget','checklist','calendar'];
   prefix.forEach(function(s) {
     var stb = document.getElementById('stb-'+s);
     var spn = document.getElementById('spn-'+s);
