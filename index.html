@@ -856,17 +856,7 @@ function printSection(id) {
   var el=document.getElementById(id);
   if(!el)return;
   var w=window.open('','_blank');
-  w.document.write('<html><head><title>GrantCompass Export</title><style>body{font-family:system-ui,sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1a18}h2{font-size:18px;margin-bottom:16px}p{line-height:1.7;margin-bottom:12px}.card{border:1px solid #e0ddd8;border-radius:8px;padding:14px;margin-bottom:10px}.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}.strong{background:#eaf3de;color:#3b6d11}.good{background:#fef3c7;color:#92400e}
-/* ── Help panel ─────────────────────────────────────────── */
-.help-section{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f0ede8}
-.help-section:last-child{border-bottom:none}
-.help-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:2px}
-.help-title{font-size:14px;font-weight:600;margin-bottom:5px}
-.help-body{font-size:13px;color:#555;line-height:1.65;margin-bottom:8px}
-.help-tips{display:flex;flex-direction:column;gap:5px}
-.tip{font-size:12px;color:#666;background:#fafaf8;border-radius:6px;padding:5px 10px;border-left:2px solid #d0cdc8}
-
-</style></head><body>'+el.innerHTML+'</body></html>');
+  w.document.write('<html><head><title>GrantCompass Export</title><style>body{font-family:system-ui,sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1a18}.card{border:1px solid #e0ddd8;border-radius:8px;padding:14px;margin-bottom:10px}.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}.strong{background:#eaf3de;color:#3b6d11}.good{background:#fef3c7;color:#92400e}.rev-card{border:1px solid #e0ddd8;border-radius:8px;padding:12px;margin-bottom:8px}.bar{height:5px;background:#e0ddd8;border-radius:99px;margin-bottom:8px}.bar-fill{height:100%;border-radius:99px;background:#3b6d11}.cl-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #f0ede8}.ba-box{border-radius:8px;padding:10px;font-size:13px}.ba-before{background:#fef2f2;color:#7f1d1d}.ba-after{background:#f0fdf4;color:#14532d}</style></head><body>'+el.innerHTML+'</body></html>');
   w.document.close();
   setTimeout(function(){w.print();},500);
 }
