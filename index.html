@@ -289,7 +289,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
       <button class="p" id="btn-scan" onclick="doScan()" style="flex-shrink:0;white-space:nowrap">Scan &amp; find grants</button>
     </div>
     <div class="prog" id="scan-prog">
-      <div class="prog-hdr"><span>Scanning...</span><span id="scan-secs">0s</span></div>
+      <div class="prog-hdr"><span>Scanning... (typically 3-5 minutes)</span><span id="scan-secs">0s</span></div>
       <ul class="steps">
         <li class="step"><div class="si" id="si1">1</div> Reading your website</li>
         <li class="step"><div class="si" id="si2">2</div> Identifying mission &amp; programs</li>
@@ -960,7 +960,7 @@ function doFind() {
   if(!useGW&&!useFed&&!useSt){document.getElementById('res-find').innerHTML='<div class="err">Please select at least one source.</div>';return;}
   var btn=document.getElementById('btn-find');btn.disabled=true;
   var srcList=[useGW?'GrantWatch':'',useFed?'Grants.gov':'',useSt?'State portal':''].filter(Boolean).join(', ');
-  document.getElementById('res-find').innerHTML='<div class="loading">Searching '+esc(srcList)+'...</div>';
+  document.getElementById('res-find').innerHTML='<div class="loading">Searching '+esc(srcList)+'...<div style="font-size:12px;color:#aaa;margin-top:6px">Typically takes 2-4 minutes. Please keep this tab open.</div></div>';
   var profile=[org?'Organization: '+org:'',focus?'Focus: '+focus:'',budget?'Budget: '+budget:'',state?'State: '+state:'',mission?'Mission: '+mission:'',eligibilityProfile?'Eligibility: '+eligibilityProfile.summary:''].filter(Boolean).join('\n');
   var kw=keyword(focus||mission),sub=stateSubdomain(state);
   var allGrants=[],promises=[],sources=[];
@@ -1016,7 +1016,7 @@ function doScan(){
   .then(function(){
     var orgProf='';
     if(scanResult){var d2=scanResult;try{if(typeof scanResult==='string')d2=pj(scanResult);}catch(e){}orgProf=typeof d2==='string'?d2:JSON.stringify(d2,null,2);
-      document.getElementById('res-scan').innerHTML='<div class="card" style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:#666;white-space:pre-wrap;line-height:1.5">'+esc(orgProf.slice(0,500))+'</pre></div><div class="loading">Searching all sources...</div>';}
+      document.getElementById('res-scan').innerHTML='<div class="card" style="margin-bottom:12px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#888;margin-bottom:6px">Organization identified</div><pre style="font-size:12px;color:#666;white-space:pre-wrap;line-height:1.5">'+esc(orgProf.slice(0,500))+'</pre></div><div class="loading">Searching all sources...<div style=\"font-size:12px;color:#aaa;margin-top:6px\">Typically takes 3-5 minutes. Please keep this tab open.</div></div>';}
     var orgText=(orgProf||'').toLowerCase();
     var sm=orgText.match(/\b(arizona|california|texas|florida|new york|colorado|washington|oregon|illinois|georgia|ohio|pennsylvania|michigan)\b/);
     detectedState=sm?sm[1]:'';
