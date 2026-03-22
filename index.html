@@ -109,33 +109,25 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .fdrop.loaded{border-style:solid;border-color:var(--bs);background:var(--bgs);color:var(--s)}
 footer{text-align:center;font-size:12px;color:var(--tx3);margin-top:2rem}
 </style>
+
+  
 <script>
-// Core tab switching - isolated so syntax errors elsewhere cannot break it
 function switchTab(tab) {
   var ids = ['discover','webscan','review','checklist','saved'];
   document.querySelectorAll('.tab').forEach(function(t,i) {
     t.classList.toggle('on', ids[i] === tab);
   });
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
-  document.getElementById('panel-'+tab).classList.add('on');
+  document.getElementById('panel-' + tab).classList.add('on');
   if (tab === 'saved' && typeof renderSaved === 'function') renderSaved();
 }
 function setStep(n, state) {
-  var el = document.getElementById('si'+n);
+  var el = document.getElementById('si' + n);
   if (!el) return;
   el.className = 'si s' + state.charAt(0);
   el.textContent = state === 'done' ? '✓' : state === 'active' ? '●' : String(n);
 }
 </script>
-  <script>
-  function switchTab(t) {
-    var ids = ['discover','webscan','review','checklist','saved'];
-    document.querySelectorAll('.tab').forEach(function(el,i){ el.classList.toggle('on', ids[i]===t); });
-    document.querySelectorAll('.panel').forEach(function(el){ el.classList.remove('on'); });
-    document.getElementById('panel-'+t).classList.add('on');
-    if (t==='saved' && typeof renderSaved === 'function') renderSaved();
-  }
-  </script>
 </head>
 <body>
 <div id="app">
@@ -277,9 +269,11 @@ function setStep(n, state) {
 </div>
 <footer>GrantCompass -- free for nonprofits</footer>
 
+
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-try {
 var saved = [];
 try { saved = JSON.parse(localStorage.getItem('gc_saved') || '[]'); } catch(e) {}
 
@@ -287,6 +281,11 @@ var grantStore = {};
 var scanSecs = 0;
 var scanTimer = null;
 
+
+document.addEventListener('DOMContentLoaded', function() {
+  var savedRadio = document.getElementById('t-saved');
+  if (savedRadio) savedRadio.addEventListener('change', function() { if (this.checked) renderSaved(); });
+});
 
 function callClaude(prompt) {
   return fetch('/api/claude', {
@@ -683,8 +682,6 @@ function handleDrop(e) {
 }
 
 updateBadge();
-} catch(e) { console.error("GrantCompass JS error:", e); }
 </script>
-<script src="/app.js"></script>
 </body>
 </html>
