@@ -214,8 +214,8 @@ footer{text-align:center;font-size:12px;color:#aaa;margin-top:24px}
       <ul class="steps">
         <li class="step"><div class="si" id="si1">1</div> Reading your website</li>
         <li class="step"><div class="si" id="si2">2</div> Identifying mission &amp; programs</li>
-        <li class="step"><div class="si" id="si3">3</div> Searching GrantWatch</li>
-        <li class="step"><div class="si" id="si4">4</div> Ranking matches</li>
+        <li class="step"><div class="si" id="si3">3</div> Searching GrantWatch, Grants.gov &amp; state portal</li>
+        <li class="step"><div class="si" id="si4">4</div> Ranking matches across all sources</li>
       </ul>
     </div>
     <div class="res" id="res-scan"></div>
@@ -925,29 +925,81 @@ function doScan() {
     var kw=keyword(orgProfile);
     var sub=stateSubdomain(orgProfile);
 
-    if (searchResult){stepSet(3,'done');return{result:searchResult,orgProfile:orgProfile};}
+    if (searchResult){stepSet(3,'done');return{result:searchResult,orgProfile:orgProfile,detectedState:detectedState};}
 
     stepSet(3,'active');
     return fetch('/api/scan-and-search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phase:'search',keyword:kw,state:sub})})
       .then(function(r){return r.json();})
       .then(function(d){if(d.error)throw new Error(d.error);return poll(d.runId,96);})
-      .then(function(result){return{result:result,orgProfile:orgProfile};});
+      .then(function(result){return{result:result,orgProfile:orgProfile,detectedState:detectedState};});
   })
   .then(function(obj){
     if (!obj||!obj.result) throw new Error('Could not retrieve grants. Please try again.');
     stepSet(3,'done');stepSet(4,'active');
+
+    // Parse GrantWatch results
+    var allGrants = [];
     var raw=typeof obj.result==='string'?obj.result:JSON.stringify(obj.result);
-    var grants=pj(raw);
-    if (!Array.isArray(grants)) grants=grants.grants||grants.data||Object.values(grants);
-    var today=new Date().toISOString().split('T')[0];
-    return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants from GrantWatch:\n'+JSON.stringify(grants,null,2).slice(0,3000)+'\n\nAdd two fields to each grant object: "match" (value: "Strong match" or "Good match") and "why" (1 short sentence explaining why). Preserve ALL original fields exactly including url, grant_name, funder, amount, deadline. Return ONLY the complete JSON array starting with [.')
-      .then(function(text){
-        var ranked=pj(text);
-        stepSet(4,'done');clearInterval(scanTimer);
-        var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grants from GrantWatch</span><span style="font-size:12px;color:#aaa">'+ranked.length+' found</span></div>';
-        ranked.forEach(function(g){h+=grantCard(g);});
-        document.getElementById('res-scan').innerHTML=h;
-      });
+    try {
+      var gwGrants=pj(raw);
+      if (!Array.isArray(gwGrants)) gwGrants=gwGrants.grants||gwGrants.data||Object.values(gwGrants);
+      gwGrants.forEach(function(g){g.source='GrantWatch';allGrants.push(g);});
+    } catch(e){}
+
+    // Detect keyword and state from org profile for other sources
+    var orgText = (obj.orgProfile||'').toLowerCase();
+    var detectedState = obj.detectedState || '';
+    var kw = keyword(orgText);
+
+    // Fetch federal + state results in parallel
+    return fetch('/api/search-federal',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({keyword:kw, state:detectedState, sources:['federal','state']})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      // Federal results arrive immediately
+      if (d.federal && Array.isArray(d.federal)) {
+        d.federal.forEach(function(g){g.source='Grants.gov';allGrants.push(g);});
+      }
+      // Poll state portal if a run was started
+      if (d.stateRunId) {
+        return poll(d.stateRunId, 40).then(function(stateResult){
+          if (stateResult) {
+            try {
+              var sr = typeof stateResult==='string'?stateResult:JSON.stringify(stateResult);
+              var stateGrants=pj(sr);
+              if (!Array.isArray(stateGrants)) stateGrants=stateGrants.grants||stateGrants.data||Object.values(stateGrants);
+              stateGrants.forEach(function(g){g.source=d.statePortalName||'State';allGrants.push(g);});
+            } catch(e){}
+          }
+        }).catch(function(){});
+      }
+    }).catch(function(){})
+    .then(function(){
+      // Rank everything with Claude
+      var today=new Date().toISOString().split('T')[0];
+      return callClaude('Today is '+today+'. Nonprofit:\n'+(obj.orgProfile||url).slice(0,800)+'\n\nGrants from multiple sources (GrantWatch, Grants.gov, State portal):\n'+JSON.stringify(allGrants,null,2).slice(0,4000)+'\n\nAdd two fields to each grant object: "match" ("Strong match" or "Good match") and "why" (1 short sentence). Preserve ALL original fields. Rank strongest matches first. Return ONLY the complete JSON array starting with [.')
+        .then(function(text){
+          var ranked=pj(text);
+          stepSet(4,'done');clearInterval(scanTimer);
+          // Group by source
+          var bySource={};
+          ranked.forEach(function(g){var s=g.source||'Other';if(!bySource[s])bySource[s]=[];bySource[s].push(g);});
+          var total=ranked.length;
+          var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+            +'<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888">Grant results</span>'
+            +'<span style="font-size:12px;color:#aaa">'+total+' found across '+Object.keys(bySource).length+' source(s)</span>'
+            +'</div>';
+          Object.keys(bySource).forEach(function(src){
+            h+='<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px">'+sourceBadge(src)
+              +'<span style="font-size:12px;color:#aaa">'+bySource[src].length+' grant'+(bySource[src].length!==1?'s':'')+'</span></div>';
+            bySource[src].forEach(function(g){h+=grantCard(g);});
+            h+='<div style="margin-bottom:16px"></div>';
+          });
+          document.getElementById('res-scan').innerHTML=h;
+        });
+    });
   })
   .catch(function(e){clearInterval(scanTimer);[1,2,3,4].forEach(function(n){stepSet(n,'pending');});document.getElementById('res-scan').innerHTML='<div class="err">'+esc(e.message)+'</div>';})
   .finally(function(){document.getElementById('scan-prog').className='prog';btn.disabled=false;});
