@@ -466,6 +466,8 @@ function doScan() {
   var url = document.getElementById('f-url').value.trim();
   if (!url) {document.getElementById('res-scan').innerHTML='<div class="err">Please enter your organization website URL.</div>';return;}
 
+  var scanResult = null, searchResult = null;
+
   var btn = document.getElementById('btn-scan');
   btn.disabled=true;
   document.getElementById('res-scan').innerHTML='';
@@ -484,7 +486,7 @@ function doScan() {
     var scanId=d.scanRunId, searchId=d.searchRunId;
     stepSet(1,'done');stepSet(2,'active');
 
-    var scanDone=false,searchDone=false,scanResult=null,searchResult=null;
+    var scanDone=false,searchDone=false;
     function pollBoth(){
       var ps=[];
       if (!scanDone) ps.push(fetch('/api/scan-status?runId='+encodeURIComponent(scanId)).then(function(r){return r.json();}).then(function(d){if(d.status==='complete'){scanResult=d.result;scanDone=true;stepSet(2,'done');stepSet(3,'active');}else if(d.status==='failed'){scanDone=true;}}).catch(function(){scanDone=true;}));
