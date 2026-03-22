@@ -5,6 +5,7 @@ module.exports = async function handler(req, res) {
   try {
     const { category, state, orgProfile } = req.body || {};
     if (!category && !orgProfile) return res.status(400).json({ error: 'category or orgProfile required' });
+
     const stateMap = {
       'arizona':'arizona','az':'arizona','california':'california','ca':'california',
       'texas':'texas','tx':'texas','florida':'florida','fl':'florida',
@@ -17,21 +18,41 @@ module.exports = async function handler(req, res) {
     const stateKey = (state || '').toLowerCase().trim();
     const gwSubdomain = stateMap[stateKey] || 'grants';
     const searchUrl = 'https://' + gwSubdomain + '.grantwatch.com/grant-search.php';
-    const orgDesc = orgProfile || ('Category: ' + category + ', State: ' + (state || 'any'));
+
+    // Extract short keyword(s) for the search box — faster than long descriptions
+    const src = (category || orgProfile || '').toLowerCase();
+    const keywordMap = [
+      ['disability','disability'],['intellectual','disability'],['developmental','disability'],
+      ['food','food'],['hunger','food'],['nutrition','nutrition'],
+      ['housing','housing'],['homeless','housing'],
+      ['youth','youth'],['children','youth'],['education','education'],
+      ['health','health'],['mental health','mental health'],
+      ['environment','environment'],['conservation','conservation'],
+      ['arts','arts'],['culture','arts'],
+      ['workforce','workforce'],['employment','workforce'],
+      ['veteran','veterans'],['refugee','refugee'],['immigrant','immigrant'],
+      ['animal','animal welfare'],['lgbtq','lgbtq'],['racial equity','racial equity'],
+    ];
+    let keyword = 'nonprofit';
+    for (var i = 0; i < keywordMap.length; i++) {
+      if (src.indexOf(keywordMap[i][0]) !== -1) { keyword = keywordMap[i][1]; break; }
+    }
+
     const response = await fetch('https://agent.tinyfish.ai/v1/automation/run-async', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
       body: JSON.stringify({
         url: searchUrl,
-        goal: 'Search GrantWatch for currently open grants matching this nonprofit:\n\n' + orgDesc + '\n\nUse the search box with relevant keywords. Extract the 8 most relevant open grants. For each return: grant_name, funder, amount, deadline (exact date shown), description, eligibility, url (full GrantWatch URL). Return ONLY a JSON array.',
+        goal: 'Go to GrantWatch. In the search box type "' + keyword + '" and press search. Wait for results. Extract the first 6 grants shown. For each grant return ONLY these fields: grant_name, funder, amount, deadline, description, url (the full URL of the grant detail page on GrantWatch). Do NOT click into individual grants. Just extract from the search results list. Return a JSON array.',
         browser_profile: 'lite',
       }),
     });
+
     const text = await response.text();
     let data;
-    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Non-JSON from Tinyfish: ' + text.slice(0, 200) }); }
-    if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + JSON.stringify(data).slice(0, 200) });
-    if (!data.run_id) return res.status(500).json({ error: 'No run_id returned', raw: data });
+    try { data = JSON.parse(text); } catch(e) { return res.status(500).json({ error: 'Non-JSON: ' + text.slice(0,200) }); }
+    if (!response.ok) return res.status(500).json({ error: 'Tinyfish ' + response.status + ': ' + JSON.stringify(data).slice(0,200) });
+    if (!data.run_id) return res.status(500).json({ error: 'No run_id', raw: data });
     return res.status(200).json({ runId: data.run_id });
   } catch (err) {
     return res.status(500).json({ error: err.message });
