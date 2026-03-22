@@ -889,7 +889,7 @@ function callClaude(prompt,maxTokens) {
 
 function pj(text){var clean=text.replace(/```json|```/gi,'').trim();var fb=clean.indexOf('{'),fbk=clean.indexOf('[');var start=fb===-1?fbk:fbk===-1?fb:Math.min(fb,fbk);if(start===-1)throw new Error('No JSON found');var isArr=fbk!==-1&&(fb===-1||fbk<fb);var end=isArr?clean.lastIndexOf(']'):clean.lastIndexOf('}');if(end===-1)throw new Error('Incomplete JSON');return JSON.parse(clean.slice(start,end+1));}
 
-function startRun(endpoint,body){return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){if(!d.runId)throw new Error('Start failed: '+(d.error||JSON.stringify(d).slice(0,100)));return d.runId;});}
+function startRun(endpoint,body){return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){if(!d.runId){var errMsg=d.error||JSON.stringify(d).slice(0,200);if(errMsg.indexOf('Insufficient credits')!==-1||errMsg.indexOf('FORBIDDEN')!==-1){throw new Error('GrantWatch search is temporarily unavailable (service credits depleted). Grants.gov results are still available — uncheck GrantWatch and try again.');}throw new Error('Start failed: '+errMsg.slice(0,120));}return d.runId;});}
 
 function poll(runId,max){var n=0;function step(){if(n++>=max)return Promise.resolve(null);return new Promise(function(res){setTimeout(res,5000);}).then(function(){return fetch(API+'/api/scan-status?runId='+encodeURIComponent(runId)).then(function(r){return r.json();});}).then(function(d){if(d.status==='complete')return d.result;if(d.status==='failed')throw new Error('Run failed.');return step();});}return step();}
 
