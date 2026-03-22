@@ -338,7 +338,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
           <div class="help-icon" style="background:#eaf3de;color:#3b6d11">&#128269;</div>
           <div>
             <div class="help-title">Find Grants</div>
-            <div class="help-body">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&apos;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div>
+            <div class="help-body">Select your focus area and state, then click <strong>Search grants</strong>. The eligibility screener appears first &mdash; answering it filters out grants you won&#39;t qualify for. Check all three sources (GrantWatch, Grants.gov, State portal) for the widest coverage. Results are ranked by match strength and show a success score estimating your competitiveness.</div>
             <div class="help-tips">
               <div class="tip">&#128161; Be specific in your mission statement &mdash; vague descriptions return generic results</div>
               <div class="tip">&#128161; Grants.gov returns federal opportunities that rarely appear on GrantWatch</div>
@@ -351,7 +351,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
           <div class="help-icon" style="background:#eff6ff;color:#1d4ed8">&#127760;</div>
           <div>
             <div class="help-title">Scan Website</div>
-            <div class="help-body">Enter your organization&apos;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div>
+            <div class="help-body">Enter your organization&#39;s website URL and click <strong>Scan &amp; find grants</strong>. The tool reads your homepage and About page to learn your mission, programs, and geography &mdash; then searches all three sources simultaneously. No form-filling needed. Best used when you want a cold start with no prior research.</div>
             <div class="help-tips">
               <div class="tip">&#128161; Works best when your website clearly describes your mission and service area</div>
               <div class="tip">&#128161; The scan takes 3-5 minutes &mdash; the progress bar shows each step</div>
@@ -379,7 +379,7 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
             <div class="help-title">Review Writing &mdash; Section Feedback</div>
             <div class="help-body">Paste a single section of your proposal (need statement, goals, budget narrative, etc.) and select the section type. You get targeted feedback specific to what funders expect in that section, a stronger opening sentence, and key phrases to weave in. Use this iteratively on each section before doing the full review.</div>
             <div class="help-tips">
-              <div class="tip">&#128161; Start with Statement of Need &mdash; it&apos;s the most frequently rejected section</div>
+              <div class="tip">&#128161; Start with Statement of Need &mdash; it&#39;s the most frequently rejected section</div>
               <div class="tip">&#128161; The key phrases panel shows funder vocabulary you should mirror</div>
               <div class="tip">&#128161; Review each section separately, then paste the improved full proposal into Overall Review</div>
             </div>
@@ -390,9 +390,9 @@ button.stab.active{color:#3b6d11;border-bottom-color:#3b6d11}
           <div class="help-icon" style="background:#fef3c7;color:#92400e">&#128196;</div>
           <div>
             <div class="help-title">Review Writing &mdash; Funder Rewrite</div>
-            <div class="help-body">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&apos;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div>
+            <div class="help-body">Enter a funder name, paste their stated priorities (from their website or RFP), then paste your proposal. The tool rewrites your narrative in the funder&#39;s own language and shows every change it made. Use this when adapting one proposal for multiple funders &mdash; it saves hours of manual editing.</div>
             <div class="help-tips">
-              <div class="tip">&#128161; Paste 3-5 sentences directly from the funder&apos;s guidelines as priorities</div>
+              <div class="tip">&#128161; Paste 3-5 sentences directly from the funder&#39;s guidelines as priorities</div>
               <div class="tip">&#128161; Aim for 80%+ alignment score before submitting</div>
               <div class="tip">&#128161; Download the rewrite as .txt to edit further in Word</div>
             </div>
@@ -855,10 +855,23 @@ function exportText(content, filename) {
 function printSection(id) {
   var el=document.getElementById(id);
   if(!el)return;
-  var w=window.open('','_blank');
-  w.document.write('<html><head><title>GrantCompass Export</title><style>body{font-family:system-ui,sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1a18}.card{border:1px solid #e0ddd8;border-radius:8px;padding:14px;margin-bottom:10px}.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}.strong{background:#eaf3de;color:#3b6d11}.good{background:#fef3c7;color:#92400e}.rev-card{border:1px solid #e0ddd8;border-radius:8px;padding:12px;margin-bottom:8px}.bar{height:5px;background:#e0ddd8;border-radius:99px;margin-bottom:8px}.bar-fill{height:100%;border-radius:99px;background:#3b6d11}.cl-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #f0ede8}.ba-box{border-radius:8px;padding:10px;font-size:13px}.ba-before{background:#fef2f2;color:#7f1d1d}.ba-after{background:#f0fdf4;color:#14532d}</style></head><body>'+el.innerHTML+'</body></html>');
-  w.document.close();
-  setTimeout(function(){w.print();},500);
+  var css='body{font-family:system-ui,sans-serif;padding:32px;max-width:700px;margin:0 auto;color:#1a1a18}'
+    +'.card{border:1px solid #e0ddd8;border-radius:8px;padding:14px;margin-bottom:10px}'
+    +'.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:600}'
+    +'.strong{background:#eaf3de;color:#3b6d11}.good{background:#fef3c7;color:#92400e}'
+    +'.rev-card{border:1px solid #e0ddd8;border-radius:8px;padding:12px;margin-bottom:8px}'
+    +'.bar{height:5px;background:#e0ddd8;border-radius:99px;margin-bottom:8px}'
+    +'.bar-fill{height:100%;border-radius:99px;background:#3b6d11}'
+    +'.cl-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #f0ede8}'
+    +'.ba-box{border-radius:8px;padding:10px;font-size:13px}'
+    +'.ba-before{background:#fef2f2;color:#7f1d1d}.ba-after{background:#f0fdf4;color:#14532d}'
+    +'.export-bar,.card-btns,.move-btns,button{display:none!important}';
+  var content='<!DOCTYPE html><html><head><meta charset=UTF-8><title>GrantCompass Export</title>'
+    +'<style>'+css+'</style></head><body>'+el.innerHTML+'</body></html>';
+  var blob=new Blob([content],{type:'text/html'});
+  var blobUrl=URL.createObjectURL(blob);
+  var w=window.open(blobUrl,'_blank');
+  if(w) setTimeout(function(){w.print();URL.revokeObjectURL(blobUrl);},600);
 }
 
 // ── Eligibility screener ───────────────────────────────────────────────────
